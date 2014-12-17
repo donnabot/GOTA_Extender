@@ -1,0 +1,540 @@
+var templates = {
+    menuBtn:
+        '<a id="extender-menu" class="navlink" data-menu="manager">' +
+            '<span class="navlinkbox">' +
+            '<span class="navlinkicon"></span>' +
+            '<span class="vertcenter">' +
+            '<span>Extender</span>' +
+            '</span>' +
+            '</span>' +
+            '</a>',
+
+    stats: function(battle, trade, intrigue) {
+        return '<div class="exstatbox">' +
+            '<div id="battle" class="statitem">' +
+            '<div><span></span>' +
+            '</div><var class="battle_val" id="battle_val">' + battle + '</var></div>' +
+            '<div id="trade" class="statitem">' +
+            '<div><span></span>' +
+            '</div><var class="trade_val" id="trade_val">' + trade + '</var></div>' +
+            '<div id="intrigue" class="statitem">' +
+            '<div><span></span></div>' +
+            '<var class="intrigue_val" id="intrigue_val">' + intrigue + '</var></div>' +
+            '</div>';
+    },
+
+    formatMessage: function(message) {
+        return '<div id="exalert" class="exrow" style="text-align: center; font-family: GoudyTrajan-Bold,Trajan,\'Trajan Pro\',Trajanbold;">' +
+            '' + message +
+            '</div>';
+    },
+
+    sendAllBtn:
+        '<span id="adventureSendAll" class="btnwrap btnsm exSendAllButton">' +
+            '<span class="btnedge">' +
+            '<a onclick="adventureSendAll(userContext.adventureData.symbol, getSwornSwords(extender_sendAllAction));" class="btnbrown">' +
+            '<span></span>Send All</a></span></span>',
+
+    pvpSendAllBtn:
+        '<span id="pvpSendAll" class="btnwrap btnsm exSendAllButton">' +
+            '<span class="btnedge">' +
+            '<a onclick="pvpSendBatch(getSwornSwords(extender_sendAllAction));" class="btnbrown">' +
+            '<span></span>Send All</a></span></span>',
+
+    avaSendAllBtn:
+    '<span id="avaSendAll" class="btnwrap btnsm exSendAllButton">' +
+        '<span class="btnedge">' +
+        '<a onclick="avaSendBatch(getSwornSwords(extender_sendAllAction, userContext.campAttackData.camp_region_index, userContext.campAttackData.camp_subregion_index));" class="btnbrown">' +
+        '<span></span>Send All</a></span></span>',
+
+    queueBtn:
+        '<span class="btnwrap btnmed equipbtn queue" data-quantity="1">' +
+            '<span class="btnedge">' +
+            '<a class="btngold">Queue</a>' +
+            '</span>' +
+            '</span>',
+
+    queue5Btn:
+        '<span class="btnwrap btnmed equipbtn queue" data-quantity="5">' +
+            '<span class="btnedge">' +
+            '<a class="btngold">Queue x5</a>' +
+            '</span>' +
+            '</span>',
+
+    queueUpgradeBtn:
+        '<h5>Actions:</h5>' +
+            '<div class="upgradeinfo">' +
+            '<span id="upgradeQueue" class="btnwrap btnmed btnprice upgradeQueue">' +
+            '<span class="btnedge">' +
+            '<a class="btngold">Enqueue upgrade</a>' +
+            '</span>' +
+            '</span>' +
+            '</div>',
+
+    saveOptionsBtn:
+        '<span id="saveOptions" class="btnwrap btnlg">' +
+            '<span class="btnedge">' +
+            '<a class="btngold">Save</a>' +
+            '</span>' +
+            '</span>',
+
+    resetOptionsBtn:
+        '<span id="resetOptions" class="btnwrap btnlg">' +
+            '<span class="btnedge">' +
+            '<a class="btngold">Reset</a>' +
+            '</span>' +
+            '</span>',
+
+    observable:
+        '<textarea id="observable" rows="1" style="width:99%; overflow:auto; display: none;"></textarea>',
+
+    tabContent:
+        '<div id="extenderTabContent" style="margin-top: 18px; margin-top: 18px; overlow-x: scroll; height: 460px;"></div>',
+
+    optionsHeader:
+        '<h1 style="font-family:GoudyTrajan-Bold,Trajan,\'Trajan Pro\',Trajanbold;">Extender options</h1><hr />' +
+            '<div id="extenderTabMenu" style="margin: 0 0 0;">' +
+            '<div class="charactertabs"></div>' +
+            '<div class="barbtmedge"></div>' +
+            '</div>',
+
+    tableSkeleton:
+        '<div style="overflow-y: auto; height: 380px;">' +
+            '<table id="queueTable" class="powertable">' +
+            '<tbody>' +
+            '<tr id="headerRow">' +
+            '<th id="col4"><span class="colsort">QueueID</span></th>' +
+            '<th id="col1"><span class="colsort">Type</span></th>' +
+            '<th id="col1"><span class="colsort">Building</span></th>' +
+            '<th id="col2"><span class="colsort">Name</span></th>' +
+            '<th id="col3"><span class="colsort">Icon</span></th>' +
+            '</tr>' +
+            '</tbody>' +
+            '</table>' +
+            '</div>',
+
+    bruteBtn:
+        '<span id="bruteBtn" class="btnwrap btnmed" style="margin-top: 6px; padding: 0 0 0 0;">' +
+            '<span class="btnedge">' +
+            '<a class="btngold" style="min-width: 0px;">Brute!</a>' +
+            '</span>' +
+            '</span>',
+
+    bruteAllBtn:
+        '<span id="bruteAllBtn" class="btnwrap btnmed" style="margin-top: 6px;">' +
+            '<span class="btnedge">' +
+            '<a class="btngold" style="min-width: 0px;">Brute ALL!</a>' +
+            '</span>' +
+            '</span>',
+
+    infoBtn:
+        '<span id="infoBtn" class="btnwrap btnmed" style="margin-top: 6px; padding: 0 0 0 0;">' +
+            '<span class="btnedge">' +
+            '<a class="btngold" style="min-width:0px !important;">?</a>' +
+            '</span>' +
+            '</span>',
+
+    bruteInfo:
+        "Congratulations, you unlocked the bruting option! This feature repeats the last done adventure of a sworn sword instantly. As this is currently in tesing here are some guidelines:" +
+            "<hr>" +
+            "+ bruting terminates when a certain amount of wounds have been received.<br />" +
+            "+ after adventure bruting you can choose either to terminate bruting or to adjust it's timer in which case the extender will wait for the sworn sword to heal from the damage and repeat the bruting process again.<br />" +
+            "+ if you've chosen to adjust the timer you can cancel it by pressing ESC key. Notification will popup, if you have the use alerts option checked.<br />" +
+            "+ the max amount of wounds can be configured up to 4 (0 disables bruting).<br />" +
+            "+ you won't be able to stop the actual bruting process. Only when the mentioned recieved damage has been dealt and the timer adjusts.<br />" +
+            "+ use this with caution, as quests, adventure parties an pvp battles CANNOT be bruted. You won't recieve rewards or silver and you'll probably cause some errors.<br />" +
+            "+ immediate stop for bruting (or for every feature for that matter) is reloading.<br />" +
+            "+ for your convenience the brute button has been integrated in the user interface when you view results from an adventure (and if the result is successful). Note that the button will appear with a few seconds delay.<br />" +
+            "+ no bruting will be done if there is no sworn sword set. You could set it from the bruting tab in options or use the integrated button, it'll set the sworn sword automatically." +
+            "<hr>" +
+            "Happy bruting!",
+
+    searchAllianceBtn:
+        '<div id="ex_search_row" class="exrow" style="padding-top: 78px;">' +
+            '<span class="alliancesearch">' +
+            '<input type="text" placeholder="Search For An Alliance" id="ex_alliance_search_input">' +
+            '<a id="ex_alliance_search" href="#"></a></span></div>',
+    
+    allianceRow: function(a, region) {
+        return '<tr>' +
+            '<td>unknown</td>' +
+            '<td><a onclick="return allianceInfo(' + a.id + ')" href="#">' + a.name + '</a></td>' +
+            '<td>members: ' + a.members + '</td>' +
+            '<td>-</td>' +
+            '<td><span class="btnmed btnwrap"><span class="btnedge"><a onclick="return allianceCampTarget(' + a.id + ', \'' + a.name + '\', ' + region + ')" class="btngold">Go</a></span></span></td>' +
+            '</tr>';
+    },
+
+    finishAllBtn:
+        '<span id="extender_finishBtn" class="btnwrap btnlg" onclick="finishAll()"><span class="btnedge"><a class="btngold">Finish All Buildings</a></span></span>',
+
+    boonsSortingOptions: [
+        { val: "available_quantity", text: "Quantity" },
+        { val: "rarity", text: "Rarity" },
+        { val: "calc_battle", text: "Battle stats" },
+        { val: "calc_trade", text: "Trade stats" },
+        { val: "calc_intrigue", text: "Intrigue stats" }
+    ],
+
+    shopSortingOptions: [
+        { val: "price", text: "Silver" },
+        { val: "price_perk_points", text: "Gold" },
+        { val: "rarity", text: "Rarity" },
+        { val: "calc_battle", text: "Battle stats" },
+        { val: "calc_trade", text: "Trade stats" },
+        { val: "calc_intrigue", text: "Intrigue stats" }
+    ],
+
+    sendAllActions: [
+        { val: "none", text: "Disable" },
+        { val: "fight", text: "Vanguards" },
+        { val: "harass", text: "Skirmishers" },
+        { val: "aid", text: "Protectors" },
+        { val: "barter", text: "Merchants" },
+        { val: "hoodwink", text: "Charlatans" },
+        { val: "bribe", text: "Corruptors" },
+        { val: "spy", text: "Agents" },
+        { val: "sabotage", text: "Saboteurs" },
+        { val: "steal", text: "Thieves" },
+        { val: "battle", text: "Battle" },
+        { val: "trade", text: "Trade" },
+        { val: "intrigue", text: "Intrigue" },
+        { val: "friendly", text: "Friendly" },
+        { val: "hostile", text: "Hostile" },
+        { val: "selected", text: "Selected action" },
+        { val: "all", text: "Throw everything" }
+    ],
+
+    outputSwornSwords: function (swornSwords) {
+
+        if (!(swornSwords instanceof Array) || swornSwords.length == 0)
+            return "";
+
+        var v = [];
+        v.push({
+            val: "none",
+            text: "None",
+        });
+
+        for (var j = 0; j < swornSwords.length; j++) {
+            var s = swornSwords[j];
+            if (s.full_name && s.id) {
+
+                v.push({
+                    val: s.id,
+                    text: s.full_name,
+                });
+            }
+        }
+
+        var c = unsafeWindow.userContext.setSwornSword;
+        return this.selectOption("Set sworn sword: ", "ss_select", v, c ? c.id : "none", "setSwornSword($(this).val())");
+
+    },
+
+    selectOption: function (label, id, options, selected, onchange) {
+        var select = "";
+
+        if (!(options instanceof Array)) {
+            return select;
+        }
+
+        select += '<label for="' + id + '">' + label + '</label>';
+        if (typeof onchange != "undefined") {
+            select += '<select id="' + id + '" class="extender-select" onchange="' + onchange + '">';
+        } else {
+            select += '<select id="' + id + '" class="extender-select">';
+        }
+
+
+        for (var i = 0; i < options.length; i++) {
+            var o = options[i];
+
+            if (!o.val || !o.text)
+                continue;
+
+            select += '<option value="' + o.val + '" ' + ((o.val === selected) ? 'selected' : '') + '>' + o.text + '</option>';
+        }
+
+        select += '</select>';
+        return select;
+    },
+
+    checkOption: function (id, name, val) {
+        return '<a style="color:white;" id="' + id + '" class="extender-option checkbox ' + (val ? 'checked' : '') + '" onclick="check(this)">' + name + '</a>';
+    },
+
+    numberOption: function (id, label, val, min, max, step) {
+        return '<label for="' + id + '">' + label + '</label>' +
+            '<span id="' + id + '" ' +
+            'class="extender-option extender-number" ' +
+            'min="' + min + '" ' +
+            'max="' + max + '" ' +
+            'step="' + step + '"' +
+            'onclick="increment(this)">' + val + '</span>';
+    },
+
+    inputNumberOption: function (id, val, maxlength) {
+        return '<div class="contribcount">' +
+            '<input id="' + id + '" type="text" onkeypress="return isNumberKeyPressed(event)" value="' + val + '" maxlength="' + maxlength + '" name="quantity" style="height: auto;">' +
+            '<a id="excountup" onclick="inputIncrement(this)"></a>' +
+            '<a id="excountdown" onclick="inputIncrement(this)"></a>' +
+            '</div>';
+    },
+
+    sellBulkBtn: function (itemId) {
+        return '<span class="sellbulk">' +
+            '<input type="number" id="sell_bulk_amount" placeholder="Amount">' +
+            '<span id="do_sell_bulk" class="btnwrap btnsm" item-id="' + itemId + '">' +
+            '<span class="btnedge">' +
+            '<a class="btngold">Sell</a>' +
+            '</span></span></span>';
+    },
+
+    optionsTab: function (id, name) {
+        return '<span id="' + id + '" class="inventorytabwrap">' +
+            '<span class="inventorytabedge">' +
+            '<a class="inventorytab" style="padding: 1px 15px 0 15px; !important">' +
+            name +
+            '<em></em>' +
+            '</a>' +
+            '</span></span>';
+    },
+
+    tableRow: function (i, el) {
+        return '<tr class="tableRow" style="cursor: pointer">' +
+            '<td><span class="ranklist colsort">' + i + '</span></td>' +
+            '<td><span class="ranklist colsort">' + el.type + '</span></td>' +
+            '<td><span class="name colsort">' + el.activeBuildingPanel + '</span></td>' +
+            '<td><span class="name colsort">' + el.name + '</span></td>' +
+            '<td><span class="avatarimg"><img src="' + el.img + '"></span></td>' +
+            '</tr>';
+    },
+
+    mainTab: function (o) {
+        return '<div class="exrow">' +
+            this.numberOption("baseDelay", "Extender base delay (seconds):", o.baseDelay, 4, 60, 4) +
+            this.finishAllBtn +
+            '</div>' +
+            '<div class="exrow">' +
+            this.checkOption("toggleDebugModes", "Debug mode", o.debugMode) +
+            this.checkOption("toggleTooltips", "Tooltips on buildings", o.doTooltips) +
+            '</div>' +
+            '<div class="exrow">' +
+            'Reload in (hours): ' +
+            this.inputNumberOption("autoReloadInterval", o.autoReloadInterval, 2) +
+            'Collect in (minutes): ' +
+            this.inputNumberOption("autoCollectInterval", o.autoCollectInterval, 2) + '(0 = disabled)' +
+            '</div>' +
+            '<div class="exrow">' +
+            this.checkOption("neverSpendGold", "Never spend gold", o.neverSpendGold) +
+            this.checkOption("autoBossChallenge", "Auto Boss challenge", o.autoBossChallenge) +
+            this.checkOption("showHeader", "Header", o.showHeader) +
+            '</div>' +
+            '<div class="exrow">' +
+            this.selectOption("Sort player inventory by: ", "boonsSortBy", this.boonsSortingOptions, o.boonsSortBy) +
+            this.selectOption(" and then by: ", "boonsSortBy2", this.boonsSortingOptions, o.boonsSortBy2) +
+            '</div>' +
+            '<div class="exrow">' +
+            this.selectOption("Sort shop by: ", "shopSortBy", this.shopSortingOptions, o.shopSortBy) +
+            this.selectOption(" and then by: ", "shopSortBy2", this.shopSortingOptions, o.shopSortBy2) +
+            '</div>' +
+            '<div class="exrow">' +
+            this.selectOption("Send all button context: ", "sendAllAction", this.sendAllActions, o.sendAllAction) +
+            '</div>';
+    },
+
+    queueTab: function (o) {
+        return '<div class="exrow">' +
+            this.numberOption("queueDelay", "Delay in (seconds):", o.queueDelay, 4, 20, 4) +
+            this.checkOption("toggleSuperiorMaterials", "Use superior materials", o.superiorMaterials) +
+            '</div>' +
+            '<div class="exrow">' +
+            'Try production in (minutes): ' +
+            this.inputNumberOption("queueTimerInterval", o.queueTimerInterval, 3) + '(0 = disabled)' +
+            '</div><hr/>' +
+            this.tableSkeleton;
+    },
+
+    bruteTab: function (o) {
+        return '<div class="exrow">' +
+            this.numberOption("bruteWounds", "Brute until: ", o.bruteWounds, 0, 4, 1) + 'wound(s) (0 = disabled) and then: ' +
+            '<span class="btnwrap btnlg" id="bruteSwitchOff" onclick="bruteSwitchToggle(this)"><span class="btnedge"><a class="btngold">' + (o.bruteSwitchOff ? 'switch off' : 'adjust') + '</a></span></span>' +
+            this.infoBtn +
+            '</div>' +
+            '<div class="exrow">' +
+            this.outputSwornSwords(o.swornSwords) +
+            this.bruteAllBtn +
+            this.bruteBtn +                        
+            '</div>';
+    },
+};
+
+var styles = {
+    modalAlertsHigh:
+        '#modals_container_high {' +
+            'z-index: 99999;' +
+            '}',
+
+    resetOptions:
+        '#resetOptions { ' +
+            'bottom: 15px; ' +
+            'left: 66%; ' +
+            'margin-left: -40px; ' +
+            'padding: 0; ' +
+            'position: absolute; ' +
+            'width: 80px; ' +
+            '}',
+
+    saveOptions:
+        '#saveOptions {' +
+            'bottom: 15px;' +
+            'left: 34%;' +
+            'margin-left: -40px; ' +
+            'padding: 0; ' +
+            'position: absolute; ' +
+            'width: 80px; ' +
+            '}',
+
+    extenderMenu:
+        '#extender-menu .navlinkicon {' +
+            'background-image: url("http://disruptorbeamcdn-01.insnw.net/images/icons/newnav-menu.png?t=386c1688da2a"); ' +
+            '}',
+
+    extenderTabMenu:
+        '#extenderTabMenu {' +
+            'background: url("http://disruptorbeamcdn-01.insnw.net/images/character/horzmenubg.png?t=074863387615") repeat-x scroll 0 bottom #000;' +
+            'height: 46px;' +
+            'margin: 0px 6px 0px;' +
+            'position: relative;' +
+            'text-align: center;' +
+            'width: auto;' +
+            '}',
+
+    exRow:
+        '.exrow {' +
+            'margin: 8px 0 0;' +
+            '}',
+
+    exOption:
+        '.extender-option {' +
+            'margin: 0 10px 0 8px;' +
+            '}',
+
+    exNumber:
+        '.extender-number {' +
+            'background: url("http://disruptorbeamcdn-01.insnw.net/images/city/buildinglvl.png?t=7e85013c75ef") no-repeat scroll 0 0 transparent;' +
+            'color: #d6b97a;' +
+            'display: inline-block;' +
+            'font-family: GoudyTrajan-Bold,Trajan,"Trajan Pro",Trajanbold;' +
+            'font-weight: bold;' +
+            'height: 32px;' +
+            'line-height: 32px;' +
+            'right: 5px;' +
+            'text-align: center;' +
+            'top: 70px;' +
+            'width: 33px;' +
+            'cursor: pointer;' +
+            '}',
+
+    exSelect:
+        '.extender-select { ' +
+            'background-color: #000;' +
+            'border: 1px solid #444;' +
+            'border-radius: 5px;' +
+            'color: white;' +
+            '}',
+
+    excountup:
+        '#excountup {' +
+            'background-position: 0 0;' +
+            'top: -4px;' +
+            '}',
+
+    excountdown:
+        '#excountdown {' +
+            'background-position: 0 bottom;' +
+            'top: 12px;' +
+            '}',
+
+    sellBulk:
+        '.sellbulk {' +
+            'color: white;' +
+            'position: relative;' +
+            '} \n' +
+            '.sellbulk input {' +
+            'background-color: #000;' +
+            'border: 1px solid #444;' +
+            'border-radius: 5px;' +
+            'color: white;' +
+            'padding: 5px;' +
+            'width: 100px;' +
+            '}',
+
+    exstatbox:
+        '.exstatbox {' +
+            'height: 84px;' +
+            'left: 166px;' +
+            'position: absolute;' +
+            'top: 44px;' +
+            'width: 101px;' +
+            'z-index: 2;' +
+            '}',
+
+    plevel:
+        '#plevel {' +
+            'top: -38px;' +
+            '} \n' +
+            '#plevel span {' +
+            'background: url("http://disruptorbeamcdn-01.insnw.net/images/icons/icon-xp.png?t=b8e2c654bf59") no-repeat scroll 0px 0px transparent;' +
+            'z-index: 2;' +
+            'width: 34px !important;' +
+            'height: 34px !important;' +
+            'top: -5px;' +
+            '} \n' +
+            '#plevel var {' +
+            'padding-left: 10px !important;' +
+            '}',
+
+    exSendAllButton:
+        '.questmodal .exSendAllButton {' +
+            'left: 110px;' +
+            '} \n' +
+            '.exSendAllButton {' +
+            'position: absolute;' +
+            'top: 7px;' +
+            '}',
+
+    addAllStyles: function() {
+
+        try {
+
+            var elmHead, elmStyle;
+            elmHead = document.getElementsByTagName('head')[0];
+            elmStyle = document.createElement('style');
+            elmStyle.type = 'text/css';
+            elmHead.appendChild(elmStyle);
+            for (var style in this) {
+                if (this.hasOwnProperty(style) && typeof this[style] == "string") {
+                    elmStyle.innerHTML
+                        ? elmStyle.innerHTML += "\n" + this[style]
+                        : elmStyle.innerHTML = this[style];
+                }
+            }
+
+        } catch (e) {
+            warn("Error occured: " + e + ". Retrying... ");
+
+            if (!document.styleSheets.length)
+                document.createStyleSheet();
+
+            for (var cStyle in this) {
+                if (this.hasOwnProperty(cStyle) && typeof this[cStyle] == "string") {
+                    document.styleSheets[0].cssText
+                        ? document.styleSheets[0].cssText += "\n" + this[cStyle]
+                        : document.styleSheets[0].cssText = this[cStyle];
+                }
+            }
+        }
+    }
+};
