@@ -12,11 +12,11 @@
 // @exclude     http://gota-www.disruptorbeam.com/users/login*
 // @license     WTFPL (more at http://www.wtfpl.net/)
 // @require     http://ajax.googleapis.com/ajax/libs/jquery/2.1.0/jquery.min.js
-// @require     https://greasyfork.org/scripts/5427-gota-extender-constants/code/GOTA_Extender_Constants.js?version=23947
+// @require     https://greasyfork.org/scripts/5427-gota-extender-constants/code/GOTA_Extender_Constants.js?version=28590
 // @require     https://greasyfork.org/scripts/5279-greasemonkey-supervalues/code/GreaseMonkey_SuperValues.js?version=20819
-// @resource 	custom https://greasyfork.org/scripts/5426-gota-extender-custom/code/GOTA_Extender_Custom.js?version=23946
-// @resource    auxiliary https://greasyfork.org/scripts/5618-gota-extender-auxiliary/code/GOTA_Extender_Auxiliary.js?version=23948
-// @resource    originals https://greasyfork.org/scripts/6702-gota-extender-original/code/GOTA_Extender_Original.js?version=26307
+// @resource 	custom https://greasyfork.org/scripts/5426-gota-extender-custom/code/GOTA_Extender_Custom.js?version=28589
+// @resource    auxiliary https://greasyfork.org/scripts/5618-gota-extender-auxiliary/code/GOTA_Extender_Auxiliary.js?version=28591
+// @resource    original https://greasyfork.org/scripts/6702-gota-extender-original/code/GOTA_Extender_Original.js?version=26307
 // @version     5.0
 // @grant       unsafeWindow
 // @grant       GM_getValue
@@ -1459,7 +1459,7 @@ function checkSource() {
     console.log("Source control check for integrity initiated...");
     var updateRequired = false;
 
-    eval(GM_getResourceText("originals"));
+    eval(GM_getResourceText("original"));
     if (typeof original == "undefined") {
         error("Cannot find original function data.");
         return;
