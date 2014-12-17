@@ -16,6 +16,7 @@
 // @require     https://greasyfork.org/scripts/5279-greasemonkey-supervalues/code/GreaseMonkey_SuperValues.js?version=20819
 // @resource 	custom https://greasyfork.org/scripts/5426-gota-extender-custom/code/GOTA_Extender_Custom.js?version=23946
 // @resource    auxiliary https://greasyfork.org/scripts/5618-gota-extender-auxiliary/code/GOTA_Extender_Auxiliary.js?version=23948
+// @resource    originals https://greasyfork.org/scripts/6702-gota-extender-original/code/GOTA_Extender_Original.js?version=26307
 // @version     4.8
 // @grant       unsafeWindow
 // @grant       GM_getValue
@@ -157,11 +158,8 @@ function initialize() {
     try {
 
         if (options.checkScript) {
-            console.log("-------------------------------------\\");
-            console.log("Script scheduled for update check.");
-            console.log("-------------------------------------/");
 
-            sourceControl();
+            checkSource();
 
             options.checkScript = false;
             options.set("checkScript");
@@ -1453,10 +1451,15 @@ function avaStart_onclick() {
     }, (options.baseDelay / 2) * 1000);
 }
 
-function sourceControl() {
+function checkSource() {
+    console.log("-------------------------------------\\");
+    console.log("Script scheduled for update check.");
+    console.log("-------------------------------------/");
+
     console.log("Source control check for integrity initiated...");
     var updateRequired = false;
 
+    eval(GM_getResourceText("originals"));
     if (typeof original == "undefined") {
         error("Cannot find original function data.");
         return;
@@ -1468,7 +1471,7 @@ function sourceControl() {
             console.log("Current function: " + fn);
 
             if (!original.hasOwnProperty(fn)) {
-                console.error("Function  does not have a stored value!");
+                console.error("Function does not have a stored value!");
                 continue;
             }
             
@@ -1480,10 +1483,10 @@ function sourceControl() {
             }
 
             var pageFn = unsafeWindow[fn].toString();
-            console.log("Functions retrieved. Comparing...");
+            console.log("Function retrieved. Comparing...");
 
             if (pageFn !== original[fn]) {
-                console.warn("Changes detected! Please revise.");
+                console.warn("Changes detected! Please revise: " + fn);
                 updateRequired = true;
                 continue;
             }
@@ -1494,6 +1497,9 @@ function sourceControl() {
         alert("Source control encountered an error: " + e);
         return;
     }
+
+    console.log("-------------------------------------|");
+    console.log("-------------------------------------| > End of script update check");
 
     alert("Source control resolved that " +
         (updateRequired ? "an update is required." : "no changes are necessary.") +
