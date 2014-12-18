@@ -329,7 +329,6 @@ var templates = {
             '<div class="exrow">' +
             this.checkOption("neverSpendGold", "Never spend gold", o.neverSpendGold) +
             this.checkOption("autoBossChallenge", "Auto Boss challenge", o.autoBossChallenge) +
-            this.checkOption("showHeader", "Header", o.showHeader) +
             '</div>' +
             '<div class="exrow">' +
             this.selectOption("Sort player inventory by: ", "boonsSortBy", this.boonsSortingOptions, o.boonsSortBy) +

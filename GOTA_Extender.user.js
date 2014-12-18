@@ -232,8 +232,6 @@ var options = {
 
     debugMode: true,
     default_debugMode: true,
-    showHeader: true,
-    default_showHeader: true,
     checkScript: false,
     default_checkScript: false,
     baseDelay: 4,
@@ -789,10 +787,6 @@ function saveMainTab() {
     options.neverSpendGold = $("#neverSpendGold").hasClass("checked");
     options.autoBossChallenge = $("#autoBossChallenge").hasClass("checked");
 
-    if (options.showHeader != $("#showHeader").hasClass("checked")) {
-        options.showHeader == $("#showHeader").hasClass("checked");
-        toggleHeader();
-    }
 
     var ari = parseInt($("#autoReloadInterval").val());
     if (!isNaN(ari) && options.autoReloadInterval !== ari) {
