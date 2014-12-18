@@ -17,7 +17,7 @@
 // @resource 	custom https://greasyfork.org/scripts/5426-gota-extender-custom/code/GOTA_Extender_Custom.js?version=28589
 // @resource    auxiliary https://greasyfork.org/scripts/5618-gota-extender-auxiliary/code/GOTA_Extender_Auxiliary.js?version=28591
 // @resource    original https://greasyfork.org/scripts/6702-gota-extender-original/code/GOTA_Extender_Original.js?version=26307
-// @version     5.1
+// @version     5.2
 // @grant       unsafeWindow
 // @grant       GM_getValue
 // @grant       GM_setValue
