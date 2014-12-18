@@ -129,11 +129,13 @@ function executeElement(element, callback) {
 };
 
 function buildingFinished(b) {
-    return b.producing_archetype_id && !b.build_remaining;
+    //return b.producing_archetype_id && !b.build_remaining;
+    return !b.build_remaining;
 }
 
 function buildingProducing(b) {
-    return b.producing_archetype_id && b.build_remaining;
+    //return b.producing_archetype_id && b.build_remaining;
+    return b.build_remaining;
 }
 
 var bruteForceTimeout;
