@@ -447,6 +447,10 @@ finishAll = function() {
 
     for (var i = 0; i < userContext.buildingsData.length; i++) {
         var b = userContext.buildingsData[i];
+        if(b.symbol === "counting_house"){
+            continue;
+        }
+
         if (buildingFinished(b)) {
             log("Attempt to finish production on " + b.symbol);
             doFinishProduction(b.item_id, finishAll);
