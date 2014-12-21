@@ -612,7 +612,28 @@ function setSwornSword(param) {
     }
 }
 
+function checkCommandPoints() {
+    if(!userContext || !userContext.playerData || !userContext.playerData.stat)
+        return false;
+
+    var commandPoints = userContext.playerData.stat.command - userContext.playerData.stat.current_command;
+
+    log("Debugging check command points: command points: " + commandPoints + ", " +
+    "continue then? " + (!isNaN(commandPoints) && commandPoints > 0));
+
+    return !isNaN(commandPoints) && commandPoints > 0;
+}
 function adventureSendAll(adventure, swornswords) {
+
+    if (extender_sendAllAction === "none") {
+        inform("This function is disabled. Please enable it from options.");
+        return;
+    }
+
+    if(!checkCommandPoints()){
+        inform("Not enough command points. <br>Action cannot execute.");
+        return;
+    }
 
     if (typeof swornswords == "undefined" || !(swornswords instanceof window.Array)) {
         error("An array should be passed to the function. Sending failed.");
@@ -664,7 +685,12 @@ function pvpSendBatch(swornswords) {
         inform("This function is disabled. Please enable it from options.");
         return;
     }
-    
+
+    if(!checkCommandPoints()){
+        inform("Not enough command points. <br>Action cannot execute.");
+        return;
+    }
+
     if (typeof swornswords == "undefined" || !(swornswords instanceof window.Array)) {
         error("An array should be passed to the function. Sending failed.");
         return;
@@ -736,6 +762,12 @@ function avaSendBatch(swornswords) {
         inform("This function is disabled. Please enable it from options.");
         return;
     }
+
+    if(!checkCommandPoints()){
+        inform("Not enough command points. <br>Action cannot execute.");
+        return;
+    }
+
 
     if (typeof swornswords == "undefined" || !(swornswords instanceof window.Array)) {
         error("An array should be passed to the function. Sending failed.");
