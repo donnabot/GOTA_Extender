@@ -158,11 +158,10 @@ doFinishProduction = function doFinishProduction(b, callback) {
 
                     uiEvent("do_finish_production");
                     uiEvent("building_panel_" + userContext.activeBuildingPanel);
-                    a.produced_item && "stacks_of_coins" == a.produced_item.symbol && retrievePlayerData(true, function(a) {
-                        userContext.playerData.quests =
-                            a.quests;
-                        reRenderQuestActionItems();
-                    });
+                    a.produced_item && ("stacks_of_coins" == a.produced_item.symbol ? retrievePlayerData(!0, function (a) {
+                        userContext.playerData.quests = a.quests;
+                        reRenderQuestActionItems()
+                    }) : "stacks_of_coins" == a.produced_item.symbol && (userContext.playerData.stat.ftpe_decorative_blade = 1));
 
                     "Upgrade" == theNewItem.slot && buildingUpgradePanel(b.symbol);
                     updatePlayerInfo(userContext.playerData);
