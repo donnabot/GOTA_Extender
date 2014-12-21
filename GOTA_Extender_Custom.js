@@ -89,7 +89,7 @@ doFinishProduction = function doFinishProduction(b, callback) {
 
                 doLog("doFinishProduction: succeess ");
                 freeLock(d);
-                var b = buildingByItemId(b, a.building);
+                var c = buildingByItemId(b, a.building);
                 userContext.playerData.character = a.character;
                 userContext.playerData.user.money = a.user.money;
                 userContext.playerData.stat.onboarding = a.stat.onboarding;
@@ -97,10 +97,10 @@ doFinishProduction = function doFinishProduction(b, callback) {
                 userContext.playerData.stat.produced_stone = a.stat.produced_stone;
                 userContext.playerData.stat.building_upgrades_finished =
                     a.stat.building_upgrades_finished;
-                b.producing_archetype_id = null;
-                b.modifier = null;
-                b.recipe_symbol = null;
-                var f = extractItemBySymbol(playerInventory, b.symbol);
+                c.producing_archetype_id = null;
+                c.modifier = null;
+                c.recipe_symbol = null;
+                var f = extractItemBySymbol(playerInventory, c.symbol);
                 f.effective_upgrade_level = a.building.effective_upgrade_level;
                 f.producing_archetype_id = null;
                 f.modifier = null;
@@ -148,11 +148,11 @@ doFinishProduction = function doFinishProduction(b, callback) {
                     isWeb() ? (renderBuildingInventory(userContext.playerData),
                             renderBuildingsOnScreen(userContext.playerData))
                         : (f = null, f = null == q
-                                ? { symbol: b.symbol, status: "idle" }
-                                : { symbol: b.symbol, status: "idle", upgrade: q },
+                                ? { symbol: c.symbol, status: "idle" }
+                                : { symbol: c.symbol, status: "idle", upgrade: q },
                             iosSignal("finish_production", "update", f),
                             isAndroid()
-                                && mobileCooldownDataSignal([{ mode: "building", symbol: b.symbol }]),
+                                && mobileCooldownDataSignal([{ mode: "building", symbol: c.symbol }]),
                             refreshActiveBuildingPanel(),
                             $("#building_tab_prod, .buildingupgradetree").fadeTo("slow", "1"));
 
@@ -163,7 +163,7 @@ doFinishProduction = function doFinishProduction(b, callback) {
                         reRenderQuestActionItems()
                     }) : "stacks_of_coins" == a.produced_item.symbol && (userContext.playerData.stat.ftpe_decorative_blade = 1));
 
-                    "Upgrade" == theNewItem.slot && buildingUpgradePanel(b.symbol);
+                    "Upgrade" == theNewItem.slot && buildingUpgradePanel(c.symbol);
                     updatePlayerInfo(userContext.playerData);
                     updateAllStatus();
                 }
@@ -446,7 +446,7 @@ finishAll = function() {
 
     for (var i = 0; i < userContext.buildingsData.length; i++) {
         var b = userContext.buildingsData[i];
-        if(b.symbol === "counting_house"){
+        if(b.symbol === "keep"){
             continue;
         }
 
@@ -1328,7 +1328,8 @@ function questSubmit(b, a, c, d, g, k, f) {
 				return;
 			}
 				
-			log("Boss challenge automated. Actions remaining: " + a.actions_remaining, "BOSS");
+			log("Boss challenge automated. Actions remaining: " + a.actions_remaining + "," +
+            "stage: " + a.stage, "BOSS");
 
             if (a.actions_remaining > 0) {
                 questSubmit(a.symbol, a.stage, c, a.chosen, null, null, a.id);
