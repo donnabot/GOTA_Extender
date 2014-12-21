@@ -163,6 +163,7 @@ function initialize() {
 
             options.checkScript = false;
             options.set("checkScript");
+            // TODO: Uncomment this when done testing
             //window.location.reload(true);
             return;
         }

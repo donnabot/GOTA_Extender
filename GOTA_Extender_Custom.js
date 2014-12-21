@@ -74,22 +74,22 @@ doInstantSpeedUp = function doInstantSpeedUp(c, a, callback) {
 };
 log("Instant speed up returns if gold is required.", "initialize");
 
-doFinishProduction = function doFinishProduction(c, callback) {
-    var a = buildingByItemId(c), b = itemFromId(a.producing_archetype_id);
+doFinishProduction = function doFinishProduction(b, callback) {
+    var a = buildingByItemId(b), c = itemFromId(a.producing_archetype_id);
     userContext.lastFinish = a.symbol;
-    doLog("doFinishProduction: building_id=" + c + " symbol=" + a.symbol + " producing=" + b.symbol);
-    "Upgrade" !== b.slot && (analytics.track("Production Finish", { building_symbol: a.symbol, item_symbol: b.symbol, item_category: b.slot }), analytics.wizardtrack("Production Finish", { building_symbol: a.symbol, item_symbol: b.symbol, item_category: b.slot }));
-    var d = "finish-" + c;
+    doLog("doFinishProduction: building_id=" + b + " symbol=" + a.symbol + " producing=" + c.symbol);
+    "Upgrade" !== c.slot && (analytics.track("Production Finish", { building_symbol: a.symbol, item_symbol: c.symbol, item_category: c.slot }), analytics.wizardtrack("Production Finish", { building_symbol: a.symbol, item_symbol: c.symbol, item_category: c.slot }));
+    var d = "finish-" + b;
     userLock(d) && (playSound("build"),
         isWeb() && $("#collect_" + a.symbol).html(""), $.ajax({
-            url: "/play/finish_production/" + c,
+            url: "/play/finish_production/" + b,
             dataType: "JSON",
             success: function(a) {
                 //console.debug("Logging server response for doFinishProduction: ", a);
 
                 doLog("doFinishProduction: succeess ");
                 freeLock(d);
-                var b = buildingByItemId(c, a.building);
+                var b = buildingByItemId(b, a.building);
                 userContext.playerData.character = a.character;
                 userContext.playerData.user.money = a.user.money;
                 userContext.playerData.stat.onboarding = a.stat.onboarding;
