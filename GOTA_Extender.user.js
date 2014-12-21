@@ -163,7 +163,7 @@ function initialize() {
 
             options.checkScript = false;
             options.set("checkScript");
-            window.location.reload(true);
+            //window.location.reload(true);
             return;
         }
 
@@ -1450,6 +1450,8 @@ function checkSource() {
     console.log("Script scheduled for update check.");
     console.log("-------------------------------------/");
 
+    var lastUpdateCheck = GM_SuperValue.get("lastUpdateCheck", "never");
+    console.log("Function definitions updated: " + lastUpdateCheck);
     console.log("Source control check for integrity initiated...");
     var updateRequired = false;
 
@@ -1481,6 +1483,7 @@ function checkSource() {
 
             if (pageFn !== original[fn]) {
                 console.warn("Changes detected! Please revise: " + fn);
+
                 updateRequired = true;
                 continue;
             }
@@ -1494,6 +1497,10 @@ function checkSource() {
 
     console.log("-------------------------------------|");
     console.log("-------------------------------------| > End of script update check");
+
+    if(!updateRequired){
+        GM_SuperValue.set("lastUpdateCheck", new Date());
+    }
 
     alert("Source control resolved that " +
         (updateRequired ? "an update is required." : "no changes are necessary.") +
