@@ -1331,6 +1331,11 @@ function questSubmit(b, a, c, d, g, k, f) {
 			log("Boss challenge automated. Actions remaining: " + a.actions_remaining + "," +
             "stage: " + a.stage, "BOSS");
 
+            if(a.stage && a.stage === 1000){
+                log("Boss challenge complete. Exiting...", "BOSS");
+                return;
+            }
+
             if (a.actions_remaining > 0) {
                 questSubmit(a.symbol, a.stage, c, a.chosen, null, null, a.id);
             } else {
