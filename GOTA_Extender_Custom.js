@@ -1126,41 +1126,41 @@ shopModal = function shopModal(b, a) {
                 shopModal(c, a);
             }
         })
-    } else
+
+    // EXTENDER :: Enwrap else - readability fixes bugs
+    } else {
         hideSpinner(),
             updateSilver(b.money),
             updateGold(b.perk_points),
             c = sortShopItems(b.shop),
             userContext.filteredShopData = distrubuteShopItemsToFilteredLists(c),
-            userContext.shopFilterIndex = userContext.shopFilterIndex || 0,
-            userContext.shopData = userContext.filteredShopData[userContext.shopFilterIndex],
-            baseShopTime = parseInt((new Date).getTime() / 1E3),
-            b.cost_refresh_shop = 2, b.userContext = userContext,
-            b.open_tab = a, b.featuredTabLabel && (phraseText.featured_tab_label = b.featuredTabLabel),
-            b.dealsData ? (b.overrideDealsData =[], b.dealsData.map(function (a) {
-        b.overrideDealsData.push(a)
-    }), b.dealsData = [], b.overrideDealsData.map(function (a) {
-        b.dealsData.push(a.symbol);
-        a.price_perk_points && (itemFromSymbol(a.symbol).price_perk_points = a.price_perk_points)
-    }), userContext.defaultDeals_id = itemFromSymbol(b.dealsData[0]).id, userContext.defaultDeals_symbol = b.dealsData[0]) : b.dealsData = shopSetDealData("deals"), b.featuredItemPack ? (b.overridefeaturedItemPack = {}, b.overridefeaturedItemPack.symbol = b.featuredItemPack.symbol, b.overridefeaturedItemPack.price_perk_points =
-        b.featuredItemPack.price_perk_points, b.featuredItemPack = b.overridefeaturedItemPack.symbol, b.overridefeaturedItemPack.price_perk_points && (itemFromSymbol(b.overridefeaturedItemPack.symbol).price_perk_points = b.overridefeaturedItemPack.price_perk_points), userContext.defaultFeaturedPack_id = itemFromSymbol(b.featuredItemPack).id, userContext.defaultFeaturedPack_symbol = b.featuredItemPack) : b.featuredItemPack = shopSetDealData("featured_item_pack"), b.featuredItem ? (b.overridefeaturedItem = [], b.featuredItem.map(function (a) {
-        b.overridefeaturedItem.push(a)
-    }),
-        b.featuredItem = [], b.overridefeaturedItem.map(function (a) {
-        b.featuredItem.push(a.symbol);
-        a.price_perk_points && (itemFromSymbol(a.symbol).price_perk_points = a.price_perk_points)
-    })) : b.featuredItem = shopSetDealData("featured_items"), userContext.shopMetadata = b, drawShopModal(userContext.shopMetadata)
 
-    // EXTENDER :: Modification - add custom filter
-    if(shopFilters.indexOf("extender") == -1)
-        shopFilters.push("extender");
+            // EXTENDER :: Modification, extender filter by default
+            userContext.shopFilterIndex = userContext.shopFilterIndex || 4,
+            console.debug("Sorting shop and putting it in the filteredShopData.");
 
-    if(userContext.filteredShopData)
+        // EXTENDER :: Load extender filter with filtered data
         userContext.filteredShopData[shopFilters.indexOf("extender")]
             = sortShop(userContext.filteredShopData[0].slice(0));
 
-    phraseText["shop_filter_extender"] = "Extender";
-    // End of modification
+        userContext.shopData = userContext.filteredShopData[userContext.shopFilterIndex],
+            baseShopTime = parseInt((new Date).getTime() / 1E3),
+            b.cost_refresh_shop = 2, b.userContext = userContext,
+            b.open_tab = a, b.featuredTabLabel && (phraseText.featured_tab_label = b.featuredTabLabel),
+            b.dealsData ? (b.overrideDealsData = [], b.dealsData.map(function (a) {
+                b.overrideDealsData.push(a)
+            }), b.dealsData = [], b.overrideDealsData.map(function (a) {
+                b.dealsData.push(a.symbol);
+                a.price_perk_points && (itemFromSymbol(a.symbol).price_perk_points = a.price_perk_points)
+            }), userContext.defaultDeals_id = itemFromSymbol(b.dealsData[0]).id, userContext.defaultDeals_symbol = b.dealsData[0]) : b.dealsData = shopSetDealData("deals"), b.featuredItemPack ? (b.overridefeaturedItemPack = {}, b.overridefeaturedItemPack.symbol = b.featuredItemPack.symbol, b.overridefeaturedItemPack.price_perk_points =
+            b.featuredItemPack.price_perk_points, b.featuredItemPack = b.overridefeaturedItemPack.symbol, b.overridefeaturedItemPack.price_perk_points && (itemFromSymbol(b.overridefeaturedItemPack.symbol).price_perk_points = b.overridefeaturedItemPack.price_perk_points), userContext.defaultFeaturedPack_id = itemFromSymbol(b.featuredItemPack).id, userContext.defaultFeaturedPack_symbol = b.featuredItemPack) : b.featuredItemPack = shopSetDealData("featured_item_pack"), b.featuredItem ? (b.overridefeaturedItem = [], b.featuredItem.map(function (a) {
+            b.overridefeaturedItem.push(a)
+        }),
+            b.featuredItem = [], b.overridefeaturedItem.map(function (a) {
+            b.featuredItem.push(a.symbol);
+            a.price_perk_points && (itemFromSymbol(a.symbol).price_perk_points = a.price_perk_points)
+        })) : b.featuredItem = shopSetDealData("featured_items"), userContext.shopMetadata = b, drawShopModal(userContext.shopMetadata)
+    }
 };
 log("Sort shop.", "initialize");
 
@@ -1271,6 +1271,9 @@ function questSubmit(b, a, c, d, g, k, f) {
 
             if(a.stage && a.stage === 1000){
                 log("Boss challenge complete. Exiting...", "BOSS");
+
+                // Close dialog and pop it from whenever necessary
+                questClose(a.symbol, a.id, true);
                 return;
             }
 

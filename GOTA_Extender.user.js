@@ -355,6 +355,15 @@ var inject = {
     // Constants required by the page
     constants: function () {
 
+        // Safe string
+        unsafeWindow.phraseText.shop_filter_extender = "Extender";
+
+        // EXTENDER :: Modification - add custom filter
+        if(unsafeWindow.shopFilters.indexOf("extender") == -1){
+            log("Injecting extender filter...");
+            unsafeWindow.shopFilters.push("extender");
+        }
+
         // Inject structured clone (for Mozilla)
         if (typeof (cloneInto) == "function") {
             unsafeWindow.extender_queueDelay = cloneInto(options.queueDelay, unsafeWindow);
