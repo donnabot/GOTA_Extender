@@ -1105,125 +1105,53 @@ shopModal = function shopModal(b, a) {
     void 0 == a && (a = "troopsequip");
 
     if (void 0 == b) {
-        firstShopItem.swornswordstab = 0;
-        firstShopItem.troopsequip = 0;
-        firstShopItem.characterequip = 0;
-        firstShopItem.boonstab = 0;
-        firstShopItem.featuredtab = 0;
-        firstShopItem.sealtab = 0;
         var c;
         c = "" + (shopModalHead() + shopModalFoot());
-        isWeb() && displayModalDialog(c, void 0, void 0,
-            "min-height: 692px; top: 0px; margin-top: 40px");
+        isWeb() && displayModalDialog(c, void 0, void 0, "min-height: 692px; top: 0px; margin-top: 40px");
         showSpinner();
         $.ajaxQueue({
             url: "/play/shop/",
             dataType: "JSON",
             complete: hideSpinner,
-            success: function(c) {
+            success: function (c) {
                 shopModal(c, a);
             }
-        });
-    } else {
-        hideSpinner();
-        updateSilver(b.money);
-        updateGold(b.perk_points);
-        userContext.shopData = [];
+        })
+    } else
+        hideSpinner(),
+            updateSilver(b.money),
+            updateGold(b.perk_points),
+            c = sortShopItems(b.shop),
+            userContext.filteredShopData = distrubuteShopItemsToFilteredLists(c),
+            userContext.shopFilterIndex = userContext.shopFilterIndex || 0,
+            userContext.shopData = userContext.filteredShopData[userContext.shopFilterIndex],
+            baseShopTime = parseInt((new Date).getTime() / 1E3),
+            b.cost_refresh_shop = 2, b.userContext = userContext,
+            b.open_tab = a, b.featuredTabLabel && (phraseText.featured_tab_label = b.featuredTabLabel),
+            b.dealsData ? (b.overrideDealsData =[], b.dealsData.map(function (a) {
+        b.overrideDealsData.push(a)
+    }), b.dealsData = [], b.overrideDealsData.map(function (a) {
+        b.dealsData.push(a.symbol);
+        a.price_perk_points && (itemFromSymbol(a.symbol).price_perk_points = a.price_perk_points)
+    }), userContext.defaultDeals_id = itemFromSymbol(b.dealsData[0]).id, userContext.defaultDeals_symbol = b.dealsData[0]) : b.dealsData = shopSetDealData("deals"), b.featuredItemPack ? (b.overridefeaturedItemPack = {}, b.overridefeaturedItemPack.symbol = b.featuredItemPack.symbol, b.overridefeaturedItemPack.price_perk_points =
+        b.featuredItemPack.price_perk_points, b.featuredItemPack = b.overridefeaturedItemPack.symbol, b.overridefeaturedItemPack.price_perk_points && (itemFromSymbol(b.overridefeaturedItemPack.symbol).price_perk_points = b.overridefeaturedItemPack.price_perk_points), userContext.defaultFeaturedPack_id = itemFromSymbol(b.featuredItemPack).id, userContext.defaultFeaturedPack_symbol = b.featuredItemPack) : b.featuredItemPack = shopSetDealData("featured_item_pack"), b.featuredItem ? (b.overridefeaturedItem = [], b.featuredItem.map(function (a) {
+        b.overridefeaturedItem.push(a)
+    }),
+        b.featuredItem = [], b.overridefeaturedItem.map(function (a) {
+        b.featuredItem.push(a.symbol);
+        a.price_perk_points && (itemFromSymbol(a.symbol).price_perk_points = a.price_perk_points)
+    })) : b.featuredItem = shopSetDealData("featured_items"), userContext.shopMetadata = b, drawShopModal(userContext.shopMetadata)
 
-        seals = [];
-        for (c = 0; c < b.shop.length; c++)
-            void 0 == b.shop[c].shop_expires_seconds && (doLog("shopModal: i=" + c + " item=" + b.shop[c].full_name), "Seal" == b.shop[c].slot ? seals.push(b.shop[c]) : userContext.shopData.push(b.shop[c]));
+    // EXTENDER :: Modification - add custom filter
+    if(shopFilters.indexOf("extender") == -1)
+        shopFilters.push("extender");
 
-        seals.sort(function(a, c) {
-            return c.rarity -
-                a.rarity;
-        });
+    if(userContext.filteredShopData)
+        userContext.filteredShopData[shopFilters.indexOf("extender")]
+            = sortShop(userContext.filteredShopData[0].slice(0));
 
-        for (c = 0; c < seals.length; c++)
-            userContext.shopData.push(seals[c]);
-
-        for (c = 0; c < b.shop.length; c++)
-            void 0 != b.shop[c].shop_expires_seconds &&
-            (doLog("shopModal: i=" + c + " item=" + b.shop[c].full_name), userContext.shopData.push(b.shop[c]));
-
-        baseShopTime = parseInt((new Date).getTime() / 1E3);
-        c = "";
-        initPagination("troopsequip", 6);
-        initPagination("characterequip", 6);
-        initPagination("boonstab", 6);
-        initPagination("swornswordstab", 6);
-        initPagination("sealtab", 6);
-        userContext.totalItems.troopsequip = 0;
-        userContext.totalItems.characterequip =
-            0;
-        userContext.totalItems.boonstab = 0;
-        userContext.totalItems.swornswordstab = 0;
-        b.cost_refresh_shop = 2;
-        b.userContext = userContext;
-        b.open_tab = a;
-        b.featuredTabLabel && (phraseText.featured_tab_label = b.featuredTabLabel);
-        b.dealsData ? (b.overrideDealsData = [], b.dealsData.map(function(a) { b.overrideDealsData.push(a); }), b.dealsData = [], b.overrideDealsData.map(function(a) {
-                b.dealsData.push(a.symbol);
-                a.price_perk_points && (itemFromSymbol(a.symbol).price_perk_points = a.price_perk_points);
-            }), userContext.defaultDeals_id = itemFromSymbol(b.dealsData[0]).id,
-            userContext.defaultDeals_symbol = b.dealsData[0]) : b.dealsData = shopSetDealData("deals");
-        b.featuredItemPack ? (b.overridefeaturedItemPack = {}, b.overridefeaturedItemPack.symbol = b.featuredItemPack.symbol, b.overridefeaturedItemPack.price_perk_points = b.featuredItemPack.price_perk_points, b.featuredItemPack = b.overridefeaturedItemPack.symbol, b.overridefeaturedItemPack.price_perk_points && (itemFromSymbol(b.overridefeaturedItemPack.symbol).price_perk_points = b.overridefeaturedItemPack.price_perk_points), userContext.defaultFeaturedPack_id =
-            itemFromSymbol(b.featuredItemPack).id, userContext.defaultFeaturedPack_symbol = b.featuredItemPack) : b.featuredItemPack = shopSetDealData("featured_item_pack");
-        b.featuredItem ? (b.overridefeaturedItem = [], b.featuredItem.map(function(a) { b.overridefeaturedItem.push(a); }), b.featuredItem = [], b.overridefeaturedItem.map(function(a) {
-            b.featuredItem.push(a.symbol);
-            a.price_perk_points && (itemFromSymbol(a.symbol).price_perk_points = a.price_perk_points);
-        })) : b.featuredItem = shopSetDealData("featured_items");
-        for (c = 0; c < userContext.shopData.length; c++) {
-            tabLocation =
-                "";
-            switch (userContext.shopData[c].slot) {
-            case "Weapon":
-            case "Armor":
-                tabLocation = "troopsequip";
-                break;
-            case "Companion":
-            case "Unit":
-                tabLocation = "characterequip";
-                break;
-            case "Consumable":
-            case "Boon":
-            case "Food":
-                tabLocation = "boonstab";
-                break;
-            case "Sworn Sword":
-                tabLocation = "swornswordstab";
-                break;
-            case "Seal":
-                tabLocation = "sealtab";
-            }
-            userContext.shopData[c].tabLocation = tabLocation;
-            userContext.totalItems[tabLocation]++;
-            doLog("shop: full_name=" + userContext.shopData[c].full_name + " slot=" + userContext.shopData[c].slot +
-                " tabLocation=" + tabLocation);
-            0 == firstShopItem[tabLocation] && (doLog("first " + tabLocation + ": " + userContext.shopData[c].id), firstShopItem[tabLocation] = userContext.shopData[c].id);
-            "true" == userContext.shopData[c].featured && (firstShopItem.featuredtab = userContext.shopData[c].id);
-        }
-
-        // EXTENDER :: Modification
-        userContext.shopData = sortShop(userContext.shopData);
-
-        isWeb()
-            ? (c = _.template('<%= shopModalHead() %><span class="btnwrap btnmed" id="sellbtn" onclick="return shopModalSell();"><span class="btnedge"><a class="btngold"><%= translateString(\'sell_an_item\') %></a></span></span></div><div id="store_bg_ss" class="storebg shopswords" style="display:none"></div><div id="store_bg_companion" class="storebg shopcompanions" style="display:none"></div>\t<% if(!isIpad()) { %> \t\t<div class="tabbedheading">\t\t\t<div class="inventorytabs">\t\t\t\t<span class="inventorytabwrap" id="dealstab"><span class="inventorytabedge"><a id="dealstab_inner" class="inventorytab" onclick="return shopTab(\'dealstab\');"><span></span><%= translateString(\'ui_shop_deals\')  %><em></em></a></span></span>\t\t\t\t<span class="inventorytabwrap" id="featuredtab"><span class="inventorytabedge"><a id="featuredtab_inner" class="inventorytab" onclick="return shopTab(\'featuredtab\');"><span></span><%= translateString(\'featured_tab_label\') %><em></em></a></span></span>\t\t\t\t<span class="inventorytabwrap" id="troopsequip"><span class="inventorytabedge"><a class="inventorytab" id="troopsequip_inner" onclick="return shopTab(\'troopsequip\');"><span></span><%= translateString(\'troopsequip_tab_label\') %><em></em></a></span></span>\t\t\t\t<span class="inventorytabwrap" id="characterequip"><span class="inventorytabedge"><a id="characterequip_inner" onclick="shopTab(\'characterequip\')"; class="inventorytab"><span></span><%= translateString(\'characterequip_tab_label\') %><em></em></a></span></span>\t\t\t\t<span class="inventorytabwrap" id="boonstab"><span class="inventorytabedge""><a id="boonstab_inner" class="inventorytab" onclick="shopTab(\'boonstab\');"><span></span><%= translateString(\'boons_tab_label\') %><em></em></a></span></span>\t\t\t\t<span class="inventorytabwrap" id="sealtab"><span class="inventorytabedge""><a id="sealtab_inner" class="inventorytab" onclick="shopTab(\'sealtab\');"><span></span><%= translateString(\'seals_tab_label\') %><em></em></a></span></span>\t\t\t</div>\t\t</div>\t<% } %>\t<div class="inventorycontent">\t\t<div class="deals packcontent" id="pack_container" style="display:none">\t\t</div>\t\t<div class="swornswordshopinfo" id="swornswordshopinfo">\t\t<% if(data.swornsword_next) { %>\t\t\t<span class="currentswords"><%= translateString(\'new_sworn_sword_in\') %>: <span id="inn_timer">\' + renderTime(json.swornsword_next) + \'</span></span>\t\t<% } else { %>\t\t\t<span class="currentswords"><span id="inn_timer"></span></span>\t\t<% } %>\t\t<span id="swornsword_remaining" class="swordlength"></span>\t</div>\t<div class="swornswordshopinfo" id="troopsequipshopinfo" style="display:none">\t<% if(data.gear_next) { %>\t\t<span class="currentswords"><%= translateString(\'new_gear_in\') %>: <span id="gear_timer"><%= renderTime(data.gear_next) %></span></span>\t<% } %>    <span id="shop_remaining" class="swordlength"></span>  </div>  <div class="swornswordshopinfo" id="characterequipshopinfo" style="display:none">\t<% if(data.companion_next) { %>\t\t<span class="currentswords"><%= translateString(\'new_companion_in\') %>: <span id="companion_timer"><%= renderTime(data.companion_next) %></span></span>\t<% } %>    <span id="shop_companion_remaining" class="swordlength"></span>  </div><div class="swornswordshopinfo" id="boonsshopinfo" style="display:none"></div><div id="statview_container_shop"></div><% if(data.open_tab==\'dealstab\') { %>\t<div id="shop_miniview" class="miniviewmenu-inventory" style="min-height: 410px; margin-left: -10px"><% } else { %>\t<div id="shop_miniview" class="darkroundedbox miniviewmenu-inventory" style="min-height: 410px;"><% } %><div class="swornswordbtns" id="swornswordbtns"><%\tif(data.userContext.playerData.character.level>=4) { %>\t<span class="btnwrap btnmed btnprice" id="refreshnowbtn"><span class="btnedge"><a class="btngold" onclick="return doShopRefresh(\'swornsword\');"><%= translateString(\'refresh_inn\') %></a></span><em><%= translateString(\'ui_shop_for\')  %></em><strong><%= data.cost_refresh_shop %></strong></span><% } %><div id="swornsword_message" style="display:none"><%= translateString(\'no_sworn_swords_now\') %></div></div><% if(data.userContext.playerData.character.level>=4) { %>\t<div class="swornswordbtns" id="troopsequipbtns" style="display:none">    <span class="btnwrap btnmed btnprice" id="refreshnowbtn"><span class="btnedge"><a class="btngold" onclick="return doShopRefresh(\'gear\');"><%= translateString(\'refresh_gear\') %></a></span><em><%= translateString(\'ui_shop_for\')  %></em><strong><%= data.cost_refresh_shop %></strong></span>\t</div><%\t} %><% if(data.userContext.playerData.character.level>=4) { %>\t<div class="swornswordbtns" id="characterequipbtns" style="display:none">    <span class="btnwrap btnmed btnprice" id="refreshnowbtn"><span class="btnedge"><a class="btngold" onclick="return doShopRefresh(\'companion\');"><%= translateString(\'refresh_companion\') %></a></span><em><%= translateString(\'ui_shop_for\')  %></em><strong><%= data.cost_refresh_shop %></strong></span>\t</div><%\t} %><%= shopDeals(data) %><%= shopFeatured(data) %>\x3c!-- Standard items --\x3e<% _.each(data.userContext.shopData,function(item,n){  %>\t<% var tabLocation = item.tabLocation; %>\t<% addPageItem(tabLocation); %>\t\t<div style="<%= pageStyle(tabLocation) %>" class="slot_<%= item.slot %> offersitem <%= pageClass(tabLocation) %>">\t<%= itemMiniView(item, {callback: shopDisplayStats, extra_styles: pageStyle(tabLocation), extra_class: pageClass(tabLocation)}) %>\t<%= markupOwnedPrice(userContext.shopData[n],\'doPurchase\',undefined,undefined) %>\t</div><% }); %><%= bookPageNumbers(\'troopsequip\',\'display:none\') %><%= bookPageNumbers(\'characterequip\',\'display:none\') %><%= bookPageNumbers(\'boonstab\',\'display:none\') %><%= bookPageNumbers(\'swornswordstab\',\'display:none\') %><%= bookPageNumbers(\'sealtab\',\'display:none\') %><span class="btnwrap btnsm" style="top:560px; left:0px; position: absolute" onclick="return enterOfferCode();"><span class="btnedge"><a class="btnbrown">Offer Code</a></span></span></span></div>',
-            { data: b }), c += shopModalFoot(), displayModalDialog(c, void 0, void 0, "min-height: 692px; top: 0px; margin-top: 40px"))
-            : iosSignal("shopData", "read", {
-                shop: userContext.shopData,
-                featuredItems: b.featuredItem.map(function(a) { return itemFromSymbol(a); }),
-                featuredPack: itemFromSymbol(b.featuredItemPack),
-                dealsData: b.dealsData.map(function(a) { return itemFromSymbol(a); })
-            });
-
-        killAllPanelTimers();
-        isWeb() && shopTab(a);
-
-        b.swornsword_next && (userContext.shopTimer.inn = setPanelTimeout("updateInnTimer(" + b.swornsword_next + ");", 1E3));
-        b.gear_next && (userContext.shopTimer.gear = setPanelTimeout("updateGearTimer(" + b.gear_next + ");", 1E3));
-        b.companion_next && (userContext.shopTimer.companion = setPanelTimeout("updateCompanionTimer(" + b.companion_next + ");", 1E3));
-    }
+    phraseText["shop_filter_extender"] = "Extender";
+    // End of modification
 };
 log("Sort shop.", "initialize");
 
@@ -1253,7 +1181,7 @@ function hasGold(b, a, c) {
             }), !1;
     }
     return !0;
-}
+};
 log("Never spend gold option.", "initialize");
 
 function pvpLaunch(callback) {
@@ -1316,6 +1244,7 @@ function questSubmit(b, a, c, d, g, k, f) {
         success: function(a) {
             isIpad() && hideSpinner();
             questSubmitCallback(a);
+            questById(f).action_taken = !0
 
             // EXTENDER :: Modification, auto boss challenger
             if (typeof a.actions_remaining == "undefined" || isNaN(a.actions_remaining)){				

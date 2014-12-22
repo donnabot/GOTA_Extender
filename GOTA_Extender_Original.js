@@ -40,4 +40,104 @@ original.hasGold =
 original.pvpLaunch =
     "function pvpLaunch(){json={pvp:{}};json.pvp.target_id=pvpForm.target_id;json.pvp.sworn_sword_id=userContext.setSwornSword.id;json.pvp.pvp_action_symbol=userContext.currentActionLabel;json.pvp.region_symbol=fealtySymbol[pvpForm.target_faction_id];pvpForm.sub_region_index=Math.floor(3*Math.random());var b=pvpForm.target_faction_id;void 0==b&&(b=userContext.playerData.character.faction_id);json.pvp.sub_region_symbol=fealtySubRegions[b][pvpForm.sub_region_index].symbol;json.pvp.attack_value=userContext.currentQuest.action_type[userContext.currentActionLabel].attacker_strength;\njson.pvp.defense_value=userContext.currentQuest.action_type[userContext.currentActionLabel].defender_strength;checkPvpBan()||(showSpinner(),$.ajax({type:\"get\",url:\"/pvps/create\",data:json,dataType:\"JSON\",complete:hideSpinner,success:function(a){void 0==a.error?(pvpForm={},userContext.pvp=a,pvpRenderProgress(a),insertInventoryFromItem(playerInventory,a.attacker.sworn_sword),analytics.track(\"PvP Start\",{pvp_context:\"attack\",pvp_action:json.pvp.pvp_action_symbol}),analytics.wizardtrack(\"PvP Start\",{pvp_context:\"attack\",\npvp_action:json.pvp.pvp_action_symbol})):handleSwornSwordError(a.error)}}))}";
 original.questSubmit =
-    "function questSubmit(b,a,c,d,g,k,f){doLog(\"questSubmit: stage=\"+a+\" choice=\"+c);uiEvent(\"quest_submit_\"+b+\"_\"+a+\"_choice_\"+c,userContext.playerData);userContext.postQuestEvent=\"quest_post_\"+b+\"_\"+a+\"_choice_\"+c;userContext.playerData;userContext.questActionChoice=c;b=void 0!=f?\"/play/quest?quest_id=\"+f+\"&stage=\"+a+\"&choice=\"+c+\"&chosen=\"+escape(d):\"/play/quest?quest_symbol=\"+b+\"&stage=\"+a+\"&choice=\"+c+\"&chosen=\"+escape(d);void 0!=g?(b=isWeb()?b+(\"&chat=\"+escape($(\"#\"+g).val())):b+(\"&chat=\"+escape(g)),\nuserContext.hideWarParty=!0):playSound(\"page-turn\");void 0!=k&&(userContext.dialogIndex++,userContext.dialogHistory[userContext.dialogIndex]=unescape(k));isIpad()&&showSpinner();$.ajax({url:b,dataType:\"JSON\",success:function(a){isIpad()&&hideSpinner();questSubmitCallback(a)}});return!1}";
+    "function questSubmit(b,a,c,d,g,k,f){doLog(\"questSubmit: stage=\"+a+\" choice=\"+c);uiEvent(\"quest_submit_\"+b+\"_\"+a+\"_choice_\"+c,userContext.playerData);userContext.postQuestEvent=\"quest_post_\"+b+\"_\"+a+\"_choice_\"+c;userContext.playerData;userContext.questActionChoice=c;b=void 0!=f?\"/play/quest?quest_id=\"+f+\"&stage=\"+a+\"&choice=\"+c+\"&chosen=\"+escape(d):\"/play/quest?quest_symbol=\"+b+\"&stage=\"+a+\"&choice=\"+c+\"&chosen=\"+escape(d);void 0!=g?(b=isWeb()?b+(\"&chat=\"+escape($(\"#\"+g).val())):b+(\"&chat=\"+escape(g)),\nuserContext.hideWarParty=!0):playSound(\"page-turn\");void 0!=k&&(userContext.dialogIndex++,userContext.dialogHistory[userContext.dialogIndex]=unescape(k));isIpad()&&showSpinner();$.ajax({url:b,dataType:\"JSON\",success:function(a){isIpad()&&hideSpinner();questSubmitCallback(a);questById(f).action_taken=!0}});return!1}";
+
+
+function advanceShopFilterIndex() {
+    userContext.shopFilterIndex = (userContext.shopFilterIndex + 1) % shopFilters.length;
+    userContext.shopData = userContext.filteredShopData[userContext.shopFilterIndex];
+    userContext.shopMetadata.open_tab = currentShopTab;
+    drawShopModal(userContext.shopMetadata)
+}
+
+function sortShopItems(b) {
+    for (var a = [], c = [], d = 0; d < b.length; d++)
+        void 0 == b[d].shop_expires_seconds && (doLog("sortShopItems: i=" + d + " item=" + b[d].full_name), "Seal" == b[d].slot ? c.push(b[d]) : a.push(b[d]));
+
+    c.sort(function (a, c) {
+        return c.rarity - a.rarity
+    });
+
+    for (d = 0; d < c.length; d++)
+        doLog("sortShopItems: i=" + d + " item=" + c[d].full_name), a.push(c[d]);
+
+    for (d = 0; d < b.length; d++)
+        void 0 != b[d].shop_expires_seconds && (doLog("sortShopItems: i=" + d + " item=" + b[d].full_name), a.push(b[d]));
+
+    return a
+}
+
+
+function drawShopModal(b) {
+    var a = "";
+    firstShopItem.swornswordstab = 0;
+    firstShopItem.troopsequip = 0;
+    firstShopItem.characterequip = 0;
+    firstShopItem.boonstab = 0;
+    firstShopItem.featuredtab = 0;
+    firstShopItem.sealtab = 0;
+    initPagination("troopsequip", 6);
+    initPagination("characterequip", 6);
+    initPagination("boonstab", 6);
+    initPagination("swornswordstab", 6);
+    initPagination("sealtab", 6);
+    userContext.totalItems.troopsequip = 0;
+    userContext.totalItems.characterequip = 0;
+    userContext.totalItems.boonstab = 0;
+    for (a = userContext.totalItems.swornswordstab =
+        0; a < userContext.shopData.length; a++) {
+        tabLocation = "";
+        switch (userContext.shopData[a].slot) {
+            case "Weapon":
+            case "Armor":
+                tabLocation = "troopsequip";
+                break;
+            case "Companion":
+            case "Unit":
+                tabLocation = "characterequip";
+                break;
+            case "Consumable":
+            case "Boon":
+            case "Food":
+                tabLocation = "boonstab";
+                break;
+            case "Sworn Sword":
+                tabLocation = "swornswordstab";
+                break;
+            case "Seal":
+                tabLocation = "sealtab"
+        }
+        userContext.shopData[a].tabLocation = tabLocation;
+        userContext.totalItems[tabLocation]++;
+        doLog("shop: full_name=" + userContext.shopData[a].full_name +
+        " slot=" + userContext.shopData[a].slot + " tabLocation=" + tabLocation);
+        0 == firstShopItem[tabLocation] && (doLog("first " + tabLocation + ": " + userContext.shopData[a].id), firstShopItem[tabLocation] = userContext.shopData[a].id);
+        "true" == userContext.shopData[a].featured && (firstShopItem.featuredtab = userContext.shopData[a].id)
+    }
+    isWeb() ? (a = _.template('<%= shopModalHead() %><span class="btnwrap btnmed" id="sellbtn" onclick="return shopModalSell();"><span class="btnedge"><a class="btngold"><%= translateString(\'sell_an_item\') %></a></span></span></div><div id="store_bg_ss" class="storebg shopswords" style="display:none"></div><div id="store_bg_companion" class="storebg shopcompanions" style="display:none"></div>\t<% if(!isIpad()) { %> \t\t<div class="tabbedheading">\t\t\t<div class="inventorytabs">\t\t\t\t<span class="inventorytabwrap" id="dealstab"><span class="inventorytabedge"><a id="dealstab_inner" class="inventorytab" onclick="return shopTab(\'dealstab\');"><span></span><%= translateString(\'ui_shop_deals\')  %><em></em></a></span></span>\t\t\t\t<span class="inventorytabwrap" id="featuredtab"><span class="inventorytabedge"><a id="featuredtab_inner" class="inventorytab" onclick="return shopTab(\'featuredtab\');"><span></span><%= translateString(\'featured_tab_label\') %><em></em></a></span></span>\t\t\t\t<span class="inventorytabwrap" id="troopsequip"><span class="inventorytabedge"><a class="inventorytab" id="troopsequip_inner" onclick="return shopTab(\'troopsequip\');"><span></span><%= translateString(\'troopsequip_tab_label\') %><em></em></a></span></span>\t\t\t\t<span class="inventorytabwrap" id="characterequip"><span class="inventorytabedge"><a id="characterequip_inner" onclick="shopTab(\'characterequip\')"; class="inventorytab"><span></span><%= translateString(\'characterequip_tab_label\') %><em></em></a></span></span>\t\t\t\t<span class="inventorytabwrap" id="boonstab"><span class="inventorytabedge""><a id="boonstab_inner" class="inventorytab" onclick="shopTab(\'boonstab\');"><span></span><%= translateString(\'boons_tab_label\') %><em></em></a></span></span>\t\t\t\t<span class="inventorytabwrap" id="sealtab"><span class="inventorytabedge""><a id="sealtab_inner" class="inventorytab" onclick="shopTab(\'sealtab\');"><span></span><%= translateString(\'seals_tab_label\') %><em></em></a></span></span>\t\t\t</div>\t\t</div>\t<% } %><div class="inventorycontent shopnew">\t<div class="deals packcontent" id="pack_container" style="display:none"></div>\t<div class="swornswordshopinfo" id="swornswordshopinfo">\t\t<% if(data.userContext.playerData.character.level>=4) { %>\t\t  <div class="headings-center" id="filtershopbybtns_ss" style="display:none">\t\t    <a class="sort-button" onclick="advanceShopFilterIndex();">\t\t      <%= translateString(\'shop_filter_by\') %>\t\t      <span class="sort-type"><%= shopFilterButtonString() %></span>\t\t    </a>\t\t  </div>\t\t<%\t} %>\t\t<% if(data.swornsword_next) { %>\t\t\t<span class="currentswords"><%= translateString(\'new_sworn_sword_in\') %>: <span id="inn_timer">\' + renderTime(json.swornsword_next) + \'</span></span>\t\t<% } else { %>\t\t\t<span class="currentswords"><span id="inn_timer"></span></span>\t\t<% } %>\t\t<div class="swornswordbtns" id="swornswordbtns">\t\t\t<%\tif(data.userContext.playerData.character.level>=4) { %>\t\t\t\t<span class="btnwrap btnmed btnprice" id="refreshnowbtn"><span class="btnedge"><a class="btngold" onclick="return doShopRefresh(\'swornsword\');"><%= translateString(\'refresh_inn\') %></a></span><em><%= translateString(\'ui_shop_for\')  %></em><strong><%= data.cost_refresh_shop %></strong></span>\t\t\t<% } %>\t\t\t<div id="swornsword_message" style="display:none"><%= translateString(\'no_sworn_swords_now\') %></div>\t\t</div>\t\t<span id="swornsword_remaining" class="swordlength"></span>\t</div>\t<div class="swornswordshopinfo" id="troopsequipshopinfo" style="display:none">\t\t<% if(data.userContext.playerData.character.level>=4) { %>\t\t  <div class="headings-center" id="filtershopbybtns_troop" style="display:none">\t\t    <a class="sort-button" onclick="advanceShopFilterIndex();">\t\t      <%= translateString(\'shop_filter_by\') %>\t\t      <span class="sort-type"><%= shopFilterButtonString() %></span>\t\t    </a>\t\t  </div>\t\t<%\t} %>\t\t<% if(data.gear_next) { %>\t\t\t<span class="currentswords"><%= translateString(\'new_gear_in\') %>: <span id="gear_timer"><%= renderTime(data.gear_next) %></span></span>\t\t<% } %>\t\t<% if(data.userContext.playerData.character.level>=4) { %>\t\t\t<div class="swornswordbtns" id="troopsequipbtns" style="display:none">\t\t    <span class="btnwrap btnmed btnprice" id="refreshnowbtn"><span class="btnedge"><a class="btngold" onclick="return doShopRefresh(\'gear\');"><%= translateString(\'refresh_gear\') %></a></span><em><%= translateString(\'ui_shop_for\')  %></em><strong><%= data.cost_refresh_shop %></strong></span>\t\t\t</div>\t\t<%\t} %>\t    <span id="shop_remaining" class="swordlength"></span>\t</div>\t<div class="swornswordshopinfo" id="characterequipshopinfo" style="display:none">\t\t<% if(data.userContext.playerData.character.level>=4) { %>\t\t  <div class="headings-center" id="filtershopbybtns_char" style="display:none">\t\t    <a class="sort-button" onclick="advanceShopFilterIndex();">\t\t      <%= translateString(\'shop_filter_by\') %>\t\t      <span class="sort-type"><%= shopFilterButtonString() %></span>\t\t    </a>\t\t  </div>\t\t<%\t} %>\t\t<% if(data.companion_next) { %>\t\t\t<span class="currentswords"><%= translateString(\'new_companion_in\') %>: <span id="companion_timer"><%= renderTime(data.companion_next) %></span></span>\t\t<% } %>\t\t<% if(data.userContext.playerData.character.level>=4) { %>\t\t\t<div class="swornswordbtns" id="characterequipbtns" style="display:none">\t\t    <span class="btnwrap btnmed btnprice" id="refreshnowbtn"><span class="btnedge"><a class="btngold" onclick="return doShopRefresh(\'companion\');"><%= translateString(\'refresh_companion\') %></a></span><em><%= translateString(\'ui_shop_for\')  %></em><strong><%= data.cost_refresh_shop %></strong></span>\t\t\t</div>\t\t<%\t} %>\t    <span id="shop_companion_remaining" class="swordlength"></span>\t</div>\t<div class="swornswordshopinfo" id="boonsshopinfo" style="display:none">\t\t<% if(data.userContext.playerData.character.level>=4) { %>\t\t  <div class="headings-center" id="filtershopbybtns_boon" style="display:none">\t\t    <a class="sort-button" onclick="advanceShopFilterIndex();">\t\t      <%= translateString(\'shop_filter_by\') %>\t\t      <span class="sort-type"><%= shopFilterButtonString() %></span>\t\t    </a>\t\t  </div>\t\t<%\t} %>\t</div>\t<div class="swornswordshopinfo" id="sealshopinfo" style="display:none">\t\t<% if(data.userContext.playerData.character.level>=4) { %>\t\t  <div class="headings-center" id="filtershopbybtns_seal" style="display:none">\t\t    <a class="sort-button" onclick="advanceShopFilterIndex();">\t\t      <%= translateString(\'shop_filter_by\') %>\t\t      <span class="sort-type"><%= shopFilterButtonString() %></span>\t\t    </a>\t\t  </div>\t\t<%\t} %>\t</div>\t<div id="statview_container_shop">\t</div>\t<% if(data.open_tab==\'dealstab\') { %>\t\t<div id="shop_miniview" class="darkroundedbox miniviewmenu-inventory dealswrap">\t<% } else { %>\t\t<div id="shop_miniview" class="darkroundedbox miniviewmenu-inventory">\t<% } %><%= shopDeals(data) %><%= shopFeatured(data) %>\x3c!-- Standard items --\x3e<% _.each(data.userContext.shopData,function(item,n){  %>\t<% var tabLocation = item.tabLocation; %>\t<% addPageItem(tabLocation); %>\t\t<div style="<%= pageStyle(tabLocation) %>" class="slot_<%= item.slot %> offersitem <%= pageClass(tabLocation) %>">\t<%= itemMiniView(item, {callback: shopDisplayStats, extra_styles: pageStyle(tabLocation), extra_class: pageClass(tabLocation)}) %>\t<%= markupOwnedPrice(userContext.shopData[n],\'doPurchase\',undefined,undefined) %>\t</div><% }); %><%= bookPageNumbers(\'troopsequip\',\'display:none\') %><%= bookPageNumbers(\'characterequip\',\'display:none\') %><%= bookPageNumbers(\'boonstab\',\'display:none\') %><%= bookPageNumbers(\'swornswordstab\',\'display:none\') %><%= bookPageNumbers(\'sealtab\',\'display:none\') %></div></div><span class="btnwrap btnxxl" id="shop_offer_btn" onclick="return enterOfferCode();"><span class="btnedge"><a class="btnbrown">Offer Code</a></span></span></span>',
+        {data: b}), a += shopModalFoot(), displayModalDialog(a, void 0, void 0, "min-height: 692px; top: 0px; margin-top: 40px")) : iosSignal("shopData", "read", {
+        shop: userContext.shopData,
+        featuredItems: b.featuredItem.map(function (a) {
+            return itemFromSymbol(a)
+        }),
+        featuredPack: itemFromSymbol(b.featuredItemPack),
+        dealsData: b.dealsData.map(function (a) {
+            return itemFromSymbol(a)
+        })
+    });
+    killAllPanelTimers();
+    isWeb() && shopTab(b.open_tab);
+    b.swornsword_next && (userContext.shopTimer.inn = setPanelTimeout("updateInnTimer(" + b.swornsword_next +
+    ");", 1E3));
+    b.gear_next && (userContext.shopTimer.gear = setPanelTimeout("updateGearTimer(" + b.gear_next + ");", 1E3));
+    b.companion_next && (userContext.shopTimer.companion = setPanelTimeout("updateCompanionTimer(" + b.companion_next + ");", 1E3));
+    userContext.playerData.stat.ftpe_viewed_shop = 1
+}
+
+function shopFilterButtonString() {
+    return translateString("shop_filter_" + shopFilters[userContext.shopFilterIndex])
+}
+
+function translateString(b, a) {
+    return phraseText[b] ? void 0 != a && "number" === typeof a ? phraseText[b].replace("%{n}", a) : phraseText[b] : "undefined:" + b
+}
