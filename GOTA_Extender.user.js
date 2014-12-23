@@ -163,13 +163,12 @@ function initialize() {
 
             options.checkScript = false;
             options.set("checkScript");
-            // TODO: Uncomment this when done testing
             window.location.reload(true);
             return;
         }
 
         // Clean up GOTA shit...
-        //console.clear();
+        console.clear();
 
         // Try an injection sequence        
         inject.observable();
@@ -179,9 +178,6 @@ function initialize() {
         // Inject auxiliary code
         inject.code(GM_getResourceText("custom"));
         inject.code(GM_getResourceText("auxiliary"));
-
-        // Fucking iframes
-        //console.log(unsafeWindow.campAttackProgress.toString());
 
     } catch (e) {
         error("Fatal error, injection failed: " + e);
@@ -194,10 +190,8 @@ function initialize() {
         // Toggle
         toggleAll();
 
-        // Claim daily
-		unsafeWindow.claimQuartermaster();
-        unsafeWindow.claimDaily();
-        
+        // Claim
+        quarterMasterDo();
         
         // If extender reloaded automatically, load queue
         if (options.productionQueue && options.productionQueue.length > 0) {
@@ -594,6 +588,73 @@ function toggleReloadWindow() {
 
 }
 
+function quarterMasterDo(status){
+
+    if(!status) {
+        ajax({
+            url: "/play/quartermaster_status",
+            success: function(response){
+                quarterMasterDo(response);
+            }
+        });
+
+        return;
+    }
+
+    if (status.total_keys) {
+        openBox();
+        return;
+    }
+
+    if(status.available_daily_key){
+        claimDailyQuarterMaster();
+        return;
+    }
+
+    if(status.available_bonus_key){
+        claimBonusQuarterMaster();
+        return;
+    }
+
+    log("All quartermaster rewards have been taken.");
+
+    unsafeWindow.claimDaily();
+    log("Daily reward claimed.")
+}
+
+function claimDailyQuarterMaster(){
+
+    ajax({
+        url: "/play/quartermaster_claim_daily",
+        success: function(r){
+            quarterMasterDo(r.status);
+        }
+    });
+}
+
+function claimBonusQuarterMaster() {
+
+    ajax({
+        url: "/play/quartermaster_claim_bonus",
+        success: function (r) {
+            quarterMasterDo(r.status);
+        }
+    });
+}
+
+function openBox(){
+    ajax({
+        url: "/play/quartermaster_open_chest/?bribes=0&nonce=" + unsafeWindow.userContext.purchase_nonce,
+        success: function (r) {
+            unsafeWindow.userContext.purchase_nonce = r.purchase_nonce;
+            log("Quartermaster opened a reward box. Rewards:")
+            console.debug(r.rewards);
+
+            quarterMasterDo();
+        }
+    });
+}
+
 function collectTax() {
     try {
 
@@ -720,10 +781,10 @@ function wireEvents(e) {
                         var attack = a.attacks.filter(function (e) {
                             return e.camp_attack_id === null ? e.pvp_id == id : e.camp_attack_id == id;
                         })[0];
-						
+
 						if(!attack)
 							return;
-                        
+
 						$(this).find("span.charname").attr("onclick", "return characterMainModal(" + attack.attacker.user_id + ")");
                         $(this).find("span.charportrait").attr("onclick", "return characterMainModal(" + attack.attacker.user_id + ")");
                         $(this).find("span.targetalliancename").attr("onclick", "return allianceInfo(" + attack.alliance_id + ")");
@@ -1515,4 +1576,89 @@ function checkSource() {
     alert("Source control resolved that " +
         (updateRequired ? "an update is required." : "no changes are necessary.") +
         "\nSee the console log for details.\nPress OK to reload again.");
+}
+
+// jQuery ajax
+function ajax(params){
+    if(typeof params != "object") {
+        error("The request requires parameters.");
+        return;
+    }
+
+    // Required
+    if(!params.url) {
+        error("Request url was not passed.");
+        return;
+    }
+
+    if(!params.onload && !params.success){
+        error("Callback handler missing. Cannot execute.");
+        return;
+    }
+
+    if(!params.type){
+        params.type = "GET";
+    }
+
+    if(!params.timeout){
+        params.timeout = 3E4;
+    }
+
+    if(!params.onerror){
+        params.onerror = function(gme){
+            error("Error occurred while running the request. Details:");
+            console.debug("Original ajax request parameters: ", params);
+            console.debug("Grease monkey error response: ", gme);
+        }
+    }
+
+    if(!params.onload){
+        params.onload = function(gmr){
+
+            if(!gmr.response){
+                params.error ? params.error(gmr) : params.onerror(gmr);
+            } else {
+                if (gmr.responseHeaders.contains("json")) {
+                    var response = JSON.parse(gmr.responseText);
+                    params.success(response);
+                } else {
+                    params.success(gmr.responseText);
+                }
+            }
+
+            if(params.complete)
+                params.complete(gmr);
+        }
+    }
+
+    if(!params.ontimeout){
+        params.ontimeout = function(gmt){
+            warn("The request timed out. Details:");
+            console.debug("Original ajax request parameters: ", params);
+            console.debug("Grease monkey error response: ", gmt);
+        }
+    }
+
+    window.setTimeout(function () {
+        GM_xmlhttpRequest({
+            //binary: false,
+            //context: {},
+            //data: "",
+            //headers: {},
+            method: params.type,
+            //onabort: params.onabort,
+            onerror: params.onerror,
+            onload: params.onload,
+            //onprogress: params.onprogress,
+            //onreadystatechange: params.onreadystatechange,
+            ontimeout: params.ontimeout,
+            //overrideMimeType: "",
+            //password: "",
+            //synchronous: false,
+            timeout: params.timeout,
+            //upload: {},
+            url: params.url
+            //user: ""
+        });
+    }, 1E3);
 }
