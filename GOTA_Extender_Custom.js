@@ -344,7 +344,7 @@ buildTimerUpdate = function(c, a, b) {
     0 < a || (closeSpeedUp(), finalizeBuildingConstruction(d), clearBuildingTimer(d.symbol));
 
     // EXTENDER :: Modification REVISE
-    if (a == 300 - 1) {
+    if (a == 300 - 10) {
         doInstantSpeedUp(c, false, function() {
             setTimeout(function() {
                 doFinishProduction(d.item_id);
@@ -357,7 +357,7 @@ buildTimerUpdate = function(c, a, b) {
                 }
             }, extender_queueDelay * 1000);
         });
-    } else if (a < 300 - 10) {
+    } else if (a < 300 - 30) {
         doInstantSpeedUp(c, false, function() {
             doFinishProduction(d.item_id);
         });
