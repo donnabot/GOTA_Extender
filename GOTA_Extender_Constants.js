@@ -134,16 +134,21 @@ var templates = {
             '</span>' +
             '</span>',
 
-    bruteInfo:
-        "Congratulations, you unlocked the bruting option! This feature repeats the last done adventure of a sworn sword instantly. As this is currently in tesing here are some guidelines:<hr />" +
-            "+ bruting terminates when a certain amount of wounds have been reached.<br />" +
-            "+ after adventure bruting you can choose either to terminate bruting or to adjust it's timer in which case the extender will wait for the sworn sword to heal from the damage and repeat the bruting process again.<br />" +
-            "+ if you've chosen to adjust the timer you can cancel it by pressing ESC key.<br />" +
-            "+ you can terminate the bruting process at any given point with the ESC key.<br />" +
-            "+ set specific sworn sword for bruting or brute them all (the sworn swords that were not on adventure will be skipped)<br />" +
-            "+ for your convenience the brute button has been integrated in the user interface when you view results from an adventure (and if the result is successful). Note that the button will appear with a few seconds delay.<br />" +
-            "+ while using bruting every adventure is done instantly.<hr />" +
-            "Happy bruting!",
+    ssInfo: function(swornSwords){
+
+        var ssRow = "List of sworn swords:<br />";
+        ssRow += '<div style="margin-top: 18px; margin-top: 18px; overflow-y: scroll; height: 460px;" id="swornSwordsInfo">';
+
+        if (!(swornSwords instanceof Array) || swornSwords.length == 0)
+            ssRow += "You have no sworn swords to output.";
+        else
+            for (var j = 0; j < swornSwords.length; j++) {
+                var s = swornSwords[j];
+                ssRow += s.id + " : " + s.full_name + "<br />";
+            }
+
+       return ssRow;
+    },
 
     searchAllianceBtn:
         '<div id="ex_search_row" class="exrow" style="padding-top: 78px;">' +

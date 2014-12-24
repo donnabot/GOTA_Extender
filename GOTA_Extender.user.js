@@ -239,8 +239,8 @@ var options = {
     default_superiorMaterials: true,
     queueTimerInterval: 30,
     default_queueTimerInterval: 30,
-    allowBruting: false,
-    default_allowBruting: false,
+    allowBruting: true,
+    default_allowBruting: true,
     bruteWounds: 1,
     default_bruteWounds: 1,
     bruteSwitchOff: true,
@@ -1127,12 +1127,6 @@ function viewAdventure_onclick() {
         log("View adventure details.");
 
     var vBtn = $(this).find("a.btngold");
-    //    log("Append condition: " +
-    //        "is there a button? (" + (typeof vBtn != "undefined") + "), " +
-    //        "correct text? (" + vBtn.text() + " - " + (vBtn.text() == 'View Results!') + "), " +
-    //        "are we bruting? (" + (options.allowBruting) + "), " +
-    //        "then: " + ((!vBtn || vBtn.text() != "View Results!" || options.allowBruting) ? "return" : "execute"), "DEBUG");
-
     if (!vBtn || vBtn.text() != "View Results!" || !options.allowBruting) {
         return;
     }
@@ -1382,7 +1376,8 @@ function loadProductionQueue() {
 
 $("#credits_roll").on('click', "#infoBtn", info_onclick);
 function info_onclick() {
-    $("#extenderTabContent").html(templates.bruteInfo);
+    getSwornSwords();
+    $("#extenderTabContent").html(templates.ssInfo(options.swornSwords));
 }
 
 //$("#modals_container").on("click", "#hudchatbtn", warmap_onclick);
