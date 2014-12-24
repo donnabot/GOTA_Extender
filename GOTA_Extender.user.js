@@ -203,7 +203,7 @@ function initialize() {
 
         // Sort player inventory
         unsafeWindow.sort();
-
+        
         log('Initialized. Happy hacking.');
         inform("Initialized.");
 
@@ -670,7 +670,10 @@ function collectTax() {
 // <-- Loops handling
 
 // --> Settings handling
-function showSettings() {
+$("#main_toolbar_buttons").on('click', "#extender-menu", showSettings);
+function showSettings(e) {
+    e.preventDefault();
+
     try {
 
         $("#credits_page").empty();
@@ -796,14 +799,6 @@ function wireEvents(e) {
             }
         });
     }, (options.baseDelay / 2) * 1000);
-}
-
-$("#main_toolbar_buttons").on('click', "#extender-menu", extenderButton_clicked);
-function extenderButton_clicked(e) {
-    e.preventDefault();
-    showSettings();
-
-    //    log("Menu was accessed.");
 }
 
 $("#credits_roll").on('click', "#saveOptions", saveOptions_click);
@@ -1045,16 +1040,19 @@ function queue_clicked(e) {
                     recipeName = r.symbol;
                     break;
                 }
-
-                // Last attempt, these here are expensive operations
-                var recipeInputs = JSON.stringify(r.input.split(","));
-                if (JSON.stringify(source.recipeInputs) === recipeInputs) {
-                    recipeName = r.symbol;
-                    break;
-                }
-
             }
 
+            // Last attempt, these here are expensive operations
+            if(!recipeName){
+                for (var i = 0; i < unsafeWindow.userContext.recipeData.length; i++) {
+                    var r = unsafeWindow.userContext.recipeData[i];
+                    var recipeInputs = JSON.stringify(r.input.split(","));
+                    if (JSON.stringify(source.recipeInputs) === recipeInputs) {
+                        recipeName = r.symbol;
+                        break;
+                    }
+                }
+            }
             if (!recipeName) {
                 error('Failed to extract recipeName.');
                 return;
