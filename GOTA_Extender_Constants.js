@@ -92,7 +92,7 @@ var templates = {
         '<div id="extenderTabContent" style="margin-top: 18px; margin-top: 18px; overlow-x: scroll; height: 460px;"></div>',
 
     optionsHeader:
-        '<h1 style="font-family:GoudyTrajan-Bold,Trajan,\'Trajan Pro\',Trajanbold;">Extender options</h1><hr />' +
+        '<h1 style="font-family:GoudyTrajan-Bold,Trajan,\'Trajan Pro\',Trajanbold;">Extender options | v.' + GM_info.script.version + '</h1><hr />' +
             '<div id="extenderTabMenu" style="margin: 0 0 0;">' +
             '<div class="charactertabs"></div>' +
             '<div class="barbtmedge"></div>' +
@@ -135,18 +135,14 @@ var templates = {
             '</span>',
 
     bruteInfo:
-        "Congratulations, you unlocked the bruting option! This feature repeats the last done adventure of a sworn sword instantly. As this is currently in tesing here are some guidelines:" +
-            "<hr>" +
-            "+ bruting terminates when a certain amount of wounds have been received.<br />" +
+        "Congratulations, you unlocked the bruting option! This feature repeats the last done adventure of a sworn sword instantly. As this is currently in tesing here are some guidelines:<hr />" +
+            "+ bruting terminates when a certain amount of wounds have been reached.<br />" +
             "+ after adventure bruting you can choose either to terminate bruting or to adjust it's timer in which case the extender will wait for the sworn sword to heal from the damage and repeat the bruting process again.<br />" +
-            "+ if you've chosen to adjust the timer you can cancel it by pressing ESC key. Notification will popup, if you have the use alerts option checked.<br />" +
-            "+ the max amount of wounds can be configured up to 4 (0 disables bruting).<br />" +
-            "+ you won't be able to stop the actual bruting process. Only when the mentioned recieved damage has been dealt and the timer adjusts.<br />" +
-            "+ use this with caution, as quests, adventure parties an pvp battles CANNOT be bruted. You won't recieve rewards or silver and you'll probably cause some errors.<br />" +
-            "+ immediate stop for bruting (or for every feature for that matter) is reloading.<br />" +
+            "+ if you've chosen to adjust the timer you can cancel it by pressing ESC key.<br />" +
+            "+ you can terminate the bruting process at any given point with the ESC key.<br />" +
+            "+ set specific sworn sword for bruting or brute them all (the sworn swords that were not on adventure will be skipped)<br />" +
             "+ for your convenience the brute button has been integrated in the user interface when you view results from an adventure (and if the result is successful). Note that the button will appear with a few seconds delay.<br />" +
-            "+ no bruting will be done if there is no sworn sword set. You could set it from the bruting tab in options or use the integrated button, it'll set the sworn sword automatically." +
-            "<hr>" +
+            "+ while using bruting every adventure is done instantly.<hr />" +
             "Happy bruting!",
 
     searchAllianceBtn:
@@ -213,7 +209,7 @@ var templates = {
         var v = [];
         v.push({
             val: "none",
-            text: "None",
+            text: "None"
         });
 
         for (var j = 0; j < swornSwords.length; j++) {
@@ -222,7 +218,7 @@ var templates = {
 
                 v.push({
                     val: s.id,
-                    text: s.full_name,
+                    text: s.full_name
                 });
             }
         }
@@ -366,7 +362,7 @@ var templates = {
             this.bruteAllBtn +
             this.bruteBtn +                        
             '</div>';
-    },
+    }
 };
 
 var styles = {
