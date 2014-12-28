@@ -1611,7 +1611,11 @@ function ajax(params){
             if(!gmr.response){
                 params.error ? params.error(gmr) : params.onerror(gmr);
             } else {
-                if (gmr.responseHeaders.contains("json")) {
+                //var headerString = gmr.responseHeaders;
+                //var headers = headerString.split('\n');
+
+                //console.debug("Debugging response headers: ", headers);
+                if (gmr.responseHeaders.indexOf("Content-Type: application/json;") > -1) {
                     var response = JSON.parse(gmr.responseText);
                     params.success(response);
                 } else {
@@ -1621,7 +1625,7 @@ function ajax(params){
 
             if(params.complete)
                 params.complete(gmr);
-        }
+        };
     }
 
     if(!params.ontimeout){
@@ -1629,7 +1633,7 @@ function ajax(params){
             warn("The request timed out. Details:");
             console.debug("Original ajax request parameters: ", params);
             console.debug("Grease monkey error response: ", gmt);
-        }
+        };
     }
 
     window.setTimeout(function () {
