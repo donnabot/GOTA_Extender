@@ -30,12 +30,12 @@
 
 GM_registerMenuCommand("HOME", openHome);
 function openHome() {
-    GM_openInTab("https://greasyfork.org/en/scripts/3788-gota-extender");    
+    GM_openInTab("https://greasyfork.org/en/scripts/3788-gota-extender");
 }
 
 GM_registerMenuCommand("DEBUG", enterDebugMode);
 function enterDebugMode() {
-    options.debugMode = true;    
+    options.debugMode = true;
     options.set("debugMode");
 
     alert("Debug mode has been enabled. Extender will now reload.");
@@ -54,9 +54,9 @@ function checkScript() {
 $ = this.$ = this.jQuery = jQuery.noConflict(true);
 
 $(window).bind("load", function () {
-    setTimeout(function () {        
+    setTimeout(function () {
         initialize();
-    }, ((options ? options.baseDelay : 4E3)  / 2) * 1000);
+    }, ((options ? options.baseDelay : 4E3) / 2) * 1000);
 });
 
 // Observes DOM object mutations
@@ -142,7 +142,7 @@ function signal_acknowledged() {
         default:
             error("Unknown command.");
             break;
-    }    
+    }
 }
 // <-- Page command handling
 
@@ -192,7 +192,7 @@ function initialize() {
 
         // Claim
         quarterMasterDo();
-        
+
         // If extender reloaded automatically, load queue
         if (options.productionQueue && options.productionQueue.length > 0) {
             loadProductionQueue();
@@ -353,7 +353,7 @@ var inject = {
         unsafeWindow.phraseText.shop_filter_extender = "Extender";
 
         // EXTENDER :: Modification - add custom filter
-        if(unsafeWindow.shopFilters.indexOf("extender") == -1){
+        if (unsafeWindow.shopFilters.indexOf("extender") == -1) {
             log("Injecting extender filter...");
             unsafeWindow.shopFilters.push("extender");
         }
@@ -365,13 +365,13 @@ var inject = {
             unsafeWindow.extender_bruteWounds = cloneInto(options.bruteWounds, unsafeWindow);
             unsafeWindow.extender_bruteSwitchOff = cloneInto(options.bruteSwitchOff, unsafeWindow);
             unsafeWindow.extender_debugMode = cloneInto(options.debugMode, unsafeWindow);
-            unsafeWindow.extender_baseDelay = cloneInto(options.baseDelay, unsafeWindow);            
+            unsafeWindow.extender_baseDelay = cloneInto(options.baseDelay, unsafeWindow);
             unsafeWindow.extender_neverSpendGold = cloneInto(options.neverSpendGold, unsafeWindow);
 
             unsafeWindow.extender_boonsSortBy = cloneInto(options.boonsSortBy, unsafeWindow);
             unsafeWindow.extender_boonsSortBy2 = cloneInto(options.boonsSortBy2, unsafeWindow);
             unsafeWindow.extender_shopSortBy = cloneInto(options.shopSortBy, unsafeWindow);
-            unsafeWindow.extender_shopSortBy2 = cloneInto(options.shopSortBy2, unsafeWindow);            
+            unsafeWindow.extender_shopSortBy2 = cloneInto(options.shopSortBy2, unsafeWindow);
 
             unsafeWindow.extender_sendAllAction = cloneInto(options.sendAllAction, unsafeWindow);
             unsafeWindow.extender_autoBossChallenge = cloneInto(options.autoBossChallenge, unsafeWindow);
@@ -384,13 +384,13 @@ var inject = {
             unsafeWindow.extender_bruteWounds = options.bruteWounds;
             unsafeWindow.extender_bruteSwitchOff = options.bruteSwitchOff;
             unsafeWindow.extender_debugMode = options.debugMode;
-            unsafeWindow.extender_baseDelay = options.baseDelay;            
+            unsafeWindow.extender_baseDelay = options.baseDelay;
             unsafeWindow.extender_neverSpendGold = options.neverSpendGold;
 
             unsafeWindow.extender_boonsSortBy = options.boonsSortBy;
             unsafeWindow.extender_boonsSortBy2 = options.boonsSortBy2;
             unsafeWindow.extender_shopSortBy = options.shopSortBy;
-            unsafeWindow.extender_shopSortBy2 = options.shopSortBy2;            
+            unsafeWindow.extender_shopSortBy2 = options.shopSortBy2;
 
             unsafeWindow.extender_sendAllAction = options.sendAllAction;
             unsafeWindow.extender_autoBossChallenge = options.autoBossChallenge;
@@ -433,7 +433,7 @@ var inject = {
             //	characterData: true,
             //  subtree: true,
             attributeOldValue: true
-             // if attributes
+            // if attributes
             //	characterDataOldValue: true,    // if characterData
             //	attributeFilter: ["id", "dir"], // if attributes
         });
@@ -444,11 +444,11 @@ var inject = {
     // Inject console and alert handling separately once
     console: function () {
         if (typeof exportFunction == "function") {
-            exportFunction(log, unsafeWindow, { defineAs: "log" });
-            exportFunction(warn, unsafeWindow, { defineAs: "warn" });
-            exportFunction(error, unsafeWindow, { defineAs: "error" });
+            exportFunction(log, unsafeWindow, {defineAs: "log"});
+            exportFunction(warn, unsafeWindow, {defineAs: "warn"});
+            exportFunction(error, unsafeWindow, {defineAs: "error"});
 
-            exportFunction(inform, unsafeWindow, { defineAs: "inform" });
+            exportFunction(inform, unsafeWindow, {defineAs: "inform"});
 
         } else {
             unsafeWindow.log = log;
@@ -588,12 +588,12 @@ function toggleReloadWindow() {
 
 }
 
-function quarterMasterDo(status){
+function quarterMasterDo(status) {
 
-    if(!status) {
+    if (!status) {
         ajax({
             url: "/play/quartermaster_status",
-            success: function(response){
+            success: function (response) {
                 quarterMasterDo(response);
             }
         });
@@ -606,12 +606,12 @@ function quarterMasterDo(status){
         return;
     }
 
-    if(status.available_daily_key){
+    if (status.available_daily_key) {
         claimDailyQuarterMaster();
         return;
     }
 
-    if(status.available_bonus_key){
+    if (status.available_bonus_key) {
         claimBonusQuarterMaster();
         return;
     }
@@ -622,11 +622,11 @@ function quarterMasterDo(status){
     log("Daily reward claimed.")
 }
 
-function claimDailyQuarterMaster(){
+function claimDailyQuarterMaster() {
 
     ajax({
         url: "/play/quartermaster_claim_daily",
-        success: function(r){
+        success: function (r) {
             quarterMasterDo(r.status);
         }
     });
@@ -642,7 +642,7 @@ function claimBonusQuarterMaster() {
     });
 }
 
-function openBox(){
+function openBox() {
     ajax({
         url: "/play/quartermaster_open_chest/?bribes=0&nonce=" + unsafeWindow.userContext.purchase_nonce,
         success: function (r) {
@@ -785,10 +785,10 @@ function wireEvents(e) {
                             return e.camp_attack_id === null ? e.pvp_id == id : e.camp_attack_id == id;
                         })[0];
 
-						if(!attack)
-							return;
+                        if (!attack)
+                            return;
 
-						$(this).find("span.charname").attr("onclick", "return characterMainModal(" + attack.attacker.user_id + ")");
+                        $(this).find("span.charname").attr("onclick", "return characterMainModal(" + attack.attacker.user_id + ")");
                         $(this).find("span.charportrait").attr("onclick", "return characterMainModal(" + attack.attacker.user_id + ")");
                         $(this).find("span.targetalliancename").attr("onclick", "return allianceInfo(" + attack.alliance_id + ")");
                     });
@@ -848,7 +848,7 @@ function saveMainTab() {
         options.baseDelay = bd;
     }
 
-    options.debugMode = $("#toggleDebugModes").hasClass("checked");    
+    options.debugMode = $("#toggleDebugModes").hasClass("checked");
     options.doTooltips = $("#toggleTooltips").hasClass("checked");
     options.neverSpendGold = $("#neverSpendGold").hasClass("checked");
     options.autoBossChallenge = $("#autoBossChallenge").hasClass("checked");
@@ -872,7 +872,7 @@ function saveMainTab() {
     options.shopSortBy = $("#shopSortBy").val();
     options.shopSortBy2 = $("#shopSortBy2").val();
 
-    options.sendAllAction = $("#sendAllAction").val();    
+    options.sendAllAction = $("#sendAllAction").val();
 
     options.set();
     inject.constants();
@@ -1043,7 +1043,7 @@ function queue_clicked(e) {
             }
 
             // Last attempt, these here are expensive operations
-            if(!recipeName){
+            if (!recipeName) {
                 for (var i = 0; i < unsafeWindow.userContext.recipeData.length; i++) {
                     var r = unsafeWindow.userContext.recipeData[i];
                     var recipeInputs = JSON.stringify(r.input.split(","));
@@ -1124,7 +1124,7 @@ function deleteTableRow(e) {
 //--> Brute force adventure
 $("#modal_dialogs_top").on("click", "#speedupbtn", viewAdventure_onclick);
 function viewAdventure_onclick() {
-        log("View adventure details.");
+    log("View adventure details.");
 
     var vBtn = $(this).find("a.btngold");
     if (!vBtn || vBtn.text() != "View Results!" || !options.allowBruting) {
@@ -1164,7 +1164,7 @@ function brute_onclick() {
     }
 
     unsafeWindow.brutingImmediateTermination = false;
-    b.text("Bruting...");    
+    b.text("Bruting...");
 
     if (this.id == "bruteAllBtn") {
         // Brute all sworn swords adventure...
@@ -1408,18 +1408,18 @@ function searchAlliance_onclick(e) {
     e.preventDefault();
     unsafeWindow.showSpinner();
 
-    window.setTimeout(function() {
-        
+    window.setTimeout(function () {
+
         var keys = $("#ex_alliance_search_input").val();
         if (!keys || keys.length == 0) {
             return;
         }
-        
+
         var keysArray = keys.split(" ");
         var c = keysArray[0];
         for (var i = 1; i < keysArray.length; i++) {
             c += "+" +
-                keysArray[i];
+            keysArray[i];
         }
 
         //console.debug("Sending data: ", c);
@@ -1427,7 +1427,7 @@ function searchAlliance_onclick(e) {
         GM_xmlhttpRequest({
             method: "GET",
             url: "/play/alliance_search/?tags=0&name=" + c,
-            onload: function(a) {
+            onload: function (a) {
                 unsafeWindow.hideSpinner();
 
                 if (a.error) {
@@ -1454,7 +1454,7 @@ function displayResults(a) {
     if (!(a instanceof Array) || a.length == 0) {
         $("#ex_alliance_search_input").attr("placeholder", "No alliances found");
         return;
-    }   
+    }
 
     // Clean table
     $(".avaranking:visible:first tr:not(:first)").empty();
@@ -1534,7 +1534,7 @@ function checkSource() {
                 console.error("Function does not have a stored value!");
                 continue;
             }
-            
+
             console.log("Retrieving page function...");
 
             if (!unsafeWindow[fn]) {
@@ -1562,53 +1562,53 @@ function checkSource() {
     console.log("-------------------------------------|");
     console.log("-------------------------------------| > End of script update check");
 
-    if(!updateRequired){
+    if (!updateRequired) {
         GM_SuperValue.set("lastUpdateCheck", new Date());
     }
 
     alert("Source control resolved that " +
-        (updateRequired ? "an update is required." : "no changes are necessary.") +
-        "\nSee the console log for details.\nPress OK to reload again.");
+    (updateRequired ? "an update is required." : "no changes are necessary.") +
+    "\nSee the console log for details.\nPress OK to reload again.");
 }
 
 // jQuery ajax
-function ajax(params){
-    if(typeof params != "object") {
+function ajax(params) {
+    if (typeof params != "object") {
         error("The request requires parameters.");
         return;
     }
 
     // Required
-    if(!params.url) {
+    if (!params.url) {
         error("Request url was not passed.");
         return;
     }
 
-    if(!params.onload && !params.success){
+    if (!params.onload && !params.success) {
         error("Callback handler missing. Cannot execute.");
         return;
     }
 
-    if(!params.type){
+    if (!params.type) {
         params.type = "GET";
     }
 
-    if(!params.timeout){
+    if (!params.timeout) {
         params.timeout = 3E4;
     }
 
-    if(!params.onerror){
-        params.onerror = function(gme){
+    if (!params.onerror) {
+        params.onerror = function (gme) {
             error("Error occurred while running the request. Details:");
             console.debug("Original ajax request parameters: ", params);
             console.debug("Grease monkey error response: ", gme);
         }
     }
 
-    if(!params.onload){
-        params.onload = function(gmr){
+    if (!params.onload) {
+        params.onload = function (gmr) {
 
-            if(!gmr.response){
+            if (!gmr.response) {
                 params.error ? params.error(gmr) : params.onerror(gmr);
             } else {
                 //var headerString = gmr.responseHeaders;
@@ -1623,13 +1623,13 @@ function ajax(params){
                 }
             }
 
-            if(params.complete)
+            if (params.complete)
                 params.complete(gmr);
         };
     }
 
-    if(!params.ontimeout){
-        params.ontimeout = function(gmt){
+    if (!params.ontimeout) {
+        params.ontimeout = function (gmt) {
             warn("The request timed out. Details:");
             console.debug("Original ajax request parameters: ", params);
             console.debug("Grease monkey error response: ", gmt);
