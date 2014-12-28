@@ -1467,7 +1467,7 @@ function displayResults(a) {
 
 }
 
-$("#modal_dialogs_top").on('click', "#adventurebox_holder .adventuremenu .adventurescroll .adventureitem", adventureItem_onclick);
+$("#modal_dialogs_top").on('click', "[onclick*='chooseAdventure']", adventureItem_onclick);
 function adventureItem_onclick() {
     //log("Adventures display.");
 
@@ -1481,6 +1481,7 @@ function adventureItem_onclick() {
     }, (options.baseDelay / 2) * 1000);
 }
 
+$("#modals_container").on('click', "[onclick*='pvpTargetSelected']", pvpStart_onclick);
 $("#modals_container").on('click', "[onclick*='pvpStartWithTarget']", pvpStart_onclick);
 function pvpStart_onclick() {
     //log('Displaying pvp dialog with a target specified.');
