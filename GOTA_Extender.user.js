@@ -118,7 +118,15 @@ function signal_acknowledged() {
             //    "has own prop? " + (options.hasOwnProperty(args[0])) + ", " +
             //    "argument 2 = " + args[1], "DEBUG");
 
-            if (options.hasOwnProperty(args[0]) && (typeof args[1] == "undefined" || !args[1])) {
+            // Count on the second check only
+            if (options.hasOwnProperty(args[0]) && typeof options[args[0]] === typeof args[1]) {
+                options[args[0]] = args[1];
+                options.set(args[0]);
+                log("Option set.");
+                return;
+            }
+
+            if (options.hasOwnProperty(args[0])) {
 
                 if (typeof options[args[0]] == "object") {
                     log(args[0] + " is a composite object:");
@@ -127,13 +135,6 @@ function signal_acknowledged() {
                     log(args[0] + ": " + options[args[0]]);
                 }
 
-                return;
-            }
-
-            if (options.hasOwnProperty(args[0]) && typeof options[args[0]] === typeof args[1]) {
-                options[args[0]] = args[1];
-                options.set(args[0]);
-                log("Option set.");
                 return;
             }
 
@@ -646,8 +647,20 @@ function openBox() {
     ajax({
         url: "/play/quartermaster_open_chest/?bribes=0&nonce=" + unsafeWindow.userContext.purchase_nonce,
         success: function (r) {
+            if(!r.purchase_nonce) {
+                error("Could not retrieve a purchase nonce. Process terminated...");
+                return;
+            }
+
             unsafeWindow.userContext.purchase_nonce = r.purchase_nonce;
-            log("Quartermaster opened a reward box. Rewards:")
+
+            if(!r.rewards) {
+                error("No rewards retrieved. Process terminated...");
+                console.debug("Server responded: ", r);
+                return;
+            }
+
+            log("Auto quartermaster opened a reward box. Rewards:")
             console.debug(r.rewards);
 
             quarterMasterDo();
