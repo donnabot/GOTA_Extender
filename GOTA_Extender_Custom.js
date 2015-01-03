@@ -166,10 +166,14 @@ doFinishProduction = function doFinishProduction(b, callback) {
                     "Upgrade" == theNewItem.slot && buildingUpgradePanel(c.symbol);
                     updatePlayerInfo(userContext.playerData);
                     updateAllStatus();
+                } else {
+
+                    // EXTENDER :: Modification ...
+                    console.debug("This building is still producing! Building: ", a.building);
                 }
 
-                // EXTENDER :: Modification
                 if (typeof callback == "function") {
+                    console.debug("Calling callback... ");
                     callback();
                 }
             }
@@ -313,6 +317,7 @@ doProduction = function(c, a, b, d, g, callback) {
 log("Do production and call callback if any. Inject superior materials condition.", "initialize");
 
 buildTimerUpdate = function(c, a, b) {
+
     $("#timer-" + c).html(renderBuildTime(a));
     $("#timer-panel-" + c).html(renderBuildTime(a));
 
@@ -322,6 +327,10 @@ buildTimerUpdate = function(c, a, b) {
     var d = buildingById(c);
     d.build_remaining = a;
     markup = renderBuildPanelAction(d);
+
+    console.debug("Debugging building: " + d.symbol + ", " +
+    "build time remaining: " + a + " ms, " +
+    "original build seconds: " + b + " ms");
 
     $("#speed_button_" + c).show();
     $("#build_panel_action_" + c).html(markup);
