@@ -138,6 +138,10 @@ function buildingProducing(b) {
     //return b.build_remaining;
 }
 
+function updateBuildingTimer(b){
+        
+}
+
 var bruteForceTimeout;
 function bruteForce(enabled, times) {
 
@@ -227,7 +231,7 @@ function bruteForce(enabled, times) {
             ? userContext.currentActionLabel : s.modifier;
 
         // console.debug("Attack with: " + attack);
-        if (times == "once") {                  
+        if (times == "once") {
             doAdventure("", attack, false, function (failure) {
                 bruteForce(false, times);
             });
