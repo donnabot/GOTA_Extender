@@ -226,6 +226,9 @@ var options = {
     productionQueue: [],
     default_productionQueue: [],
 
+    log: [],
+    default_log: [new Date().toLocaleTimeString() + ": Logging started..."],
+
     debugMode: true,
     default_debugMode: true,
     checkScript: false,
@@ -465,7 +468,7 @@ var inject = {
 // <-- Inject object
 
 // --> Message handling
-function log(message, type) {
+function log(message, type, destination) {
     if (options && options.debugMode && console && console.log
         && typeof (console.log) == "function") {
         if (!type)
@@ -474,9 +477,13 @@ function log(message, type) {
         var prefix = type.toString().toUpperCase() + " <" + new Date().toLocaleTimeString() + "> ";
         console.log(prefix + message);
     }
+
+    if(typeof destination === "string"){
+        clientLog(message, type, destination)
+    }
 }
 
-function error(message, type) {
+function error(message, type, destination) {
     if (console && console.error && typeof (console.error) == "function") {
         if (!type)
             type = "extender";
@@ -484,15 +491,55 @@ function error(message, type) {
         var prefix = type.toString().toUpperCase() + " - ERROR <" + new Date().toLocaleTimeString() + "> ";
         console.error(prefix + message);
     }
+
+    if(typeof destination === "string"){
+        clientLog(message, type, destination)
+    }
 }
 
-function warn(message, type) {
+function warn(message, type, destination) {
     if (console && console.warn && typeof (console.warn) == "function") {
         if (!type)
             type = "extender";
 
         var prefix = type.toString().toUpperCase() + " - WARNING <" + new Date().toLocaleTimeString() + "> ";
         console.warn(prefix + message);
+    }
+
+    if(typeof destination === "string"){
+        clientLog(message, type, destination)
+    }
+}
+
+function clientLog(message, type, destination){
+    switch(destination){
+        case "logEntry":
+        {
+            if (!type)
+                type = "extender";
+
+            var prefix = type.toString().toUpperCase() + " | " + new Date().toLocaleTimeString() + " | ";
+            options.log.push(prefix + message);
+            break;
+        }
+        case "commandLine":
+        {
+            var observable = $("textarea#observable");
+            if (!observable) {
+                error("The observable DOM element was not found in the page.");
+                return;
+            }
+
+            if (!type)
+                type = "extender";
+
+            var prefix = type.toString().toUpperCase() + " <" + new Date().toLocaleTimeString() + "> ";
+
+            observable.val(prefix + message );
+            break;
+        }
+        default:
+            return;
     }
 }
 
