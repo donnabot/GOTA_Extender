@@ -4,7 +4,10 @@ var extender = {
         $("textarea#observable").attr("command", JSON.stringify(cmd));
     },
     lastcommand: function () {
-        return $("textarea#observable").attr("command");
+        var observable = $("textarea#observable");
+        var lcmd = observable.attr("command");
+        observable.val(lcmd);
+        return lcmd;
     },
     option: function (option, val) {
         if (typeof option == "string") {
@@ -854,8 +857,19 @@ function observable_onkeyup(e){
     if(e.keyCode !== 13)
         return true;
 
-    var cmd = $("#observable").val().toString();
-    $("#observable").val("");
-    eval("extender." + cmd);
+    var observable = $("textarea#observable");
+    if (!observable) {
+        error("The observable DOM element was not found in the page.");
+        return false;
+    }
+
+    try {
+        var cmd = observable.val().toString();
+        eval("extender." + cmd);
+    } catch(err) {
+        var prefix = "COMMAND ACKNOWLEDGED" + " | " + new Date().toLocaleTimeString() + " | ";
+        observable.val(prefix + err);
+    }
+
     return false;
 }

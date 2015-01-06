@@ -85,6 +85,13 @@ var templates = {
             '</span>' +
             '</span>',
 
+    clearLogOptionsBtn:
+        '<span id="clearExLog" class="btnwrap btnlg">' +
+            '<span class="btnedge">' +
+            '<a class="btngold">Clear log</a>' +
+            '</span>' +
+            '</span>',
+
     observable:
         '<textarea id="observable" rows="1" style="width:99%; overflow:auto; display: none;" onkeyup="observable_onkeyup(event)"></textarea>',
 
@@ -310,6 +317,19 @@ var templates = {
             '<td><span class="name colsort">' + el.name + '</span></td>' +
             '<td><span class="avatarimg"><img src="' + el.img + '"></span></td>' +
             '</tr>';
+    },
+
+    logTab: function (o) {
+
+        var output = '<div class="exrow" style="text-align: right"> ' + this.clearLogOptionsBtn + '</div>';
+
+        output += '<div class="exrow"><textarea style="width: 95%">';
+        for(var i = 0; i < o.log.length; i++){
+            output += o.log[i] + "\n";
+        }
+        output += '</textarea></div>';
+
+        return output;
     },
 
     mainTab: function (o) {

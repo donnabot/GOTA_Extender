@@ -100,12 +100,20 @@ function signal_acknowledged() {
 
     var commandObj = JSON.parse(observable.attr("command"));
     if (!commandObj || typeof commandObj != "object") {
-        error("Cannot parse the command object given.");
+        var msg = "Error: Cannot parse the command object given.";
+
+        var prefix = "COMMAND ACKNOWLEDGED" + " | " + new Date().toLocaleTimeString() + " | ";
+        observable.val(prefix + msg);
+        error(msg);
         return;
     }
 
-    if (!commandObj.name || !commandObj.args) {
-        error("Command does not define a name or arguments.");
+    if (typeof commandObj.name !== "string") {
+        var msg = "Error: Command does not have a name specified.";
+
+        var prefix = "COMMAND ACKNOWLEDGED" + " | " + new Date().toLocaleTimeString() + " | ";
+        observable.val(prefix + msg);
+        error(msg);
         return;
     }
 
@@ -118,11 +126,14 @@ function signal_acknowledged() {
             //    "has own prop? " + (options.hasOwnProperty(args[0])) + ", " +
             //    "argument 2 = " + args[1], "DEBUG");
 
-            // Count on the second check only
+            // Rely on the second check only
             if (options.hasOwnProperty(args[0]) && typeof options[args[0]] === typeof args[1]) {
                 options[args[0]] = args[1];
                 options.set(args[0]);
-                log("Option set.");
+
+                var prefix = "COMMAND ACKNOWLEDGED" + " | " + new Date().toLocaleTimeString() + " | ";
+                observable.val(prefix + "Option set.");
+
                 return;
             }
 
@@ -135,16 +146,30 @@ function signal_acknowledged() {
                     log(args[0] + ": " + options[args[0]]);
                 }
 
+                var prefix = "COMMAND ACKNOWLEDGED" + " | " + new Date().toLocaleTimeString() + " | ";
+                observable.val(prefix + "See console for requested option.");
+
                 return;
             }
 
-            warn("Lack of or incorrect parameters passed to command.");
+            var msg = "Warning: Lack of or incorrect parameters passed to command.";
+
+            var prefix = "COMMAND ACKNOWLEDGED" + " | " + new Date().toLocaleTimeString() + " | ";
+            observable.val(prefix + msg);
+            warn(msg);
+
             break;
         default:
-            error("Unknown command.");
+            var msg = "Error: Unknown command.";
+
+            var prefix = "COMMAND ACKNOWLEDGED" + " | " + new Date().toLocaleTimeString() + " | ";
+            observable.val(prefix + msg);
+            error(msg);
+
             break;
     }
 }
+
 // <-- Page command handling
 
 // --> Initizalization
@@ -468,7 +493,7 @@ var inject = {
 // <-- Inject object
 
 // --> Message handling
-function log(message, type, destination) {
+function log(message, type) {
     if (options && options.debugMode && console && console.log
         && typeof (console.log) == "function") {
         if (!type)
@@ -477,13 +502,9 @@ function log(message, type, destination) {
         var prefix = type.toString().toUpperCase() + " <" + new Date().toLocaleTimeString() + "> ";
         console.log(prefix + message);
     }
-
-    if(typeof destination === "string"){
-        clientLog(message, type, destination)
-    }
 }
 
-function error(message, type, destination) {
+function error(message, type) {
     if (console && console.error && typeof (console.error) == "function") {
         if (!type)
             type = "extender";
@@ -491,55 +512,15 @@ function error(message, type, destination) {
         var prefix = type.toString().toUpperCase() + " - ERROR <" + new Date().toLocaleTimeString() + "> ";
         console.error(prefix + message);
     }
-
-    if(typeof destination === "string"){
-        clientLog(message, type, destination)
-    }
 }
 
-function warn(message, type, destination) {
+function warn(message, type) {
     if (console && console.warn && typeof (console.warn) == "function") {
         if (!type)
             type = "extender";
 
         var prefix = type.toString().toUpperCase() + " - WARNING <" + new Date().toLocaleTimeString() + "> ";
         console.warn(prefix + message);
-    }
-
-    if(typeof destination === "string"){
-        clientLog(message, type, destination)
-    }
-}
-
-function clientLog(message, type, destination){
-    switch(destination){
-        case "logEntry":
-        {
-            if (!type)
-                type = "extender";
-
-            var prefix = type.toString().toUpperCase() + " | " + new Date().toLocaleTimeString() + " | ";
-            options.log.push(prefix + message);
-            break;
-        }
-        case "commandLine":
-        {
-            var observable = $("textarea#observable");
-            if (!observable) {
-                error("The observable DOM element was not found in the page.");
-                return;
-            }
-
-            if (!type)
-                type = "extender";
-
-            var prefix = type.toString().toUpperCase() + " <" + new Date().toLocaleTimeString() + "> ";
-
-            observable.val(prefix + message );
-            break;
-        }
-        default:
-            return;
     }
 }
 
@@ -738,6 +719,7 @@ function showSettings(e) {
 
         $("#credits_page").empty();
         $("#credits_page").append(templates.optionsHeader);
+        $("#extenderTabMenu .charactertabs").append(templates.optionsTab("logTab", "LOG"));
         $("#extenderTabMenu .charactertabs").append(templates.optionsTab("mainTab", "MAIN"));
         $("#extenderTabMenu .charactertabs").append(templates.optionsTab("queueTab", "QUEUE"));
 
@@ -782,6 +764,9 @@ function tab_onchange(e) {
     $(this).find(".inventorytab").addClass("active");
 
     switch (this.id) {
+        case "logTab":
+            $("#extenderTabContent").html(templates.logTab(options));
+            break;
         case "mainTab":
             $("#extenderTabContent").html(templates.mainTab(options));
             break;
@@ -796,6 +781,11 @@ function tab_onchange(e) {
         default:
             break;
     }
+}
+
+$("#credits_roll").on("click", "#clearExLog", clearLog);
+function clearLog(){
+    options.log = options.default_log.slice(0);
 }
 
 function renderProductionItems() {
