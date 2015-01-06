@@ -849,3 +849,13 @@ function receiveMessage(event) {
     console.log("Evaluated: ", eval(event.data));
 
 }
+
+function observable_onkeyup(e){
+    if(e.keyCode !== 13)
+        return true;
+
+    var cmd = $("#observable").val().toString();
+    $("#observable").val("");
+    eval("extender." + cmd);
+    return false;
+}

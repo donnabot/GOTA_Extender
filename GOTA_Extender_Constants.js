@@ -86,7 +86,7 @@ var templates = {
             '</span>',
 
     observable:
-        '<textarea id="observable" rows="1" style="width:99%; overflow:auto; display: none;"></textarea>',
+        '<textarea id="observable" rows="1" style="width:99%; overflow:auto; display: none;" onkeyup="observable_onkeyup(event)"></textarea>',
 
     tabContent:
         '<div id="extenderTabContent" style="margin-top: 18px; margin-top: 18px; overlow-x: scroll; height: 460px;"></div>',
