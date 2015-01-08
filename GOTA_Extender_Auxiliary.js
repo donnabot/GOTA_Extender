@@ -132,13 +132,27 @@ function executeElement(element, callback) {
 };
 
 function buildingFinished(b) {
-    return b.producing_archetype_id && !b.build_remaining;
-    //return !b.build_remaining;
+
+    // DO NOT call this function for the keep: it has neither build_remaining nor producing_archetype_id
+
+    // When a building finished either producing or bonus archetype id's should be present along with
+    // no build time remaining to safely determine that this building has produced the item (luck or not)
+    // but has not finalized the production yet (that's clicking the finish button)
+    // Note that upgrades also enlist with a producing_archetype_id here, so they behave similarly
+    return (b.producing_archetype_id != void 0 || b.bonus_archetype_id != void 0) && b.build_remaining == void 0;
 }
 
 function buildingProducing(b) {
-    return b.producing_archetype_id && b.build_remaining;
-    //return b.build_remaining;
+
+    // DO NOT call this function for the keep: it has neither build_remaining nor producing_archetype_id
+
+    // Luck-based recipes do not assign producing_archetype_id property
+    // for all others this returns the remaining build
+    //return b.producing_archetype_id && b.build_remaining;
+
+    // Simple and short, if this property is present and the value
+    // is a positive number, then the building is still in production
+    return b.build_remaining != void 0 && b.build_remaining > 0;
 }
 
 function updateBuildingTimer(b){
@@ -362,6 +376,7 @@ function inputIncrement(me) {
     } else if (me.id == "excountdown") {
         (v - 1 < 0 ? v = 0 : v = v - 1);
     }
+
     input.val(v);
 }
 
@@ -605,6 +620,7 @@ function checkGarrison(s, region, subregion) {
 
 function setSwornSword(param) {
     if (typeof param == "undefined") {
+        error("The function requires a sworn sword id as parameter.")
         return;
     }
         
