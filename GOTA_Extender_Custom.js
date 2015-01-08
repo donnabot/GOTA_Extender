@@ -328,9 +328,9 @@ buildTimerUpdate = function(c, a, b) {
     d.build_remaining = a;
     markup = renderBuildPanelAction(d);
 
-    console.debug("Debugging building: " + d.symbol + ", " +
-    "build time remaining: " + a + " ms, " +
-    "original build seconds: " + b + " ms");
+    //console.debug("Debugging building: " + d.symbol + ", " +
+    //"build time remaining: " + a + " ms, " +
+    //"original build seconds: " + b + " ms");
 
     $("#speed_button_" + c).show();
     $("#build_panel_action_" + c).html(markup);
