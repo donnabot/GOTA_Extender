@@ -40,7 +40,9 @@ function attemptProduction(bSymbol) {
             log("Building " + b.symbol + " finished production.", "PRODUCTION");
 
             doFinishProduction(b.item_id, function() {
-                attemptProduction(b.symbol);
+                setTimeout(function() {
+                    attemptProduction(b.symbol);
+                }, extender_queueDelay * 1000);
             });
 
             return;
@@ -64,7 +66,9 @@ function attemptProduction(bSymbol) {
             if (buildingFinished(b)) {
                 log("Building " + b.symbol + " finished production.", "PRODUCTION");
                 doFinishProduction(b.item_id, function() {
-                    attemptProduction();
+                    setTimeout(function() {
+                        attemptProduction(b.symbol);
+                    }, extender_queueDelay * 1000);
                 });
 
                 return;
@@ -888,4 +892,22 @@ function observable_onkeyup(e){
     }
 
     return false;
+}
+
+function clearLog(){
+    if(clientEntries == void 0){
+        error("Could not find the client log on page.");
+    }
+
+    if(!(clientEntries instanceof Array)){
+        error("The log on the page is not an array!");
+    }
+
+    if(clientEntries.length === 0){
+        warn("The log has no entries!");
+    }
+
+    clientEntries = [];
+    $("#logTab").trigger("click");
+    log("The client log has been cleared successfully.");
 }
