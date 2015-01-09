@@ -417,7 +417,7 @@ claimDaily = function() {
         url: "/play/advice_claim_daily",
         dataType: "JSON",
         success: function(c) {
-            console.debug("Logging response from the server: ", c);
+            //console.debug("Logging response from the server: ", c);
             hideSpinner();
 
             // EXTENDER :: Modification
@@ -440,6 +440,7 @@ claimDaily = function() {
 
             // EXTENDER :: Modification
             $(".welcomemodal").hide();
+            log("Daily reward claimed: " + c.item + ", gold: " + c.gold + ", silver: " + c.silver, "CLAIM_DAILY", true);
         }
     });
 
@@ -820,7 +821,7 @@ charCharacterTab = function charCharacterTab() {
     markup += "\t\t\t\t\t\t</div>";
     markup += '\t\t\t\t\t\t<div class="reviewfealty">\t';
     void 0 != playerData.fealty && (markup += '                         <div class="reviewcircle">', markup += '                             <a class="icon-book" onclick="lorePage(\'house_' + playerData.fealty.toLowerCase() + "')\"></a>", markup += '                             <img style="margin: 7px" img src="' +
-    assetUrl() + "/images/banner-" + playerData.fealty.toLowerCase() + '-lg.png?t=fe526f65c954"></img>', markup += "                         </div>");
+    assetUrl() + "/images/banner-" + playerData.fealty.toLowerCase() + '-lg.png?t=2106882ad94f"></img>', markup += "                         </div>");
     markup += "\t\t\t\t\t\t</div>";
     markup += '\t\t\t\t\t    <div class="reviewbackground">\t';
     void 0 != playerData.background_option && (markup += '\t\t\t\t\t\t\t<div class="reviewcircle ' + playerData.background_option + '">', markup += '\t\t\t\t\t\t\t\t<a class="icon-book" onclick="lorePage(\'background-' + playerData.background_option + "');\"></a>", markup += "\t\t\t\t\t\t\t</div>");
