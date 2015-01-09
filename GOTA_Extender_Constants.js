@@ -86,7 +86,7 @@ var templates = {
             '</span>',
 
     clearLogOptionsBtn:
-        '<span id="clearExLog" class="btnwrap btnlg">' +
+        '<span id="clearExLog" class="btnwrap btnlg" onclick="clearLog()">' +
             '<span class="btnedge">' +
             '<a class="btngold">Clear log</a>' +
             '</span>' +
@@ -319,13 +319,13 @@ var templates = {
             '</tr>';
     },
 
-    logTab: function (o) {
+    logTab: function (log) {
 
         var output = '<div class="exrow" style="text-align: right"> ' + this.clearLogOptionsBtn + '</div>';
 
-        output += '<div class="exrow"><textarea style="width: 95%">';
-        for(var i = 0; i < o.log.length; i++){
-            output += o.log[i] + "\n";
+        output += '<div class="exrow"><textarea style="width: 95%; height: 400px; overflow-y: scroll;" readonly="readonly" onkeydown="return false;" onkeypress="return false;" onkeyup="return false;" disabled="disabled">';
+        for(var i = log.length - 1; i > -1; i--){
+            output += log[i] + "\n";
         }
         output += '</textarea></div>';
 
