@@ -251,9 +251,6 @@ var options = {
     productionQueue: [],
     default_productionQueue: [],
 
-    log: [],
-    default_log: [new Date().toLocaleTimeString() + ": Logging started..."],
-
     debugMode: true,
     default_debugMode: true,
     checkScript: false,
@@ -487,13 +484,19 @@ var inject = {
             unsafeWindow.inform = inform;
         }
 
+        var clientEntriesArray = [new Date().toLocaleTimeString() + " | Logging started..."];
+
+       typeof (cloneInto) == "function"
+           ? unsafeWindow.clientEntries = cloneInto(clientEntriesArray, unsafeWindow)
+           : unsafeWindow.clientEntries = clientEntriesArray;
+
         log("Messaging system injected successfully.");
     }
 };
 // <-- Inject object
 
 // --> Message handling
-function log(message, type) {
+function log(message, type, clientEntry) {
     if (options && options.debugMode && console && console.log
         && typeof (console.log) == "function") {
         if (!type)
@@ -501,6 +504,10 @@ function log(message, type) {
 
         var prefix = type.toString().toUpperCase() + " <" + new Date().toLocaleTimeString() + "> ";
         console.log(prefix + message);
+    }
+
+    if(clientEntry != void 0){
+        unsafeWindow.clientEntries.push(new Date().toLocaleTimeString() + " | " + message);
     }
 }
 
@@ -688,8 +695,15 @@ function openBox() {
                 return;
             }
 
-            log("Auto quartermaster opened a reward box. Rewards:")
-            console.debug(r.rewards);
+            //console.debug(r.rewards);
+
+            for(var i = 0; i < r.rewards.length; i++){
+                var reward =  r.rewards[i];
+                var clientEntry = "Reward claimed: " + reward.item_symbol + ', ' +
+                    'quantity: ' + reward.quantity;
+
+                log(clientEntry, "QUARTERMASTER", true);
+            }
 
             quarterMasterDo();
         }
@@ -765,7 +779,7 @@ function tab_onchange(e) {
 
     switch (this.id) {
         case "logTab":
-            $("#extenderTabContent").html(templates.logTab(options));
+            $("#extenderTabContent").html(templates.logTab(unsafeWindow.clientEntries));
             break;
         case "mainTab":
             $("#extenderTabContent").html(templates.mainTab(options));
@@ -781,11 +795,6 @@ function tab_onchange(e) {
         default:
             break;
     }
-}
-
-$("#credits_roll").on("click", "#clearExLog", clearLog);
-function clearLog(){
-    options.log = options.default_log.slice(0);
 }
 
 function renderProductionItems() {
@@ -1710,3 +1719,4 @@ function ajax(params) {
         });
     }, 1E3);
 }
+
