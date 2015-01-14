@@ -342,7 +342,7 @@ var templates = {
             this.checkOption("toggleTooltips", "Tooltips on buildings", o.doTooltips) +
             '</div>' +
             '<div class="exrow">' +
-            'Reload in (hours): ' +
+            'Reload in (minutes): ' +
             this.inputNumberOption("autoReloadInterval", o.autoReloadInterval, 2) +
             'Collect in (minutes): ' +
             this.inputNumberOption("autoCollectInterval", o.autoCollectInterval, 2) + '(0 = disabled)' +
