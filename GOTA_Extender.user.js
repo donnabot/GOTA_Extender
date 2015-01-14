@@ -1,8 +1,8 @@
 // ==UserScript==
-// @name        GOTA Extender
-// @namespace   gota_extender
-// @author      Panayot Ivanov
-// @description Game of Thrones Ascent Extender
+// @name        Donnabots GOTA Extender 
+// @namespace   gota_extender_2
+// @author      Donna Botwin
+// @description Game of Thrones Ascent Extender Forked from Panayot Ivanov's https://greasyfork.org/en/scripts/3788-gota-extender
 // @include     http://gota.disruptorbeam.com/*
 // @include     http://gota-www.disruptorbeam.com/*
 // @include     https://gota.disruptorbeam.com/*
@@ -17,7 +17,7 @@
 // @resource 	custom https://greasyfork.org/scripts/5426-gota-extender-custom/code/GOTA_Extender_Custom.js?version=31296
 // @resource    auxiliary https://greasyfork.org/scripts/5618-gota-extender-auxiliary/code/GOTA_Extender_Auxiliary.js?version=31298
 // @resource    original https://greasyfork.org/scripts/6702-gota-extender-original/code/GOTA_Extender_Original.js?version=31299
-// @version     6.2.2
+// @version     0.0.1
 // @grant       unsafeWindow
 // @grant       GM_getValue
 // @grant       GM_setValue
