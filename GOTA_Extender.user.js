@@ -232,13 +232,20 @@ function initialize() {
 
         log('Initialized. Happy hacking.');
         inform("Initialized.");
-saveProductionQueue();
 
+//save if initialise worked.
+if(options.autoSave){
+saveProductionQueue();
+}
 
     } catch (e) {
         error("Fatal error, initialization failed: " + e);
         inform("Fatal error, initialization failed: " + e);
-        saveProductionQueue();
+
+//save even if initialise errored.
+if(options.autoSave){
+saveProductionQueue();
+}
 
         return;
     }
@@ -665,7 +672,13 @@ function quarterMasterDo(status) {
 
     unsafeWindow.claimDaily();
     log("Daily reward claimed.")
+
+//Terrible spot for it but it works for now
+if(options.autoBrute){
     unsafeWindow.bruteSendAll();
+}
+//will move it later
+
 }
 
 function claimDailyQuarterMaster() {
