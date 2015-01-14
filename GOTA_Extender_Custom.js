@@ -1295,9 +1295,9 @@ function questSubmit(b, a, c, d, g, k, f) {
                 bossChallengeTimout =
                     setTimeout(function() {
                         questSubmit(a.symbol, a.stage, c, a.chosen, null, null, a.id);
-                    }, 3 * 5 * 60 * 1000);
+                    }, 3 * 4 * 60 * 1000);
 
-                log("Timer running. Fire again in 15 minutes.", "BOSS");
+                log("Timer running. Fire again in 12 minutes.", "BOSS");
 
             }
         }
