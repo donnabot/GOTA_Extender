@@ -1,4 +1,4 @@
-﻿// ==UserScript==
+// ==UserScript==
 // @name        GOTA Extender
 // @namespace   gota_extender
 // @author      Panayot Ivanov
@@ -232,14 +232,19 @@ function initialize() {
 
         log('Initialized. Happy hacking.');
         inform("Initialized.");
+saveProductionQueue();
 
 
     } catch (e) {
         error("Fatal error, initialization failed: " + e);
         inform("Fatal error, initialization failed: " + e);
+        saveProductionQueue();
+
         return;
     }
+    
 
+    
 }
 // <-- Initizalization
 
@@ -275,8 +280,8 @@ var options = {
     default_doTooltips: false,
     neverSpendGold: true,
     default_neverSpendGold: true,
-    autoReloadInterval: 6,
-    default_autoReloadInterval: 6,
+    autoReloadInterval: 180,
+    default_autoReloadInterval: 180,
     boonsSortBy: "available_quantity",
     default_boonsSortBy: "available_quantity",
     boonsSortBy2: "rarity",
@@ -615,8 +620,8 @@ function toggleReloadWindow() {
         setTimeout(function () {
             saveProductionQueue();
             window.location.reload(true);
-        }, options.autoReloadInterval * 60 * 60 * 1000);
-        log("Auto reload interval set to: " + options.autoReloadInterval + "h.");
+        }, options.autoReloadInterval * 60 * 1000);
+        log("Auto reload interval set to: " + options.autoReloadInterval + "m.");
     } else {
         reloadWindowTimeout = clearTimeout(reloadWindowTimeout);
         log("Auto reloading cancelled.");
@@ -656,6 +661,7 @@ function quarterMasterDo(status) {
 
     unsafeWindow.claimDaily();
     log("Daily reward claimed.")
+    unsafeWindow.bruteSendAll();
 }
 
 function claimDailyQuarterMaster() {
@@ -1398,6 +1404,7 @@ function saveProductionQueue() {
     if (p && p.length > 0) {
         options.productionQueue = p;
         options.set("productionQueue");
+        log("Queue Saved.");
     }
 }
 
