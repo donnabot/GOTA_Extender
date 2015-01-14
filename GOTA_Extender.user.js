@@ -17,7 +17,7 @@
 // @resource 	custom https://greasyfork.org/scripts/7492-donnabot-s-gota-extender-custom/code/Donnabot's%20GOTA_Extender_Custom.js?version=31942
 // @resource    auxiliary https://greasyfork.org/scripts/7490-donnabot-s-gota-extender-auxiliary/code/Donnabot's%20GOTA_Extender_Auxiliary.js?version=31940
 // @resource    original https://greasyfork.org/scripts/7493-donnabot-s-gota-extender-original/code/Donnabot's%20GOTA_Extender_Original.js?version=31943
-// @version     0.0.2
+// @version     0.0.3
 // @grant       unsafeWindow
 // @grant       GM_getValue
 // @grant       GM_setValue
@@ -934,6 +934,9 @@ function saveMainTab() {
     options.doTooltips = $("#toggleTooltips").hasClass("checked");
     options.neverSpendGold = $("#neverSpendGold").hasClass("checked");
     options.autoBossChallenge = $("#autoBossChallenge").hasClass("checked");
+
+    options.autoBrute = $("#autoBrute").hasClass("checked");
+    options.autoSave = $("#autoSave").hasClass("checked");
 
 
     var ari = parseInt($("#autoReloadInterval").val());
