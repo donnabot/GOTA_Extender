@@ -294,6 +294,10 @@ var options = {
     default_sendAllAction: "friendly",
     autoBossChallenge: false,
     default_autoBossChallenge: false,
+    autoBrute: false,
+    default_autoBrute: false,
+    autoSave: true,
+    default_autoSave: true,
 
     get: function () {
         var prefix = "";
