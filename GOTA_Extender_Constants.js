@@ -343,13 +343,17 @@ var templates = {
             '</div>' +
             '<div class="exrow">' +
             'Reload in (minutes): ' +
-            this.inputNumberOption("autoReloadInterval", o.autoReloadInterval, 2) +
+            this.inputNumberOption("autoReloadInterval", o.autoReloadInterval, 3) +
             'Collect in (minutes): ' +
             this.inputNumberOption("autoCollectInterval", o.autoCollectInterval, 2) + '(0 = disabled)' +
             '</div>' +
             '<div class="exrow">' +
             this.checkOption("neverSpendGold", "Never spend gold", o.neverSpendGold) +
             this.checkOption("autoBossChallenge", "Auto Boss challenge", o.autoBossChallenge) +
+            '</div>' +
+            '<div class="exrow">' +
+            this.checkOption("autoBrute", "Brute all on load", o.autoBrute) +
+            this.checkOption("autoSave", "Save Queue on load", o.autoSave) +
             '</div>' +
             '<div class="exrow">' +
             this.selectOption("Sort player inventory by: ", "boonsSortBy", this.boonsSortingOptions, o.boonsSortBy) +
