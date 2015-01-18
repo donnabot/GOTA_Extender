@@ -43,3 +43,7 @@ original.questSubmit =
     "function questSubmit(b,a,c,d,g,k,f){doLog(\"questSubmit: stage=\"+a+\" choice=\"+c);uiEvent(\"quest_submit_\"+b+\"_\"+a+\"_choice_\"+c,userContext.playerData);userContext.postQuestEvent=\"quest_post_\"+b+\"_\"+a+\"_choice_\"+c;userContext.playerData;userContext.questActionChoice=c;b=void 0!=f?\"/play/quest?quest_id=\"+f+\"&stage=\"+a+\"&choice=\"+c+\"&chosen=\"+escape(d):\"/play/quest?quest_symbol=\"+b+\"&stage=\"+a+\"&choice=\"+c+\"&chosen=\"+escape(d);void 0!=g?(b=isWeb()?b+(\"&chat=\"+escape($(\"#\"+g).val())):b+(\"&chat=\"+escape(g)),\nuserContext.hideWarParty=!0):playSound(\"page-turn\");void 0!=k&&(userContext.dialogIndex++,userContext.dialogHistory[userContext.dialogIndex]=unescape(k));isIpad()&&showSpinner();$.ajax({url:b,dataType:\"JSON\",success:function(a){isIpad()&&hideSpinner();questSubmitCallback(a);questById(f).action_taken=!0}});return!1}";
 
 
+
+
+unescape("function charCharacterTab(){$(\".lineag...haracter.user_id&&uiEvent(\"character_self\")}")
+
