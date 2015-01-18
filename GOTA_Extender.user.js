@@ -1314,20 +1314,13 @@ function queue_clicked(e) {
 //    }
 //}
 
-<<<<<<< HEAD
-    var p = unsafeWindow.productionQueue;
-    if (p && p.length > 0) {
-        options.productionQueue = p;
-        options.set("productionQueue");
-        log("Queue Saved.");
-=======
+
 function saveComponent(component) {
     console.debug("Saving component " + component);
     
     if (component == void 0) {
         error("Cannot save " + component + ". Exiting...")
         return;
->>>>>>> upstream/master
     }
 
     var p = unsafeWindow[component];

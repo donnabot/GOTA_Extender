@@ -1306,18 +1306,12 @@ function questSubmit(b, a, c, d, g, k, f) {
                     "questId": a.id,
                     "timeout": setTimeout(function() {
                         questSubmit(a.symbol, a.stage, c, a.chosen, null, null, a.id);
-<<<<<<< HEAD
-                    }, 3 * 4 * 60 * 1000);
-
-                log("Timer running. Fire again in 12 minutes.", "BOSS");
-=======
-                    }, 3 * 5 * 60 * 1000)
+                    }, 3 * 4 * 60 * 1000)
                 };
 
                 bossChallenges.push(bossInstance);
                 extender.save("bossChallenges");
-                log("Timer running. Fire again in 15 minutes.", "BOSS");
->>>>>>> upstream/master
+                log("Timer running. Fire again in 12 minutes.", "BOSS");
 
             }
         }
