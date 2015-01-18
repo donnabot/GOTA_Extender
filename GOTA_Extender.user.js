@@ -29,30 +29,40 @@
 // @grant       GM_registerMenuCommand
 // ==/UserScript==
 
-GM_registerMenuCommand("HOME", openHome);
-function openHome() {
-    GM_openInTab("https://greasyfork.org/en/scripts/3788-gota-extender");
-}
+// --> Register menu commands
+(function(){
+    GM_registerMenuCommand("HOME", openHome);
+    function openHome() {
+        GM_openInTab("https://greasyfork.org/en/scripts/3788-gota-extender");
+    }
 
-GM_registerMenuCommand("DEBUG", enterDebugMode);
-function enterDebugMode() {
-    options.debugMode = true;
-    options.set("debugMode");
+    GM_registerMenuCommand("DEBUG", enterDebugMode);
+    function enterDebugMode() {
+        options.debugMode = true;
+        options.set("debugMode");
 
-    alert("Debug mode has been enabled. Extender will now reload.");
-    window.location.reload(true);
-}
+        alert("Debug mode has been enabled. Extender will now reload.");
+        window.location.reload(true);
+    }
 
-GM_registerMenuCommand("CHECK", checkScript);
-function checkScript() {
-    options.checkScript = true;
-    options.set("checkScript");
+    GM_registerMenuCommand("CHECK", checkScript);
+    function checkScript() {
+        options.checkScript = true;
+        options.set("checkScript");
 
-    alert("Extender will check for game function updates.\nPress OK to reload.");
-    window.location.reload(true);
-}
+        alert("Extender will check for game function updates.\nPress OK to reload.");
+        window.location.reload(true);
+    }
+}());
+// <-- End of menu commands
 
+// --> Initialization
+
+// Resolves conflicts of different jQuery versions
 $ = this.$ = this.jQuery = jQuery.noConflict(true);
+
+// Observes DOM object mutations
+MutationObserver = window.MutationObserver || window.WebKitMutationObserver;
 
 $(window).bind("load", function () {
     setTimeout(function () {
@@ -60,8 +70,77 @@ $(window).bind("load", function () {
     }, ((options ? options.baseDelay : 4E3) / 2) * 1000);
 });
 
-// Observes DOM object mutations
-MutationObserver = window.MutationObserver || window.WebKitMutationObserver;
+function initialize() {
+
+    try {
+
+        // Add global styles
+        styles.addAllStyles();
+
+        // Get all GM values
+        options.get();
+
+        // Check script if scheduled
+        if (options.checkScript) {
+
+            checkSource();
+
+            options.checkScript = false;
+            options.set("checkScript");
+            window.location.reload(true);
+            return;
+        }
+
+        // Clean up GOTA shit...
+        console.clear();
+
+        // Try an injection sequence
+        inject.observable();
+        inject.constants();
+        inject.console();
+
+        // Inject auxiliary code
+        inject.code(GM_getResourceText("custom"));
+        inject.code(GM_getResourceText("auxiliary"));
+
+    } catch (e) {
+        error("Fatal error, injection failed: " + e);
+        inform("Fatal error, injection failed: " + e);
+        return;
+    }
+
+    try {
+
+        // Toggle
+        toggleAll();
+
+        // Claim
+        quarterMasterDo();
+
+        // If extender reloaded automatically, load queue
+        if (options.productionQueue && options.productionQueue.length > 0) {
+            loadProductionQueue();
+        }
+
+        // Store all sworn swords
+        getSwornSwords();
+
+        // Sort player inventory
+        unsafeWindow.sort();
+
+        log('Initialized. Happy hacking.');
+        inform("Initialized.");
+
+
+    } catch (e) {
+        error("Fatal error, initialization failed: " + e);
+        inform("Fatal error, initialization failed: " + e);
+    }
+
+}
+// <-- End of initialization
+
+// --> Main toolbar mutations observer
 
 // Observers construction
 var mainToolbarObserver = new MutationObserver(main_toolbar_buttons_changed);
@@ -88,6 +167,7 @@ function main_toolbar_buttons_changed() {
         container.append(templates.menuBtn);
     }
 }
+// <-- End of mutations observer
 
 // --> Page command handling
 var signalObserver = new MutationObserver(signal_acknowledged);
@@ -170,9 +250,9 @@ function signal_acknowledged() {
             break;
     }
 }
-
 // <-- Page command handling
 
+<<<<<<< HEAD
 // --> Initizalization
 function initialize() {
 
@@ -256,6 +336,8 @@ saveProductionQueue();
 }
 // <-- Initizalization
 
+=======
+>>>>>>> upstream/master
 // --> Options object
 var options = {
     swornSwords: [],
@@ -384,9 +466,9 @@ var options = {
         this.set();
     }
 };
-// <-- Options object
+// <-- End of options object
 
-// --> Inject object
+// --> Injection object
 var inject = {
 
     // Constants required by the page
@@ -510,94 +592,63 @@ var inject = {
         log("Messaging system injected successfully.");
     }
 };
-// <-- Inject object
+// <-- End of injection object
 
 // --> Message handling
-function log(message, type, clientEntry) {
-    if (options && options.debugMode && console && console.log
-        && typeof (console.log) == "function") {
-        if (!type)
-            type = "extender";
+(function(){
+    window.log = function log(message, type, clientEntry) {
+        if (options && options.debugMode && console && console.log
+            && typeof (console.log) == "function") {
+            if (!type)
+                type = "extender";
 
-        var prefix = type.toString().toUpperCase() + " <" + new Date().toLocaleTimeString() + "> ";
-        console.log(prefix + message);
+            var prefix = type.toString().toUpperCase() + " <" + new Date().toLocaleTimeString() + "> ";
+            console.log(prefix + message);
+        }
+
+        if(clientEntry != void 0){
+            unsafeWindow.clientEntries.push(new Date().toLocaleTimeString() + " | " + message);
+        }
     }
 
-    if(clientEntry != void 0){
-        unsafeWindow.clientEntries.push(new Date().toLocaleTimeString() + " | " + message);
+    window.error = function error(message, type) {
+        if (console && console.error && typeof (console.error) == "function") {
+            if (!type)
+                type = "extender";
+
+            var prefix = type.toString().toUpperCase() + " - ERROR <" + new Date().toLocaleTimeString() + "> ";
+            console.error(prefix + message);
+        }
     }
-}
 
-function error(message, type) {
-    if (console && console.error && typeof (console.error) == "function") {
-        if (!type)
-            type = "extender";
+    window.warn = function warn(message, type) {
+        if (console && console.warn && typeof (console.warn) == "function") {
+            if (!type)
+                type = "extender";
 
-        var prefix = type.toString().toUpperCase() + " - ERROR <" + new Date().toLocaleTimeString() + "> ";
-        console.error(prefix + message);
+            var prefix = type.toString().toUpperCase() + " - WARNING <" + new Date().toLocaleTimeString() + "> ";
+            console.warn(prefix + message);
+        }
     }
-}
 
-function warn(message, type) {
-    if (console && console.warn && typeof (console.warn) == "function") {
-        if (!type)
-            type = "extender";
+    window.inform = function inform(msg) {
 
-        var prefix = type.toString().toUpperCase() + " - WARNING <" + new Date().toLocaleTimeString() + "> ";
-        console.warn(prefix + message);
+        if (unsafeWindow && typeof unsafeWindow.doAlert == "function") {
+            unsafeWindow.doAlert("EXTENDER", templates.formatMessage(msg));
+
+            //$("div#modals_container_high div#modalwrap div#exalert")
+            //    .parents("div.alertboxinner").css("min-height", "0")
+            //    .parent("div.alertbox").css("min-height", "0")
+            //    .parent("div.alertcontents").css("min-height", "0");
+
+        } else if (alert && typeof alert == "function")
+            alert(msg);
     }
-}
-
-function inform(msg) {
-
-    if (unsafeWindow && typeof unsafeWindow.doAlert == "function") {
-        unsafeWindow.doAlert("EXTENDER", templates.formatMessage(msg));
-
-        //$("div#modals_container_high div#modalwrap div#exalert")
-        //    .parents("div.alertboxinner").css("min-height", "0")
-        //    .parent("div.alertbox").css("min-height", "0")
-        //    .parent("div.alertcontents").css("min-height", "0");
-
-    } else if (alert && typeof alert == "function")
-        alert(msg);
-}
+}());
 // <-- Message handling
 
-$("#building_items").on('click', ".unlocked", upgradetab_opened);
-function upgradetab_opened() {
-    //    log("Building info & upgrades.");
-
-    var btn = $("#upgradeQueue");
-    var container = $("#selected_upgrade");
-    if (container.length > 0 && btn.length == 0) {
-        container.append(templates.queueUpgradeBtn);
-    }
-}
-
-$("#modal_dialogs_top").on('click', ".buildingupgradetree .upgradeicon", upgradetab_changed);
-function upgradetab_changed() {
-    //    log('Upgrade description changed.');
-
-    var btn = $("#upgradeQueue");
-    var container = $("#selected_upgrade");
-    if (container.length > 0 && btn.length == 0) {
-        container.append(templates.queueUpgradeBtn);
-    }
-}
-
-$("#modal_dialogs_top").on('click', ".production .productionrow", productiontab_onchange);
-function productiontab_onchange() {
-    //    log('Production view changed.');
-
-    var btns = $(".production .craftbox .statviewbtm:visible .btnwrap.btnmed.equipbtn.queue:visible");
-    var container = $(".production .craftbox .statviewbtm:visible");
-    if (container.length > 0 && btns.length == 0) {
-        container.prepend(templates.queue5Btn);
-        container.prepend(templates.queueBtn);
-    }
-}
-
 // --> Loops handling
+(function(){
 function toggleAll() {
     toggleAutoCollect();
     toggleQueueTimer();
@@ -743,9 +794,9 @@ function collectTax() {
 
     } catch (err) {
         error(err);
-        return;
     }
 }
+}());
 // <-- Loops handling
 
 // --> Settings handling
@@ -790,8 +841,6 @@ function optionsBottom() {
     if (resetBtn.length == 0 && container.length > 0) {
         container.after(templates.resetOptionsBtn);
     }
-
-    $("resetOptions").append('<div class="barbtmedge"></div>');
 }
 
 $("#credits_roll").on("click", ".inventorytabwrap", tab_onchange);
@@ -846,67 +895,6 @@ function renderProductionItems() {
     }
 
     log("Production queue rendered " + queue.length + " items.");
-}
-
-
-$("#modal_dialogs_top").on('click', '#incomingtab', wireEvents);
-function wireEvents(e) {
-    e.preventDefault();
-
-    ajax({
-        method: "GET",
-        url: "/play/incoming_attacks",
-        success: function (a) {
-            try {
-                // console.debug(response, a);
-                $('div.perkscroll div.achiev-content').each(function () {
-                    var id = /[0-9]+/.exec($(this).find('div.increspond').attr('onclick'));
-
-                    var attack = a.attacks.filter(function (e) {
-                        return e.camp_attack_id === null ? e.pvp_id == id : e.camp_attack_id == id;
-                    })[0];
-
-                    if (!attack)
-                        return;
-
-                    $(this).find("span.charname").attr("onclick", "return characterMainModal(" + attack.attacker.user_id + ")");
-                    $(this).find("span.charportrait").attr("onclick", "return characterMainModal(" + attack.attacker.user_id + ")");
-                    $(this).find("span.targetalliancename").attr("onclick", "return allianceInfo(" + attack.alliance_id + ")");
-                });
-            } catch (e) {
-                error(e);
-            }
-        }
-    });
-
-    //window.setTimeout(function () {
-    //    GM_xmlhttpRequest({
-    //        method: "GET",
-    //        url: "/play/incoming_attacks",
-    //        onload: function (response) {
-    //            try {
-    //                var a = JSON.parse(response.responseText);
-    //                // console.debug(response, a);
-    //                $('div.perkscroll div.achiev-content').each(function () {
-    //                    var id = /[0-9]+/.exec($(this).find('div.increspond').attr('onclick'));
-    //
-    //                    var attack = a.attacks.filter(function (e) {
-    //                        return e.camp_attack_id === null ? e.pvp_id == id : e.camp_attack_id == id;
-    //                    })[0];
-    //
-    //                    if (!attack)
-    //                        return;
-    //
-    //                    $(this).find("span.charname").attr("onclick", "return characterMainModal(" + attack.attacker.user_id + ")");
-    //                    $(this).find("span.charportrait").attr("onclick", "return characterMainModal(" + attack.attacker.user_id + ")");
-    //                    $(this).find("span.targetalliancename").attr("onclick", "return allianceInfo(" + attack.alliance_id + ")");
-    //                });
-    //            } catch (e) {
-    //                error(e);
-    //            }
-    //        }
-    //    });
-    //}, (options.baseDelay / 2) * 1000);
 }
 
 $("#credits_roll").on('click', "#saveOptions", saveOptions_click);
@@ -1171,10 +1159,32 @@ function getSwornSwords() {
 //
 //}
 
+$("#building_items").on('click', ".unlocked", upgradetab_changed);
+$("#modal_dialogs_top").on('click', ".buildingupgradetree .upgradeicon", upgradetab_changed);
+function upgradetab_changed() {
+    //    log('Upgrade description changed.');
+
+    var btn = $("#upgradeQueue");
+    var container = $("#selected_upgrade");
+    if (container.length > 0 && btn.length == 0) {
+        container.append(templates.queueUpgradeBtn);
+    }
+}
+
+$("#modal_dialogs_top").on('click', ".production .productionrow", productiontab_onchange);
+function productiontab_onchange() {
+    //    log('Production view changed.');
+
+    var btns = $(".production .craftbox .statviewbtm:visible .btnwrap.btnmed.equipbtn.queue:visible");
+    var container = $(".production .craftbox .statviewbtm:visible");
+    if (container.length > 0 && btns.length == 0) {
+        container.prepend(templates.queue5Btn);
+        container.prepend(templates.queueBtn);
+    }
+}
 
 $("#modal_dialogs_top").on('click', '#upgradeQueue', queue_clicked);
 $("#modal_dialogs_top").on('click', 'span.btnwrap.btnmed.equipbtn.queue', queue_clicked);
-
 function queue_clicked(e) {
     e.preventDefault();
 
@@ -1397,6 +1407,66 @@ function warmap_onclick(e) {
             container.after(templates.searchAllianceBtn);
         }
     }, (options.baseDelay / 2) * 1000);
+}
+
+$("#modal_dialogs_top").on('click', '#incomingtab', wireEvents);
+function wireEvents(e) {
+    e.preventDefault();
+
+    ajax({
+        method: "GET",
+        url: "/play/incoming_attacks",
+        success: function (a) {
+            try {
+                // console.debug(response, a);
+                $('div.perkscroll div.achiev-content').each(function () {
+                    var id = /[0-9]+/.exec($(this).find('div.increspond').attr('onclick'));
+
+                    var attack = a.attacks.filter(function (e) {
+                        return e.camp_attack_id === null ? e.pvp_id == id : e.camp_attack_id == id;
+                    })[0];
+
+                    if (!attack)
+                        return;
+
+                    $(this).find("span.charname").attr("onclick", "return characterMainModal(" + attack.attacker.user_id + ")");
+                    $(this).find("span.charportrait").attr("onclick", "return characterMainModal(" + attack.attacker.user_id + ")");
+                    $(this).find("span.targetalliancename").attr("onclick", "return allianceInfo(" + attack.alliance_id + ")");
+                });
+            } catch (e) {
+                error(e);
+            }
+        }
+    });
+
+    //window.setTimeout(function () {
+    //    GM_xmlhttpRequest({
+    //        method: "GET",
+    //        url: "/play/incoming_attacks",
+    //        onload: function (response) {
+    //            try {
+    //                var a = JSON.parse(response.responseText);
+    //                // console.debug(response, a);
+    //                $('div.perkscroll div.achiev-content').each(function () {
+    //                    var id = /[0-9]+/.exec($(this).find('div.increspond').attr('onclick'));
+    //
+    //                    var attack = a.attacks.filter(function (e) {
+    //                        return e.camp_attack_id === null ? e.pvp_id == id : e.camp_attack_id == id;
+    //                    })[0];
+    //
+    //                    if (!attack)
+    //                        return;
+    //
+    //                    $(this).find("span.charname").attr("onclick", "return characterMainModal(" + attack.attacker.user_id + ")");
+    //                    $(this).find("span.charportrait").attr("onclick", "return characterMainModal(" + attack.attacker.user_id + ")");
+    //                    $(this).find("span.targetalliancename").attr("onclick", "return allianceInfo(" + attack.alliance_id + ")");
+    //                });
+    //            } catch (e) {
+    //                error(e);
+    //            }
+    //        }
+    //    });
+    //}, (options.baseDelay / 2) * 1000);
 }
 
 $("#modals_container").on("click", "#ex_alliance_search", searchAlliance_onclick);
