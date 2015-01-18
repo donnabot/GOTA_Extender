@@ -117,25 +117,9 @@ function initialize() {
         // Claim
         quarterMasterDo();
 
-        // Try to load the queue
-        if (options.productionQueue != void 0 && options.productionQueue.length > 0) {
-            loadComponent("productionQueue");
-
-            // When done attempt production
-            if (typeof unsafeWindow.attemptProduction == "function") {
-                unsafeWindow.attemptProduction();
-            }
-        }
-
-        // Try to load the boss challenges
-        if (options.bossChallenges != void 0 && options.bossChallenges.length > 0) {
-            loadComponent("bossChallenges");
-
-            // When done attempt production
-            for(var i = 0; i < options.bossChallenges.length; i++){
-                var c = options.bossChallenges[i];
-                unsafeWindow.questSubmit(c.symbol, c.stage, s.attack, c.chosen, null, null, c.questId);
-            }
+        // If extender reloaded automatically, load queue
+        if (options.productionQueue && options.productionQueue.length > 0) {
+            loadProductionQueue();
         }
 
         // Store all sworn swords
@@ -146,6 +130,7 @@ function initialize() {
 
         log('Initialized. Happy hacking.');
         inform("Initialized.");
+
 
     } catch (e) {
         error("Fatal error, initialization failed: " + e);
@@ -217,13 +202,6 @@ function signal_acknowledged() {
 
     // Parse command
     switch (commandObj.name) {
-        case "save":
-            saveComponent(args[0]);
-
-            var prefix = "COMMAND ACKNOWLEDGED" + " | " + new Date().toLocaleTimeString() + " | ";
-            observable.val(prefix + args[0] + " set for persistence.");
-
-            break;
         case "option":
             //log("argument 1 = " + args[0] + ", " +
             //    "has own prop? " + (options.hasOwnProperty(args[0])) + ", " +
@@ -281,9 +259,6 @@ var options = {
 
     productionQueue: [],
     default_productionQueue: [],
-
-    bossChallenges: [],
-    default_bossChallenges: [],
 
     debugMode: true,
     default_debugMode: true,
@@ -583,11 +558,12 @@ var inject = {
 // <-- Message handling
 
 // --> Loops handling
+(function(){
 function toggleAll() {
     toggleAutoCollect();
     toggleQueueTimer();
     toggleReloadWindow();
-};
+}
 
 var autoCollectLoop;
 function toggleAutoCollect() {
@@ -723,7 +699,7 @@ function collectTax() {
         error(err);
     }
 }
-
+}());
 // <-- Loops handling
 
 // --> Settings handling
@@ -920,7 +896,7 @@ function saveQueueTab() {
         toggleQueueTimer();
     }
 
-    saveComponent("productionQueue");
+    saveProductionQueue();
 
     options.set();
     inject.constants();
@@ -978,9 +954,6 @@ function deleteTableRow(e) {
             unsafeWindow.productionQueue.pop();
         } else {
             unsafeWindow.productionQueue.splice(index, 1);
-
-            options.productionQueue = unsafeWindow.productionQueue;
-            options.set("productionQueue");
         }
 
         renderProductionItems();
@@ -1172,9 +1145,6 @@ function queue_clicked(e) {
                 unsafeWindow.productionQueue.push(upgrade);
             }
 
-            options.productionQueue = unsafeWindow.productionQueue;
-            options.set("productionQueue");
-
             log("Pushed upgrade to queue.");
 
         } else {
@@ -1258,9 +1228,6 @@ function queue_clicked(e) {
                     unsafeWindow.productionQueue.push(element);
                 }
 
-                options.productionQueue = unsafeWindow.productionQueue;
-                options.set("productionQueue");
-
                 quantity--;
 
                 log('Pushed element to queue.');
@@ -1277,94 +1244,46 @@ function queue_clicked(e) {
     }
 }
 
-//function saveProductionQueue() {
-//
-//    var p = unsafeWindow.productionQueue;
-//    if (p && p.length > 0) {
-//        options.productionQueue = p;
-//        options.set("productionQueue");
-//    }
-//}
+function saveProductionQueue() {
 
-function saveComponent(component) {
-    console.debug("Saving component " + component);
-    
-    if (component == void 0) {
-        error("Cannot save " + component + ". Exiting...")
-        return;
+    var p = unsafeWindow.productionQueue;
+    if (p && p.length > 0) {
+        options.productionQueue = p;
+        options.set("productionQueue");
     }
-
-    var p = unsafeWindow[component];
-    if (p == void 0) {
-        error("Could not find " + component + " on page. Exiting...")
-        return;
-    }
-
-    options.productionQueue = p;
-    options.set("productionQueue");
-
 }
 
-function loadComponent(component) {
-
-    if (component == void 0) {
-        error("Cannot load " + component + ". Exiting...")
-        return;
-    }
+function loadProductionQueue() {
 
     // console.debug("Conditions: ", !options.productionQueue, options.productionQueue.length == 0);
-    if (options[component] == void 0) {
-        warn("No stored " + component + " was found in options.");
+    if (!options.productionQueue || options.productionQueue.length == 0) {
+        warn("No stored queue was found in options.");
         return;
     }
 
     // console.debug("Conditions: ", !unsafeWindow.productionQueue);
-    if (unsafeWindow[component] == void 0) {
-        warn("The " + component + " was not found in page. Extender will create it.");
+    if (!unsafeWindow.productionQueue) {
+        warn("No queue was found on page to fill.");
+        return;
     }
 
-    if (typeof cloneInto == "function") { // Mozilla
-        unsafeWindow[component] = cloneInto(options[component], unsafeWindow);
-    } else {                            // Chrome
-        unsafeWindow[component] = options[component];
+    if (typeof cloneInto == "function") {
+        unsafeWindow.productionQueue = cloneInto(options.productionQueue, unsafeWindow);
+    } else {
+        unsafeWindow.productionQueue = options.productionQueue;
     }
 
     // Clear this from options
-    options[component] = null;
-    options.set(component);
-}
+    options.productionQueue = null;
+    options.set("productionQueue");
 
-//function loadProductionQueue() {
-//
-//    // console.debug("Conditions: ", !options.productionQueue, options.productionQueue.length == 0);
-//    if (!options.productionQueue || options.productionQueue.length == 0) {
-//        warn("No stored queue was found in options.");
-//        return;
-//    }
-//
-//    // console.debug("Conditions: ", !unsafeWindow.productionQueue);
-//    if (!unsafeWindow.productionQueue) {
-//        warn("No queue was found on page to fill.");
-//        return;
-//    }
-//
-//    if (typeof cloneInto == "function") {
-//        unsafeWindow.productionQueue = cloneInto(options.productionQueue, unsafeWindow);
-//    } else {
-//        unsafeWindow.productionQueue = options.productionQueue;
-//    }
-//
-//    // Clear this from options
-//    options.productionQueue = null;
-//    options.set("productionQueue");
-//
-//
-//    // When done attempt production
-//    if (typeof unsafeWindow.attemptProduction == "function") {
-//        unsafeWindow.attemptProduction();
-//    }
-//
-//}
+
+    // When done attempt production
+    if (typeof unsafeWindow.attemptProduction == "function") {
+        unsafeWindow.attemptProduction();
+    }
+
+}
 
 //$("#modals_container").on("click", "#hudchatbtn", warmap_onclick);
 $("#modals_container").on("click", ".messagetab", warmap_onclick);
@@ -1411,9 +1330,7 @@ function wireEvents(e) {
 
                     $(this).find("span.charname").attr("onclick", "return characterMainModal(" + attack.attacker.user_id + ")");
                     $(this).find("span.charportrait").attr("onclick", "return characterMainModal(" + attack.attacker.user_id + ")");
-                    //$(this).find("span.targetalliancename").attr("onclick", "return allianceInfo(" + attack.alliance_id + ")");
-
-                    var text = 'Last seen:' + moment(attack.attacker.updated_at,"YYYY-MM-DD HH:mm:ss Z").local().format('MMMM Do YYYY, h:mm:ss a');
+                    $(this).find("span.targetalliancename").attr("onclick", "return allianceInfo(" + attack.alliance_id + ")");
                 });
             } catch (e) {
                 error(e);
@@ -1449,24 +1366,6 @@ function wireEvents(e) {
     //        }
     //    });
     //}, (options.baseDelay / 2) * 1000);
-}
-
-function saveBossChallenges() {
-
-    var p = unsafeWindow.bossChallenges;
-    if (p && p.length > 0) {
-        options.bossChallenges = p;
-        options.set("bossChallenges");
-    }
-}
-
-function loadBossChallenges() {
-
-    var p = unsafeWindow.bossChallenges;
-    if (p && p.length > 0) {
-        options.bossChallenges = p;
-        options.set("bossChallenges");
-    }
 }
 
 $("#modals_container").on("click", "#ex_alliance_search", searchAlliance_onclick);

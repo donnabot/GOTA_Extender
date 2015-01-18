@@ -15,13 +15,6 @@ var extender = {
         } else {
             error("Please specify name and value as parameters.", "COMMAND");
         }
-    },
-    save: function(component){
-        if (typeof component == "string") {
-            this.command("save", [component]);
-        } else {
-            error("Please specify the component to be saved.", "COMMAND");
-        }
     }
 };
 
@@ -128,7 +121,6 @@ function executeElement(element, callback) {
 
         doProduction(element.outputSymbol, element.recipeCategory, null, null, element.recipeName, callback);
         productionQueue.splice(index, 1);
-        extender.save("productionQueue");
 
         log('Production details: ' + element.name + ' at ' + element.activeBuildingPanel + ', ' + element.outputSymbol + ', ' + element.recipeCategory + ', ' + element.recipeName + ';', "PRODUCTION");
     } else {
@@ -137,7 +129,6 @@ function executeElement(element, callback) {
 
         applySelectedUpgrade({ building_id: buildingId, id: element.upgradeId, gold: 0, silver: 0 }, null, callback);
         productionQueue.splice(index, 1);
-        extender.save("productionQueue");
 
         log('Production details: ' + element.name + ' : ' + element.type + ' at ' + element.activeBuildingPanel + ', ' + element.symbol + ';', "PRODUCTION");
 

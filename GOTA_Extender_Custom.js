@@ -821,7 +821,7 @@ charCharacterTab = function charCharacterTab() {
     markup += "\t\t\t\t\t\t</div>";
     markup += '\t\t\t\t\t\t<div class="reviewfealty">\t';
     void 0 != playerData.fealty && (markup += '                         <div class="reviewcircle">', markup += '                             <a class="icon-book" onclick="lorePage(\'house_' + playerData.fealty.toLowerCase() + "')\"></a>", markup += '                             <img style="margin: 7px" img src="' +
-    assetUrl() + "/images/banner-" + playerData.fealty.toLowerCase() + '-lg.png?t=a66ccbf438b6"></img>', markup += "                         </div>");
+    assetUrl() + "/images/banner-" + playerData.fealty.toLowerCase() + '-lg.png?t=2106882ad94f"></img>', markup += "                         </div>");
     markup += "\t\t\t\t\t\t</div>";
     markup += '\t\t\t\t\t    <div class="reviewbackground">\t';
     void 0 != playerData.background_option && (markup += '\t\t\t\t\t\t\t<div class="reviewcircle ' + playerData.background_option + '">', markup += '\t\t\t\t\t\t\t\t<a class="icon-book" onclick="lorePage(\'background-' + playerData.background_option + "');\"></a>", markup += "\t\t\t\t\t\t\t</div>");
@@ -1245,7 +1245,7 @@ function pvpLaunch(callback) {
 }
 log("Player vs player enhanced. Client pvpBan, hilarious.", "initialize");
 
-var bossChallenges = [];
+var bossChallengeTimout;
 function questSubmit(b, a, c, d, g, k, f) {
     doLog("questSubmit: stage=" + a + " choice=" + c);
     uiEvent("quest_submit_" + b + "_" + a + "_choice_" + c, userContext.playerData);
@@ -1263,11 +1263,11 @@ function questSubmit(b, a, c, d, g, k, f) {
         success: function(a) {
             isIpad() && hideSpinner();
             questSubmitCallback(a);
-            questById(f).action_taken = !0;
+            questById(f).action_taken = !0
 
             // EXTENDER :: Modification, auto boss challenger
             if (typeof a.actions_remaining == "undefined" || isNaN(a.actions_remaining)){				
-				log("Not on boss challenge (no actions remaining). Exiting...", "BOSS");
+				log("Not on boss challenge, or the boss challenge is completed", "BOSS");
 				return;
 			}
 			
@@ -1282,12 +1282,6 @@ function questSubmit(b, a, c, d, g, k, f) {
             if(a.stage && a.stage === 1000){
                 log("Boss challenge complete. Exiting...", "BOSS");
 
-                // Remove the quest from the array
-                bossChallenges = bossChallenges.filter(function (el) {
-                        return el.questId !== a.id;
-                    });
-                extender.save("bossChallenges");
-
                 // Close dialog and pop it from whenever necessary
                 questClose(a.symbol, a.id, true);
                 return;
@@ -1298,19 +1292,11 @@ function questSubmit(b, a, c, d, g, k, f) {
             } else {
                 log("No actions remaining! Adjusting...", "BOSS");
 
-                var bossInstance = {
-                    "quest": a.symbol,
-                    "stage": a.stage,
-                    "attack": c,
-                    "chosen": a.chosen,
-                    "questId": a.id,
-                    "timeout": setTimeout(function() {
+                bossChallengeTimout =
+                    setTimeout(function() {
                         questSubmit(a.symbol, a.stage, c, a.chosen, null, null, a.id);
-                    }, 3 * 5 * 60 * 1000)
-                };
+                    }, 3 * 5 * 60 * 1000);
 
-                bossChallenges.push(bossInstance);
-                extender.save("bossChallenges");
                 log("Timer running. Fire again in 15 minutes.", "BOSS");
 
             }
