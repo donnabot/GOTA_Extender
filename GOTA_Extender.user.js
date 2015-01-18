@@ -13,6 +13,9 @@
 // @license     WTFPL (more at http://www.wtfpl.net/)
 // @require     http://ajax.googleapis.com/ajax/libs/jquery/2.1.0/jquery.min.js
 // @require     https://greasyfork.org/scripts/7491-donnabot-s-gota-extender-constants/code/Donnabot's%20GOTA_Extender_Constants.js?version=31941
+// @require     http://momentjs.com/downloads/moment.min.js
+// @require     http://code.jquery.com/jquery-2.1.3.min.js
+// @require     https://greasyfork.org/scripts/5427-gota-extender-constants/code/GOTA_Extender_Constants.js?version=31297
 // @require     https://greasyfork.org/scripts/5279-greasemonkey-supervalues/code/GreaseMonkey_SuperValues.js?version=20819
 // @resource 	custom https://greasyfork.org/scripts/7492-donnabot-s-gota-extender-custom/code/Donnabot's%20GOTA_Extender_Custom.js?version=31942
 // @resource    auxiliary https://greasyfork.org/scripts/7490-donnabot-s-gota-extender-auxiliary/code/Donnabot's%20GOTA_Extender_Auxiliary.js?version=31940
@@ -846,41 +849,66 @@ function renderProductionItems() {
 
     log("Production queue rendered " + queue.length + " items.");
 }
-// <-- Settings handling
+
 
 $("#modal_dialogs_top").on('click', '#incomingtab', wireEvents);
 function wireEvents(e) {
     e.preventDefault();
 
-    window.setTimeout(function () {
-        GM_xmlhttpRequest({
-            method: "GET",
-            url: "/play/incoming_attacks",
-            onload: function (response) {
-                try {
-                    var a = JSON.parse(response.responseText);
-                    // console.debug(response, a);
-                    $('div.perkscroll div.achiev-content').each(function () {
-                        var id = /[0-9]+/.exec($(this).find('div.increspond').attr('onclick'));
+    ajax({
+        method: "GET",
+        url: "/play/incoming_attacks",
+        success: function (a) {
+            try {
+                // console.debug(response, a);
+                $('div.perkscroll div.achiev-content').each(function () {
+                    var id = /[0-9]+/.exec($(this).find('div.increspond').attr('onclick'));
 
-                        var attack = a.attacks.filter(function (e) {
-                            return e.camp_attack_id === null ? e.pvp_id == id : e.camp_attack_id == id;
-                        })[0];
+                    var attack = a.attacks.filter(function (e) {
+                        return e.camp_attack_id === null ? e.pvp_id == id : e.camp_attack_id == id;
+                    })[0];
 
-                        if (!attack)
-                            return;
+                    if (!attack)
+                        return;
 
-                        $(this).find("span.charname").attr("onclick", "return characterMainModal(" + attack.attacker.user_id + ")");
-                        $(this).find("span.charportrait").attr("onclick", "return characterMainModal(" + attack.attacker.user_id + ")");
-                        $(this).find("span.targetalliancename").attr("onclick", "return allianceInfo(" + attack.alliance_id + ")");
-                    });
-                } catch (e) {
-                    error(e);
-                }
-
+                    $(this).find("span.charname").attr("onclick", "return characterMainModal(" + attack.attacker.user_id + ")");
+                    $(this).find("span.charportrait").attr("onclick", "return characterMainModal(" + attack.attacker.user_id + ")");
+                    $(this).find("span.targetalliancename").attr("onclick", "return allianceInfo(" + attack.alliance_id + ")");
+                });
+            } catch (e) {
+                error(e);
             }
-        });
-    }, (options.baseDelay / 2) * 1000);
+        }
+    });
+
+    //window.setTimeout(function () {
+    //    GM_xmlhttpRequest({
+    //        method: "GET",
+    //        url: "/play/incoming_attacks",
+    //        onload: function (response) {
+    //            try {
+    //                var a = JSON.parse(response.responseText);
+    //                // console.debug(response, a);
+    //                $('div.perkscroll div.achiev-content').each(function () {
+    //                    var id = /[0-9]+/.exec($(this).find('div.increspond').attr('onclick'));
+    //
+    //                    var attack = a.attacks.filter(function (e) {
+    //                        return e.camp_attack_id === null ? e.pvp_id == id : e.camp_attack_id == id;
+    //                    })[0];
+    //
+    //                    if (!attack)
+    //                        return;
+    //
+    //                    $(this).find("span.charname").attr("onclick", "return characterMainModal(" + attack.attacker.user_id + ")");
+    //                    $(this).find("span.charportrait").attr("onclick", "return characterMainModal(" + attack.attacker.user_id + ")");
+    //                    $(this).find("span.targetalliancename").attr("onclick", "return allianceInfo(" + attack.alliance_id + ")");
+    //                });
+    //            } catch (e) {
+    //                error(e);
+    //            }
+    //        }
+    //    });
+    //}, (options.baseDelay / 2) * 1000);
 }
 
 $("#credits_roll").on('click', "#saveOptions", saveOptions_click);
@@ -1007,6 +1035,12 @@ function saveBruteTab() {
     //unsafeWindow.sort();
 }
 
+$("#credits_roll").on('click', "#infoBtn", info_onclick);
+function info_onclick() {
+    getSwornSwords();
+    $("#extenderTabContent").html(templates.ssInfo(options.swornSwords));
+}
+
 $("#credits_roll").on('click', "#resetOptions", resetOptions_click);
 function resetOptions_click(e) {
     e.preventDefault();
@@ -1020,6 +1054,125 @@ function resetOptions_click(e) {
     $("#credits_roll").hide();
     inform("Options reset.");
 }
+
+$("#credits_roll").on('click', '.tableRow', deleteTableRow);
+function deleteTableRow(e) {
+    e.preventDefault();
+
+    try {
+        var index = $(this).find("td:first span.ranklist").text();
+
+        log("Attempting to delete element with index " + index + " from the queue array.");
+
+        if (unsafeWindow.productionQueue.length == 1) {
+            unsafeWindow.productionQueue.pop();
+        } else {
+            unsafeWindow.productionQueue.splice(index, 1);
+        }
+
+        renderProductionItems();
+
+    } catch (err) {
+        error(err);
+    }
+
+}
+// <-- Settings handling
+
+//--> Brute force adventure
+$("#modal_dialogs_top").on("click", "#speedupbtn", viewAdventure_onclick);
+function viewAdventure_onclick() {
+    log("View adventure details.");
+
+    var vBtn = $(this).find("a.btngold");
+    if (!vBtn || vBtn.text() != "View Results!" || !options.allowBruting) {
+        return;
+    }
+
+    setTimeout(function () {
+
+        var btn = $("#bruteBtn");
+        var container = $(".challengerewards .challengerewarditems:first");
+        if (container.length > 0 && btn.length == 0) {
+            container.after(templates.bruteBtn);
+        }
+    }, (options.baseDelay / 2) * 1000);
+}
+
+$("#quests_container").on("click", "span#bruteBtn.btnwrap.btnmed", brute_onclick);
+$("#credits_roll").on("click", "span#bruteBtn.btnwrap.btnmed", brute_onclick);
+$("#credits_roll").on("click", "span#bruteAllBtn.btnwrap.btnmed", brute_onclick);
+
+function brute_onclick() {
+    //    log("Brute!");
+
+    // Save settings first
+    saveBruteTab();
+
+    // Find button text
+    var b = $(this).find("a.btngold");
+
+    if (!b || b.length == 0) {
+        warn("Cannot find brute button!");
+    }
+
+    if (!options.allowBruting) {
+        error("Bruting is not allowed.");
+        return;
+    }
+
+    unsafeWindow.brutingImmediateTermination = false;
+    b.text("Bruting...");
+
+    if (this.id == "bruteAllBtn") {
+        // Brute all sworn swords adventure...
+        unsafeWindow.bruteSendAll();
+    } else {
+        // Else, brute adventure...
+        unsafeWindow.bruteForce(true);
+    }
+
+}
+
+function getSwornSwords() {
+
+    var ss = [];
+    var pi = unsafeWindow.playerInventory;
+    for (var i = 0; i < pi.length; i++) {
+        var s = pi[i];
+        if (s.slot == "Sworn Sword") {
+            ss.push(s);
+        }
+    }
+
+    if (ss.length > 0) {
+        options.swornSwords = ss;
+        options.set();
+    }
+}
+// <-- Brute force adventure
+
+// Do adventures anytime <DEPRECATED>
+//$("#modal_dialogs_top").on("click", ".adventurebox .adventuremenu .adventurescroll .adventureitem.locked", lockedAdventure_onclick);
+//function lockedAdventure_onclick(e) {
+//    log("Trying to unlock adventure.");
+//
+//    try {
+//        e.preventDefault();
+//        e.stopPropagation();
+//
+//        var id = this.id;
+//        var aid = id.replace("adventure_", "");
+//
+//        // console.debug(id, aid);
+//
+//        unsafeWindow.chooseAdventure(aid);
+//    } catch (e) {
+//        error(e);
+//    }
+//
+//}
+
 
 $("#modal_dialogs_top").on('click', '#upgradeQueue', queue_clicked);
 $("#modal_dialogs_top").on('click', 'span.btnwrap.btnmed.equipbtn.queue', queue_clicked);
@@ -1183,241 +1336,6 @@ function queue_clicked(e) {
     }
 }
 
-$("#credits_roll").on('click', '.tableRow', deleteTableRow);
-function deleteTableRow(e) {
-    e.preventDefault();
-
-    try {
-        var index = $(this).find("td:first span.ranklist").text();
-
-        log("Attempting to delete element with index " + index + " from the queue array.");
-
-        if (unsafeWindow.productionQueue.length == 1) {
-            unsafeWindow.productionQueue.pop();
-        } else {
-            unsafeWindow.productionQueue.splice(index, 1);
-        }
-
-        renderProductionItems();
-
-    } catch (err) {
-        error(err);
-    }
-
-}
-
-//--> Brute force adventure
-$("#modal_dialogs_top").on("click", "#speedupbtn", viewAdventure_onclick);
-function viewAdventure_onclick() {
-    log("View adventure details.");
-
-    var vBtn = $(this).find("a.btngold");
-    if (!vBtn || vBtn.text() != "View Results!" || !options.allowBruting) {
-        return;
-    }
-
-    setTimeout(function () {
-
-        var btn = $("#bruteBtn");
-        var container = $(".challengerewards .challengerewarditems:first");
-        if (container.length > 0 && btn.length == 0) {
-            container.after(templates.bruteBtn);
-        }
-    }, (options.baseDelay / 2) * 1000);
-}
-
-$("#quests_container").on("click", "span#bruteBtn.btnwrap.btnmed", brute_onclick);
-$("#credits_roll").on("click", "span#bruteBtn.btnwrap.btnmed", brute_onclick);
-$("#credits_roll").on("click", "span#bruteAllBtn.btnwrap.btnmed", brute_onclick);
-
-function brute_onclick() {
-    //    log("Brute!");
-
-    // Save settings first
-    saveBruteTab();
-
-    // Find button text
-    var b = $(this).find("a.btngold");
-
-    if (!b || b.length == 0) {
-        warn("Cannot find brute button!");
-    }
-
-    if (!options.allowBruting) {
-        error("Bruting is not allowed.");
-        return;
-    }
-
-    unsafeWindow.brutingImmediateTermination = false;
-    b.text("Bruting...");
-
-    if (this.id == "bruteAllBtn") {
-        // Brute all sworn swords adventure...
-        unsafeWindow.bruteSendAll();
-    } else {
-        // Else, brute adventure...
-        unsafeWindow.bruteForce(true);
-    }
-
-}
-// <-- Brute force adventure
-
-// --> Bulk sell
-$("#modal_dialogs").on("click", "#shop_miniview .offersitem.paginated_sellitem .miniview", sellitem_onchange);
-function sellitem_onchange() {
-    //    log("Item for sale changed");
-    var itemId = this.id.replace("item_mini_", "");
-
-    setTimeout(function () {
-
-        var btn = $("#do_sell_bulk");
-        var container = $("#modal_dialogs #statview_container_right .statviewbtm:first");
-        if (container.length > 0 && btn.length == 0) {
-            container.append(templates.sellBulkBtn(itemId));
-        }
-    }, 1000);
-}
-
-var amount;
-var amountOwned;
-
-$("#modal_dialogs").on("click", "#do_sell_bulk", bulkSell_onclick);
-function bulkSell_onclick() {
-    var amountInput = $("#sell_bulk_amount");
-    if (!amountInput) {
-        error("Cannot find the input for the sale amoun!");
-        return;
-    }
-
-    amount = null;
-    amountOwned = null;
-
-    amount = parseInt(amountInput.val());
-    if (!amount || isNaN(amount)) {
-        error("Failed to parse amount of items to be sold.");
-
-        amountInput.val("");
-        amountInput.attr("placeholder", "Invalid...");
-        return;
-    }
-
-    var parent = $(this).parents("div.statviewbtm");
-    var ownedHtml = parent.children("p.itemowned").html();
-
-    amountOwned = parseInt(ownedHtml.replace("Owned: ", ""));
-    if (!amountOwned || isNaN(amountOwned)) {
-        error("Failed to parse amount of owned items.");
-
-        amountInput.val("");
-        amountInput.attr("placeholder", "Error!");
-        return;
-    }
-
-    var itemId = $(this).attr("item-id");
-    if (!itemId) {
-        error("Cannot resolve item id!");
-
-        amountInput.val("");
-        amountInput.attr("placeholder", "Error!");
-        return;
-    }
-
-    if (0 >= amount) {
-        amountInput.val("");
-        amountInput.attr("placeholder", "Greater pls...");
-        return;
-    }
-
-    if (amount > amountOwned) {
-        warn("You don't have enough of that item.");
-
-        amountInput.val("");
-        amountInput.attr("placeholder", "Insufficient...");
-        return;
-    }
-
-    bulkSell(itemId, amount);
-
-    var observableId = "owned_quantity_" + itemId;
-    itemSoldObserver.observe(document.getElementById(observableId), {
-        childList: true
-    });
-
-    amountInput.val("");
-    amountInput.attr("placeholder", "Selling...");
-}
-
-var itemSoldObserver = new MutationObserver(item_sold);
-function item_sold(mutations) {
-
-    var txt = mutations[mutations.length - 1].addedNodes[0].textContent;
-    var val = parseInt(txt);
-
-    if (amountOwned - val == amount) {
-        itemSoldObserver.disconnect();
-        inform("Done!");
-
-        var amountInput = $("#sell_bulk_amount");
-        amountInput.attr("placeholder", "Sold.");
-
-    }
-}
-
-function bulkSell(id, count) {
-    if (!id || !count) {
-        error("Please specify both id (" + id + ") and count (" + count + ") and run again.");
-        return;
-    }
-
-    for (var i = 0; i < count; i++) {
-        try {
-            unsafeWindow.doSell(id);
-        } catch (e) {
-            error("Error occured (processing " + i + ", id " + id + "): " + e);
-            return;
-        }
-    }
-}
-// <-- Bulk sell
-
-function getSwornSwords() {
-
-    var ss = [];
-    var pi = unsafeWindow.playerInventory;
-    for (var i = 0; i < pi.length; i++) {
-        var s = pi[i];
-        if (s.slot == "Sworn Sword") {
-            ss.push(s);
-        }
-    }
-
-    if (ss.length > 0) {
-        options.swornSwords = ss;
-        options.set();
-    }
-}
-
-// Do adventures anytime
-$("#modal_dialogs_top").on("click", ".adventurebox .adventuremenu .adventurescroll .adventureitem.locked", lockedAdventure_onclick);
-function lockedAdventure_onclick(e) {
-    log("Trying to unlock adventure.");
-
-    try {
-        e.preventDefault();
-        e.stopPropagation();
-
-        var id = this.id;
-        var aid = id.replace("adventure_", "");
-
-        // console.debug(id, aid);
-
-        unsafeWindow.chooseAdventure(aid);
-    } catch (e) {
-        error(e);
-    }
-
-}
-
 function saveProductionQueue() {
 
     var p = unsafeWindow.productionQueue;
@@ -1458,12 +1376,6 @@ function loadProductionQueue() {
         unsafeWindow.attemptProduction();
     }
 
-}
-
-$("#credits_roll").on('click', "#infoBtn", info_onclick);
-function info_onclick() {
-    getSwornSwords();
-    $("#extenderTabContent").html(templates.ssInfo(options.swornSwords));
 }
 
 //$("#modals_container").on("click", "#hudchatbtn", warmap_onclick);
@@ -1661,7 +1573,7 @@ function checkSource() {
 // jQuery ajax
 function ajax(params) {
     if (typeof params != "object") {
-        error("The request requires parameters.");
+        error("The request requires object with parameters.");
         return;
     }
 
@@ -1671,6 +1583,7 @@ function ajax(params) {
         return;
     }
 
+    // Required
     if (!params.onload && !params.success) {
         error("Callback handler missing. Cannot execute.");
         return;
@@ -1688,13 +1601,14 @@ function ajax(params) {
         params.onerror = function (gme) {
             error("Error occurred while running the request. Details:");
             console.debug("Original ajax request parameters: ", params);
-            console.debug("Grease monkey error response: ", gme);
+            console.debug("GM_XmlHttpRequest error response: ", gme);
         }
     }
 
     if (!params.onload) {
         params.onload = function (gmr) {
 
+            var response;
             if (!gmr.response) {
                 params.error ? params.error(gmr) : params.onerror(gmr);
             } else {
@@ -1703,7 +1617,7 @@ function ajax(params) {
 
                 //console.debug("Debugging response headers: ", headers);
                 if (gmr.responseHeaders.indexOf("Content-Type: application/json;") > -1) {
-                    var response = JSON.parse(gmr.responseText);
+                    response = JSON.parse(gmr.responseText);
                     params.success(response);
                 } else {
                     params.success(gmr.responseText);
@@ -1711,7 +1625,7 @@ function ajax(params) {
             }
 
             if (params.complete)
-                params.complete(gmr);
+                params.complete(response);
         };
     }
 
