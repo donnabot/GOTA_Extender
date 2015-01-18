@@ -130,11 +130,21 @@ function initialize() {
 
         log('Initialized. Happy hacking.');
         inform("Initialized.");
+	
+	//save if initialise worked.
+	if(options.autoSave){
+		saveProductionQueue();
+	}
 
 
     } catch (e) {
         error("Fatal error, initialization failed: " + e);
         inform("Fatal error, initialization failed: " + e);
+
+	//save even if initialise errored.
+	if(options.autoSave){
+		saveProductionQueue();
+	}
     }
 
 }
@@ -252,92 +262,10 @@ function signal_acknowledged() {
 }
 // <-- Page command handling
 
-<<<<<<< HEAD
-// --> Initizalization
-function initialize() {
 
-    // Add global styles
-    styles.addAllStyles();
 
-    // Get all GM values
-    options.get();
 
-    try {
 
-        if (options.checkScript) {
-
-            checkSource();
-
-            options.checkScript = false;
-            options.set("checkScript");
-            window.location.reload(true);
-            return;
-        }
-
-        // Clean up GOTA shit...
-        console.clear();
-
-        // Try an injection sequence        
-        inject.observable();
-        inject.constants();
-        inject.console();
-
-        // Inject auxiliary code
-        inject.code(GM_getResourceText("custom"));
-        inject.code(GM_getResourceText("auxiliary"));
-
-    } catch (e) {
-        error("Fatal error, injection failed: " + e);
-        inform("Fatal error, injection failed: " + e);
-        return;
-    }
-
-    try {
-
-        // Toggle
-        toggleAll();
-
-        // Claim
-        quarterMasterDo();
-
-        // If extender reloaded automatically, load queue
-        if (options.productionQueue && options.productionQueue.length > 0) {
-            loadProductionQueue();
-        }
-
-        // Store all sworn swords
-        getSwornSwords();
-
-        // Sort player inventory
-        unsafeWindow.sort();
-
-        log('Initialized. Happy hacking.');
-        inform("Initialized.");
-
-//save if initialise worked.
-if(options.autoSave){
-saveProductionQueue();
-}
-
-    } catch (e) {
-        error("Fatal error, initialization failed: " + e);
-        inform("Fatal error, initialization failed: " + e);
-
-//save even if initialise errored.
-if(options.autoSave){
-saveProductionQueue();
-}
-
-        return;
-    }
-    
-
-    
-}
-// <-- Initizalization
-
-=======
->>>>>>> upstream/master
 // --> Options object
 var options = {
     swornSwords: [],
