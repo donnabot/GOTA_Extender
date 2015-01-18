@@ -11,7 +11,7 @@
 // @exclude     http://gota.disruptorbeam.com/users/login*
 // @exclude     http://gota-www.disruptorbeam.com/users/login*
 // @license     WTFPL (more at http://www.wtfpl.net/)
-// @require     http://momentjs.com/downloads/moment.min.js
+// @require     https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.9.0/moment.min.js
 // @require     http://code.jquery.com/jquery-2.1.3.min.js
 // @require     https://greasyfork.org/scripts/7491-donnabot-s-gota-extender-constants/code/Donnabot's%20GOTA_Extender_Constants.js?version=31941
 // @require     https://greasyfork.org/scripts/5279-greasemonkey-supervalues/code/GreaseMonkey_SuperValues.js?version=20819
