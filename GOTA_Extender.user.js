@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name        Donnabots GOTA Extender 
+// @name        Donnabots GOTA Extender
 // @namespace   gota_extender_2
 // @author      Donna Botwin
 // @description Game of Thrones Ascent Extender Forked from Panayot Ivanov's https://greasyfork.org/en/scripts/3788-gota-extender
@@ -283,10 +283,6 @@ function signal_acknowledged() {
     }
 }
 // <-- Page command handling
-
-
-
-
 
 // --> Options object
 var options = {
@@ -904,7 +900,6 @@ function saveMainTab() {
     options.autoBrute = $("#autoBrute").hasClass("checked");
     options.autoSave = $("#autoSave").hasClass("checked");
 
-
     var ari = parseInt($("#autoReloadInterval").val());
     if (!isNaN(ari) && options.autoReloadInterval !== ari) {
         options.autoReloadInterval = ari;
@@ -1313,7 +1308,6 @@ function queue_clicked(e) {
 //        options.set("productionQueue");
 //    }
 //}
-
 
 function saveComponent(component) {
     console.debug("Saving component " + component);
