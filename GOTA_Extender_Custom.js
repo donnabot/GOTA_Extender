@@ -640,7 +640,17 @@ doAdventure = function doAdventure(c, a, b, callback) {
                 "1" == userContext.playerData.stat.onboarding_ftue && uiTelemetry("ss_adventure");
             }
 
-            // EXTENDER :: Modification                        
+            // EXTENDER :: Modification
+            if(b.reward_item != void 0 && b.duration_remaining === 0){
+                var msg = b.attacker.full_name + " finished " + b.ability + "ing in " + b.location + ", " +
+                    "quest: " + b.title + " with " + b.attacker_result + "(" + b.attacker_result_word + ").";
+                log(msg, "ADVENTURE", true);
+
+                msg = "Rewards: " + b.reward_item + ", prestige: " + (b.prestige_awarded ? b.prestige_awarded : 0) + ", " +
+                    "silver: " + b.reward_silver + ", experience: " + b.reward_upgrade_points;
+                log(msg, "ADVENTURE", true);
+            }
+
             if (typeof callback == "function") {
                 userContext.setSwornSword.not_on_adventure = !b.symbol;
 
