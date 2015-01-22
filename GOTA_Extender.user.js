@@ -13,8 +13,9 @@
 // @license     WTFPL (more at http://www.wtfpl.net/)
 // @require     http://code.jquery.com/jquery-2.1.3.min.js
 // @require     https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.9.0/moment.min.js
+// @require     https://greasyfork.org/scripts/5279-greasemonkey-SuperValues/code/GreaseMonkey_SuperValues.js?version=20819
+// @require     https://greasyfork.org/scripts/7573-storage-prototype-extension/code/StoragePrototype_extension.js?version=32814
 // @require     https://greasyfork.org/scripts/5427-gota-extender-constants/code/GOTA_Extender_Constants.js?version=31297
-// @require     https://greasyfork.org/scripts/5279-greasemonkey-supervalues/code/GreaseMonkey_SuperValues.js?version=20819
 // @resource 	custom https://greasyfork.org/scripts/5426-gota-extender-custom/code/GOTA_Extender_Custom.js?version=31296
 // @resource    auxiliary https://greasyfork.org/scripts/5618-gota-extender-auxiliary/code/GOTA_Extender_Auxiliary.js?version=31298
 // @resource    original https://greasyfork.org/scripts/6702-gota-extender-original/code/GOTA_Extender_Original.js?version=31299
@@ -74,6 +75,9 @@ function initialize() {
 
     try {
 
+        // TEST
+        localStorage.set("myKey", "myValue");
+
         // Add global styles
         styles.addAllStyles();
 
@@ -103,6 +107,9 @@ function initialize() {
         inject.code(GM_getResourceText("custom"));
         inject.code(GM_getResourceText("auxiliary"));
 
+        // Inject Storage extension functions (for use in the page)
+        inject.outSource("https://greasyfork.org/scripts/7573-storage-prototype-extension/code/StoragePrototype_extension.js?version=32814");
+
     } catch (e) {
         error("Fatal error, injection failed: " + e);
         inform("Fatal error, injection failed: " + e);
@@ -116,6 +123,9 @@ function initialize() {
 
         // Claim
         quarterMasterDo();
+
+        // Claim favours
+        acceptAllFavors()
 
         // Try to load the queue
         if (options.productionQueue != void 0 && options.productionQueue.length > 0) {
@@ -356,39 +366,41 @@ var options = {
             return;
         }
 
-        var newValues = [];
+        //var newValues = [];
 
-        // Store property values in array
-        for (var newProperty in this) {
-            if (newProperty.indexOf("default_") > -1)
+        // Store all properties
+        for (var prop in this) {
+            if (prop.indexOf("default_") > -1)
                 continue;
 
-            if (this.hasOwnProperty(newProperty) && typeof this[newProperty] != "function") {
-                newValues.push(this[newProperty]);
+            if (this.hasOwnProperty(prop) && typeof this[prop] != "function") {
+                GM_SuperValue.set(prefix + prop, this[prop]);
             }
         }
 
         // console.debug(newValues);
 
+        // Load of crap ahead...
+
         // Revert
-        this.get();
-
-        var i = 0;
-
-        // Detect and change if necessary
-        for (var oldProperty in this) {
-            if (oldProperty.indexOf("default_") > -1)
-                continue;
-
-            if (this.hasOwnProperty(oldProperty) && typeof this[oldProperty] != "function" && this[oldProperty] != newValues[i]) {
-                // console.debug("Setting property " + oldProperty + " with old value of " + this[oldProperty] + " to the new value of " + newValues[i]);
-
-                GM_SuperValue.set(prefix + oldProperty, newValues[i]);
-                this[oldProperty] = newValues[i];
-            }
-
-            i++;
-        }
+        //this.get();
+        //
+        //var i = 0;
+        //
+        //// Detect and change if necessary
+        //for (var oldProperty in this) {
+        //    if (oldProperty.indexOf("default_") > -1)
+        //        continue;
+        //
+        //    if (this.hasOwnProperty(oldProperty) && typeof this[oldProperty] != "function" && this[oldProperty] != newValues[i]) {
+        //        // console.debug("Setting property " + oldProperty + " with old value of " + this[oldProperty] + " to the new value of " + newValues[i]);
+        //
+        //        GM_SuperValue.set(prefix + oldProperty, newValues[i]);
+        //        this[oldProperty] = newValues[i];
+        //    }
+        //
+        //    i++;
+        //}
     },
 
     reset: function () {
@@ -402,6 +414,78 @@ var options = {
     }
 };
 // <-- End of options object
+
+// <-- Persistence objects
+var local = {
+
+    productionQueue: [],
+    bossChallenges: [],
+
+    init: function() {
+        for (var obj in this) {
+            if (this.hasOwnProperty(obj) && typeof this[obj] != "function") {
+                this[obj] = localStorage.get(obj);
+            }
+        }
+    },
+
+    save: function (obj) {
+
+        // Store specific value
+        if (obj != void 0) {
+            if(this.hasOwnProperty(obj) && typeof this[obj] != "function") {
+                localStorage.set(obj, this[obj]);
+                return;
+            } else {
+                warn("Property not found among local persistence objects.");
+                return;
+            }
+        }
+
+        // Store all values
+        for (var prop in this) {
+
+            if (this.hasOwnProperty(prop) && typeof this[prop] != "function") {
+                localStorage.set(prop, this[prop]);
+            }
+        }
+    }
+};
+
+var session = {
+    clientLog: [],
+
+    init: function() {
+        for (var obj in this) {
+            if (this.hasOwnProperty(obj) && typeof this[obj] != "function") {
+                this[obj] = sessionStorage.get(obj);
+            }
+        }
+    },
+
+    save: function (obj) {
+
+        // Store specific value
+        if (obj != void 0) {
+            if(this.hasOwnProperty(obj) && typeof this[obj] != "function") {
+                sessionStorage.set(obj, this[obj]);
+                return;
+            } else {
+                warn("Property not found among session persistence objects.");
+                return;
+            }
+        }
+
+        // Store all values
+        for (var prop in this) {
+
+            if (this.hasOwnProperty(prop) && typeof this[prop] != "function") {
+                sessionStorage.set(prop, this[prop]);
+            }
+        }
+    }
+};
+// <-- End of persistence objects
 
 // --> Injection object
 var inject = {
@@ -544,7 +628,7 @@ var inject = {
         if(clientEntry != void 0){
             unsafeWindow.clientEntries.push(new Date().toLocaleTimeString() + " | " + message);
         }
-    }
+    };
 
     window.error = function error(message, type) {
         if (console && console.error && typeof (console.error) == "function") {
@@ -624,6 +708,18 @@ function toggleReloadWindow() {
         log("Auto reloading cancelled.");
     }
 
+}
+
+function acceptAllFavors() {
+    ajax({
+        url: "/play/accept_favor",
+        success: function (response) {
+            //status
+            //silver
+            //silver_reward
+            //accepted  Object {}
+        }
+    });
 }
 
 function quarterMasterDo(status) {
