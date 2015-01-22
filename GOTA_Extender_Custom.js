@@ -173,7 +173,7 @@ doFinishProduction = function doFinishProduction(b, callback) {
                 }
 
                 if (typeof callback == "function") {
-                    console.debug("Calling callback... ");
+                    //console.debug("Calling callback... ");
                     callback();
                 }
             }
@@ -360,10 +360,7 @@ buildTimerUpdate = function(c, a, b) {
             }, (extender_queueDelay / 2) * 1000);
 
             setTimeout(function() {
-                var el = getElement(d.symbol);
-                if (el) {
-                    executeElement(el);
-                }
+                production.attempt(d.symbol);
             }, extender_queueDelay * 1000);
         });
     } else if (a < 300 - 30) {
