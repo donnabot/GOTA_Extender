@@ -107,8 +107,10 @@ function initialize() {
         // Inject Storage extension functions (for use in the page)
         inject.outSource("https://greasyfork.org/scripts/7573-storage-prototype-extension/code/StoragePrototype_extension.js?version=32814");
 
+        // Initialize modules
         setTimeout(function() {
             unsafeWindow.production.init();
+            unsafeWindow.bossChallenger.init();
         }, 2E3);
 
     } catch (e) {

@@ -1300,3 +1300,82 @@ var production = (function($, localStorage, log, error, buildingBySymbol,
     doFinishProduction, userContext, doProduction,
     applySelectedUpgrade, buildingUpgrades, inform));
 
+var bossChallenger = (function(log, questClose, questSubmit){
+
+    var bossQuests = [];
+    var enabled = true;
+
+    function init(){
+        localStorage.get("bossQuests", []);
+
+        // Relaunch any quests pending...
+        for(var i = 0; i < bossQuests.length; i++){
+            var a = bossQuests[i];
+            questSubmit(a.quest, a.stage, a.attack, a.chosen, null, null, a.questId);
+        }
+    }
+
+    function persist(){
+        localStorage.set("bossQuests", bossQuests);
+    }
+
+    function fight(a){
+        if (a.actions_remaining == void 0 || isNaN(a.actions_remaining)){
+            log("Not on boss challenge (no actions remaining). Exiting...", "BOSS");
+            return;
+        }
+
+        if(!enabled){
+            log("Boss challenge is not automated. Exiting...", "EXTENDER");
+            return;
+        }
+
+        log("Boss challenge automated. Actions remaining: " + a.actions_remaining + "," +
+        "stage: " + a.stage, "BOSS");
+
+        if(a.stage && a.stage === 1000){
+            log("Boss challenge complete. Exiting...", "BOSS");
+
+            // Remove the quest from the array
+            bossQuests = bossQuests.filter(function (el) {
+                return el.questId !== a.id;
+            });
+
+            persist();
+
+            // Close dialog and pop it from whenever necessary
+            questClose(a.symbol, a.id, true);
+            return;
+        }
+
+        if (a.actions_remaining > 0) {
+            questSubmit(a.symbol, a.stage, c, a.chosen, null, null, a.id);
+        } else {
+            log("No actions remaining! Adjusting...", "BOSS");
+
+            var bossInstance = {
+                "quest": a.symbol,
+                "stage": a.stage,
+                "attack": c,
+                "chosen": a.chosen,
+                "questId": a.id,
+                "timeout": setTimeout(function() {
+                    questSubmit(a.symbol, a.stage, c, a.chosen, null, null, a.id);
+                }, 3 * 5 * 60 * 1000)
+            };
+
+            bossQuests.push(bossInstance);
+
+            persist();
+
+            log("Timer running. Fire again in 15 minutes.", "BOSS");
+        }
+    }
+
+    return {
+        init: init,
+        fight: fight,
+        persist: persist
+    }
+
+}(log, questClose, questSubmit));
