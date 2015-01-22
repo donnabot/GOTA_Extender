@@ -75,9 +75,6 @@ function initialize() {
 
     try {
 
-        // TEST
-        localStorage.set("myKey", "myValue");
-
         // Add global styles
         styles.addAllStyles();
 
@@ -110,6 +107,10 @@ function initialize() {
         // Inject Storage extension functions (for use in the page)
         inject.outSource("https://greasyfork.org/scripts/7573-storage-prototype-extension/code/StoragePrototype_extension.js?version=32814");
 
+        setTimeout(function() {
+            unsafeWindow.production.init();
+        }, 2E3);
+
     } catch (e) {
         error("Fatal error, injection failed: " + e);
         inform("Fatal error, injection failed: " + e);
@@ -128,25 +129,25 @@ function initialize() {
         acceptAllFavors()
 
         // Try to load the queue
-        if (options.productionQueue != void 0 && options.productionQueue.length > 0) {
-            loadComponent("productionQueue");
-
-            // When done attempt production
-            if (typeof unsafeWindow.attemptProduction == "function") {
-                unsafeWindow.attemptProduction();
-            }
-        }
-
-        // Try to load the boss challenges
-        if (options.bossChallenges != void 0 && options.bossChallenges.length > 0) {
-            loadComponent("bossChallenges");
-
-            // When done attempt production
-            for(var i = 0; i < options.bossChallenges.length; i++){
-                var c = options.bossChallenges[i];
-                unsafeWindow.questSubmit(c.symbol, c.stage, s.attack, c.chosen, null, null, c.questId);
-            }
-        }
+        //if (options.productionQueue != void 0 && options.productionQueue.length > 0) {
+        //    loadComponent("productionQueue");
+        //
+        //    // When done attempt production
+        //    if (typeof unsafeWindow.attemptProduction == "function") {
+        //        unsafeWindow.attemptProduction();
+        //    }
+        //}
+        //
+        //// Try to load the boss challenges
+        //if (options.bossChallenges != void 0 && options.bossChallenges.length > 0) {
+        //    loadComponent("bossChallenges");
+        //
+        //    // When done attempt production
+        //    for(var i = 0; i < options.bossChallenges.length; i++){
+        //        var c = options.bossChallenges[i];
+        //        unsafeWindow.questSubmit(c.symbol, c.stage, s.attack, c.chosen, null, null, c.questId);
+        //    }
+        //}
 
         // Store all sworn swords
         getSwornSwords();
@@ -227,13 +228,13 @@ function signal_acknowledged() {
 
     // Parse command
     switch (commandObj.name) {
-        case "save":
-            saveComponent(args[0]);
-
-            var prefix = "COMMAND ACKNOWLEDGED" + " | " + new Date().toLocaleTimeString() + " | ";
-            observable.val(prefix + args[0] + " set for persistence.");
-
-            break;
+        //case "save":
+        //    saveComponent(args[0]);
+        //
+        //    var prefix = "COMMAND ACKNOWLEDGED" + " | " + new Date().toLocaleTimeString() + " | ";
+        //    observable.val(prefix + args[0] + " set for persistence.");
+        //
+        //    break;
         case "option":
             //log("argument 1 = " + args[0] + ", " +
             //    "has own prop? " + (options.hasOwnProperty(args[0])) + ", " +
@@ -415,78 +416,6 @@ var options = {
 };
 // <-- End of options object
 
-// <-- Persistence objects
-var local = {
-
-    productionQueue: [],
-    bossChallenges: [],
-
-    init: function() {
-        for (var obj in this) {
-            if (this.hasOwnProperty(obj) && typeof this[obj] != "function") {
-                this[obj] = localStorage.get(obj);
-            }
-        }
-    },
-
-    save: function (obj) {
-
-        // Store specific value
-        if (obj != void 0) {
-            if(this.hasOwnProperty(obj) && typeof this[obj] != "function") {
-                localStorage.set(obj, this[obj]);
-                return;
-            } else {
-                warn("Property not found among local persistence objects.");
-                return;
-            }
-        }
-
-        // Store all values
-        for (var prop in this) {
-
-            if (this.hasOwnProperty(prop) && typeof this[prop] != "function") {
-                localStorage.set(prop, this[prop]);
-            }
-        }
-    }
-};
-
-var session = {
-    clientLog: [],
-
-    init: function() {
-        for (var obj in this) {
-            if (this.hasOwnProperty(obj) && typeof this[obj] != "function") {
-                this[obj] = sessionStorage.get(obj);
-            }
-        }
-    },
-
-    save: function (obj) {
-
-        // Store specific value
-        if (obj != void 0) {
-            if(this.hasOwnProperty(obj) && typeof this[obj] != "function") {
-                sessionStorage.set(obj, this[obj]);
-                return;
-            } else {
-                warn("Property not found among session persistence objects.");
-                return;
-            }
-        }
-
-        // Store all values
-        for (var prop in this) {
-
-            if (this.hasOwnProperty(prop) && typeof this[prop] != "function") {
-                sessionStorage.set(prop, this[prop]);
-            }
-        }
-    }
-};
-// <-- End of persistence objects
-
 // --> Injection object
 var inject = {
 
@@ -602,11 +531,13 @@ var inject = {
             unsafeWindow.inform = inform;
         }
 
-        var clientEntriesArray = [new Date().toLocaleTimeString() + " | Logging started..."];
+        var clientEntries = sessionStorage.get("clientEntries", []);
+        clientEntries.push([new Date().toLocaleTimeString() + " | Logging started..."]);
+        sessionStorage.set("clientEntries", clientEntries);
 
-       typeof (cloneInto) == "function"
-           ? unsafeWindow.clientEntries = cloneInto(clientEntriesArray, unsafeWindow)
-           : unsafeWindow.clientEntries = clientEntriesArray;
+       //typeof (cloneInto) == "function"
+       //    ? unsafeWindow.clientEntries = cloneInto(clientEntriesArray, unsafeWindow)
+       //    : unsafeWindow.clientEntries = clientEntriesArray;
 
         log("Messaging system injected successfully.");
     }
@@ -626,7 +557,9 @@ var inject = {
         }
 
         if(clientEntry != void 0){
-            unsafeWindow.clientEntries.push(new Date().toLocaleTimeString() + " | " + message);
+            var clientEntries = sessionStorage.get("clientEntries", []);
+            clientEntries.push(new Date().toLocaleTimeString() + " | " + message);
+            sessionStorage.set("clientEntries", clientEntries);
         }
     };
 
@@ -671,7 +604,7 @@ function toggleAll() {
     toggleAutoCollect();
     toggleQueueTimer();
     toggleReloadWindow();
-};
+}
 
 var autoCollectLoop;
 function toggleAutoCollect() {
@@ -699,7 +632,7 @@ var reloadWindowTimeout;
 function toggleReloadWindow() {
     if (options.autoReloadInterval > 0) {
         setTimeout(function () {
-            saveProductionQueue();
+            //saveProductionQueue();
             window.location.reload(true);
         }, options.autoReloadInterval * 60 * 60 * 1000);
         log("Auto reload interval set to: " + options.autoReloadInterval + "h.");
@@ -713,11 +646,19 @@ function toggleReloadWindow() {
 function acceptAllFavors() {
     ajax({
         url: "/play/accept_favor",
-        success: function (response) {
-            //status
-            //silver
-            //silver_reward
-            //accepted  Object {}
+        success: function (r) {
+            //console.debug(r, r.accepted);
+
+            r.silver_reward &&  log("Favors claimed: silver reward: " + r.silver_reward, "FAVOR", true);
+
+            if(!$.isEmptyObject(r.accepted)){
+                for(var item in r.accepted){
+                    var value = r.accepted[item];
+                    log("Accepted: " + value + " x " + item, "FAVOR", true);
+                }
+            } else {
+                log("All favors have been claimed.");
+            }
         }
     });
 }
@@ -875,14 +816,14 @@ function tab_onchange(e) {
 
     switch (this.id) {
         case "logTab":
-            $("#extenderTabContent").html(templates.logTab(unsafeWindow.clientEntries));
+            $("#extenderTabContent").html(templates.logTab());
             break;
         case "mainTab":
             $("#extenderTabContent").html(templates.mainTab(options));
             break;
         case "queueTab":
             $("#extenderTabContent").html(templates.queueTab(options));
-            renderProductionItems();
+            unsafeWindow.production.render();
             break;
         case "bruteTab":
             getSwornSwords();
@@ -891,33 +832,6 @@ function tab_onchange(e) {
         default:
             break;
     }
-}
-
-function renderProductionItems() {
-
-    var qTable = $("#queueTable");
-    if (qTable.length == 0) {
-        error("Can't find queue table! Rendering production items failed.");
-        return;
-    }
-
-    // Clear table from any rows first
-    $("#queueTable .tableRow").each(function () {
-        $(this).remove();
-    });
-
-    var queue = unsafeWindow.productionQueue;
-    if (!queue || queue.length == 0) {
-        log("No queue was found to render.");
-        return;
-    }
-
-    // Render items
-    for (var i = 0; i < queue.length; i++) {
-        $("#headerRow").after(templates.tableRow(i, queue[i]));
-    }
-
-    log("Production queue rendered " + queue.length + " items.");
 }
 
 $("#credits_roll").on('click', "#saveOptions", saveOptions_click);
@@ -1060,32 +974,6 @@ function resetOptions_click(e) {
     $("#credits_roll").hide();
     inform("Options reset.");
 }
-
-$("#credits_roll").on('click', '.tableRow', deleteTableRow);
-function deleteTableRow(e) {
-    e.preventDefault();
-
-    try {
-        var index = $(this).find("td:first span.ranklist").text();
-
-        log("Attempting to delete element with index " + index + " from the queue array.");
-
-        if (unsafeWindow.productionQueue.length == 1) {
-            unsafeWindow.productionQueue.pop();
-        } else {
-            unsafeWindow.productionQueue.splice(index, 1);
-
-            options.productionQueue = unsafeWindow.productionQueue;
-            options.set("productionQueue");
-        }
-
-        renderProductionItems();
-
-    } catch (err) {
-        error(err);
-    }
-
-}
 // <-- Settings handling
 
 //--> Brute force adventure
@@ -1206,172 +1094,172 @@ function productiontab_onchange() {
     }
 }
 
-$("#modal_dialogs_top").on('click', '#upgradeQueue', queue_clicked);
-$("#modal_dialogs_top").on('click', 'span.btnwrap.btnmed.equipbtn.queue', queue_clicked);
-function queue_clicked(e) {
-    e.preventDefault();
-
-    try {
-        var queueingUpgrade = $(this).hasClass('upgradeQueue');
-        log("Queing " + (queueingUpgrade ? "upgrade." : "item(s)."));
-
-        if (queueingUpgrade) {
-
-            var container = $(this).parents('div#selected_upgrade');
-            var name = $(container).find('h5:first').text();
-
-            var infoBtm = $(this).parents('div.buildinginfobtm');
-            var func = $(infoBtm).find('.upgradeicon.active').attr('onclick');
-            var upgradeImg = $(infoBtm).find('.upgradeicon.active .upgradeiconart img').attr('src');
-
-            if (func.indexOf("clickSelectUpgrade") == -1) {
-                error("Cannot resolve upgrade id.");
-                return;
-            }
-
-            // TODO: Improve...
-            // "return clickSelectUpgrade('7', 'balcony');"
-            var symbol = func.split("'")[3];
-            log("Selected " + symbol + " upgrade. Retrieve successfull.");
-
-            var upgradeId;
-
-            var buildingUpgrades = unsafeWindow.buildingUpgrades[unsafeWindow.userContext.activeBuildingPanel];
-            for (var j = 0; j < buildingUpgrades.length; j++) {
-                if (buildingUpgrades[j].symbol == symbol) {
-                    upgradeId = buildingUpgrades[j].id;
-                    break;
-                }
-            }
-
-            if (!upgradeId) {
-                error("Fatal error, cannot resolve upgrade id.");
-                return;
-            }
-
-            log("Upgrade id resolved: " + upgradeId);
-
-            var upgrade = {
-                "name": name,
-                "upgradeId": upgradeId,
-                "type": "upgrade",
-                "symbol": symbol,
-                "img": upgradeImg,
-                "activeBuildingPanel": unsafeWindow.userContext.activeBuildingPanel
-            };
-
-            // Insert the element into the queueArray (cloneInto for Mozilla)
-            if (typeof cloneInto == "function") {
-                var upgradeClone = cloneInto(upgrade, unsafeWindow);
-                unsafeWindow.productionQueue.push(upgradeClone);
-            } else {
-                unsafeWindow.productionQueue.push(upgrade);
-            }
-
-            options.productionQueue = unsafeWindow.productionQueue;
-            options.set("productionQueue");
-
-            log("Pushed upgrade to queue.");
-
-        } else {
-
-            // Extract and construct object
-            var statview = $(this).parents(".statview");
-            var imgSrc = $(statview).find("div.statviewimg img").attr('src');
-
-            if (typeof (imgSrc) == "undefined") {
-                imgSrc = $(statview).find("span.iconview img").attr('src');
-            }
-
-            var statViewName = $(statview).find(".statviewname h3").text();
-            var quantity = $(this).attr("data-quantity");
-
-            // Extract variables needed
-            var recipeName;
-
-            var source = unsafeWindow.userContext.productionItemsClick[unsafeWindow.userContext.currentProductionItem];
-
-            if (!source) {
-                error('Failed to extract source production item.');
-                return;
-            }
-
-            for (var i = 0; i < unsafeWindow.userContext.recipeData.length; i++) {
-                var r = unsafeWindow.userContext.recipeData[i];
-                if (r.output == source.outputSymbol) {
-                    recipeName = r.symbol;
-                    break;
-                }
-
-                if (r.success_loot_table && r.success_loot_table == source.outputSymbol) {
-                    recipeName = r.symbol;
-                    break;
-                }
-
-                if (r.success_loot_item && r.success_loot_item == source.outputSymbol) {
-                    recipeName = r.symbol;
-                    break;
-                }
-            }
-
-            // Last attempt, these here are expensive operations
-            if (!recipeName) {
-                for (var i = 0; i < unsafeWindow.userContext.recipeData.length; i++) {
-                    var r = unsafeWindow.userContext.recipeData[i];
-                    var recipeInputs = JSON.stringify(r.input.split(","));
-                    if (JSON.stringify(source.recipeInputs) === recipeInputs) {
-                        recipeName = r.symbol;
-                        break;
-                    }
-                }
-            }
-            if (!recipeName) {
-                error('Failed to extract recipeName.');
-                return;
-            }
-
-            log('All needed variables were extracted.');
-
-            do {
-
-                // Construct production element
-                var element = {
-                    "recipeName": recipeName,
-                    "name": statViewName,
-                    "img": imgSrc,
-                    "type": "item",
-                    "outputSymbol": source.outputSymbol,
-                    "recipeCategory": source.recipeCategory,
-                    "recipeData": unsafeWindow.userContext.recipeData,
-                    "activeBuildingPanel": unsafeWindow.userContext.activeBuildingPanel
-                };
-
-                // Insert the element into the queueArray (cloneInto for Mozilla)
-                if (typeof (cloneInto) == "function") {
-                    var elementClone = cloneInto(element, unsafeWindow);
-                    unsafeWindow.productionQueue.push(elementClone);
-                } else {
-                    unsafeWindow.productionQueue.push(element);
-                }
-
-                options.productionQueue = unsafeWindow.productionQueue;
-                options.set("productionQueue");
-
-                quantity--;
-
-                log('Pushed element to queue.');
-
-            } while (quantity > 0);
-        }
-
-        log('Attempting immediate production...');
-        unsafeWindow.attemptProduction(unsafeWindow.userContext.activeBuildingPanel);
-        inform('Enqueued.');
-
-    } catch (err) {
-        error(err);
-    }
-}
+//$("#modal_dialogs_top").on('click', '#upgradeQueue', queue_clicked);
+//$("#modal_dialogs_top").on('click', 'span.btnwrap.btnmed.equipbtn.queue', queue_clicked);
+//function queue_clicked(e) {
+//    e.preventDefault();
+//
+//    try {
+//        var queueingUpgrade = $(this).hasClass('upgradeQueue');
+//        log("Queing " + (queueingUpgrade ? "upgrade." : "item(s)."));
+//
+//        if (queueingUpgrade) {
+//
+//            var container = $(this).parents('div#selected_upgrade');
+//            var name = $(container).find('h5:first').text();
+//
+//            var infoBtm = $(this).parents('div.buildinginfobtm');
+//            var func = $(infoBtm).find('.upgradeicon.active').attr('onclick');
+//            var upgradeImg = $(infoBtm).find('.upgradeicon.active .upgradeiconart img').attr('src');
+//
+//            if (func.indexOf("clickSelectUpgrade") == -1) {
+//                error("Cannot resolve upgrade id.");
+//                return;
+//            }
+//
+//            // TODO: Improve...
+//            // "return clickSelectUpgrade('7', 'balcony');"
+//            var symbol = func.split("'")[3];
+//            log("Selected " + symbol + " upgrade. Retrieve successfull.");
+//
+//            var upgradeId;
+//
+//            var buildingUpgrades = unsafeWindow.buildingUpgrades[unsafeWindow.userContext.activeBuildingPanel];
+//            for (var j = 0; j < buildingUpgrades.length; j++) {
+//                if (buildingUpgrades[j].symbol == symbol) {
+//                    upgradeId = buildingUpgrades[j].id;
+//                    break;
+//                }
+//            }
+//
+//            if (!upgradeId) {
+//                error("Fatal error, cannot resolve upgrade id.");
+//                return;
+//            }
+//
+//            log("Upgrade id resolved: " + upgradeId);
+//
+//            var upgrade = {
+//                "name": name,
+//                "upgradeId": upgradeId,
+//                "type": "upgrade",
+//                "symbol": symbol,
+//                "img": upgradeImg,
+//                "activeBuildingPanel": unsafeWindow.userContext.activeBuildingPanel
+//            };
+//
+//            // Insert the element into the queueArray (cloneInto for Mozilla)
+//            if (typeof cloneInto == "function") {
+//                var upgradeClone = cloneInto(upgrade, unsafeWindow);
+//                unsafeWindow.productionQueue.push(upgradeClone);
+//            } else {
+//                unsafeWindow.productionQueue.push(upgrade);
+//            }
+//
+//            options.productionQueue = unsafeWindow.productionQueue;
+//            options.set("productionQueue");
+//
+//            log("Pushed upgrade to queue.");
+//
+//        } else {
+//
+//            // Extract and construct object
+//            var statview = $(this).parents(".statview");
+//            var imgSrc = $(statview).find("div.statviewimg img").attr('src');
+//
+//            if (typeof (imgSrc) == "undefined") {
+//                imgSrc = $(statview).find("span.iconview img").attr('src');
+//            }
+//
+//            var statViewName = $(statview).find(".statviewname h3").text();
+//            var quantity = $(this).attr("data-quantity");
+//
+//            // Extract variables needed
+//            var recipeName;
+//
+//            var source = unsafeWindow.userContext.productionItemsClick[unsafeWindow.userContext.currentProductionItem];
+//
+//            if (!source) {
+//                error('Failed to extract source production item.');
+//                return;
+//            }
+//
+//            for (var i = 0; i < unsafeWindow.userContext.recipeData.length; i++) {
+//                var r = unsafeWindow.userContext.recipeData[i];
+//                if (r.output == source.outputSymbol) {
+//                    recipeName = r.symbol;
+//                    break;
+//                }
+//
+//                if (r.success_loot_table && r.success_loot_table == source.outputSymbol) {
+//                    recipeName = r.symbol;
+//                    break;
+//                }
+//
+//                if (r.success_loot_item && r.success_loot_item == source.outputSymbol) {
+//                    recipeName = r.symbol;
+//                    break;
+//                }
+//            }
+//
+//            // Last attempt, these here are expensive operations
+//            if (!recipeName) {
+//                for (var i = 0; i < unsafeWindow.userContext.recipeData.length; i++) {
+//                    var r = unsafeWindow.userContext.recipeData[i];
+//                    var recipeInputs = JSON.stringify(r.input.split(","));
+//                    if (JSON.stringify(source.recipeInputs) === recipeInputs) {
+//                        recipeName = r.symbol;
+//                        break;
+//                    }
+//                }
+//            }
+//            if (!recipeName) {
+//                error('Failed to extract recipeName.');
+//                return;
+//            }
+//
+//            log('All needed variables were extracted.');
+//
+//            do {
+//
+//                // Construct production element
+//                var element = {
+//                    "recipeName": recipeName,
+//                    "name": statViewName,
+//                    "img": imgSrc,
+//                    "type": "item",
+//                    "outputSymbol": source.outputSymbol,
+//                    "recipeCategory": source.recipeCategory,
+//                    "recipeData": unsafeWindow.userContext.recipeData,
+//                    "activeBuildingPanel": unsafeWindow.userContext.activeBuildingPanel
+//                };
+//
+//                // Insert the element into the queueArray (cloneInto for Mozilla)
+//                if (typeof (cloneInto) == "function") {
+//                    var elementClone = cloneInto(element, unsafeWindow);
+//                    unsafeWindow.productionQueue.push(elementClone);
+//                } else {
+//                    unsafeWindow.productionQueue.push(element);
+//                }
+//
+//                options.productionQueue = unsafeWindow.productionQueue;
+//                options.set("productionQueue");
+//
+//                quantity--;
+//
+//                log('Pushed element to queue.');
+//
+//            } while (quantity > 0);
+//        }
+//
+//        log('Attempting immediate production...');
+//        unsafeWindow.attemptProduction(unsafeWindow.userContext.activeBuildingPanel);
+//        inform('Enqueued.');
+//
+//    } catch (err) {
+//        error(err);
+//    }
+//}
 
 //function saveProductionQueue() {
 //
@@ -1382,53 +1270,53 @@ function queue_clicked(e) {
 //    }
 //}
 
-function saveComponent(component) {
-    console.debug("Saving component " + component);
+//function saveComponent(component) {
+//    console.debug("Saving component " + component);
+//
+//    if (component == void 0) {
+//        error("Cannot save " + component + ". Exiting...")
+//        return;
+//    }
+//
+//    var p = unsafeWindow[component];
+//    if (p == void 0) {
+//        error("Could not find " + component + " on page. Exiting...")
+//        return;
+//    }
+//
+//    options.productionQueue = p;
+//    options.set("productionQueue");
+//
+//}
 
-    if (component == void 0) {
-        error("Cannot save " + component + ". Exiting...")
-        return;
-    }
-
-    var p = unsafeWindow[component];
-    if (p == void 0) {
-        error("Could not find " + component + " on page. Exiting...")
-        return;
-    }
-
-    options.productionQueue = p;
-    options.set("productionQueue");
-
-}
-
-function loadComponent(component) {
-
-    if (component == void 0) {
-        error("Cannot load " + component + ". Exiting...")
-        return;
-    }
-
-    // console.debug("Conditions: ", !options.productionQueue, options.productionQueue.length == 0);
-    if (options[component] == void 0) {
-        warn("No stored " + component + " was found in options.");
-        return;
-    }
-
-    // console.debug("Conditions: ", !unsafeWindow.productionQueue);
-    if (unsafeWindow[component] == void 0) {
-        warn("The " + component + " was not found in page. Extender will create it.");
-    }
-
-    if (typeof cloneInto == "function") { // Mozilla
-        unsafeWindow[component] = cloneInto(options[component], unsafeWindow);
-    } else {                            // Chrome
-        unsafeWindow[component] = options[component];
-    }
-
-    // Clear this from options
-    options[component] = null;
-    options.set(component);
-}
+//function loadComponent(component) {
+//
+//    if (component == void 0) {
+//        error("Cannot load " + component + ". Exiting...")
+//        return;
+//    }
+//
+//    // console.debug("Conditions: ", !options.productionQueue, options.productionQueue.length == 0);
+//    if (options[component] == void 0) {
+//        warn("No stored " + component + " was found in options.");
+//        return;
+//    }
+//
+//    // console.debug("Conditions: ", !unsafeWindow.productionQueue);
+//    if (unsafeWindow[component] == void 0) {
+//        warn("The " + component + " was not found in page. Extender will create it.");
+//    }
+//
+//    if (typeof cloneInto == "function") { // Mozilla
+//        unsafeWindow[component] = cloneInto(options[component], unsafeWindow);
+//    } else {                            // Chrome
+//        unsafeWindow[component] = options[component];
+//    }
+//
+//    // Clear this from options
+//    options[component] = null;
+//    options.set(component);
+//}
 
 //function loadProductionQueue() {
 //
