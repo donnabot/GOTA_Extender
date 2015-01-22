@@ -534,7 +534,7 @@ var inject = {
         }
 
         var clientEntries = sessionStorage.get("clientEntries", []);
-        clientEntries.push([new Date().toLocaleTimeString() + " | Logging started..."]);
+        clientEntries.push([new Date().toLocaleTimeString() + " | Extender initialized successfully."]);
         sessionStorage.set("clientEntries", clientEntries);
 
        //typeof (cloneInto) == "function"

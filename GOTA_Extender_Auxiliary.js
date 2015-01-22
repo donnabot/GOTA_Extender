@@ -925,6 +925,9 @@ var production = (function($, localStorage, log, error, buildingBySymbol,
         $("#modal_dialogs_top").on('click', '#upgradeQueue', enqueue);
         $("#modal_dialogs_top").on('click', 'span.btnwrap.btnmed.equipbtn.queue', enqueue);
         $("#credits_roll").on('click', '.tableRow', deleteTableRow);
+
+        // Attempt production on initialize
+        attempt();
     }
 
     // Saves the queue locally
@@ -960,7 +963,7 @@ var production = (function($, localStorage, log, error, buildingBySymbol,
 
                 doFinishProduction(building.item_id, function () {
                     setTimeout(function () {
-                        attemptProduction(building.symbol);
+                        attempt(building.symbol);
                     }, queueDelay);
                 });
 
@@ -984,7 +987,7 @@ var production = (function($, localStorage, log, error, buildingBySymbol,
                 log("Building " + building.symbol + " finished production.", "PRODUCTION");
                 doFinishProduction(building.item_id, function () {
                     setTimeout(function () {
-                        attemptProduction(building.symbol);
+                        attempt(building.symbol);
                     }, queueDelay);
                 });
 
@@ -994,7 +997,7 @@ var production = (function($, localStorage, log, error, buildingBySymbol,
             element = getElement(building.symbol);
             element && executeElement(element,
                 function () {
-                    attemptProduction();
+                    attempt();
                 });
         }
     }
@@ -1016,7 +1019,7 @@ var production = (function($, localStorage, log, error, buildingBySymbol,
         }
 
         if (!element) {
-            log('No elements enqueued for building ' + buildingSymbol + '. Array size: ' + productionQueue.length, "PRODUCTION");
+            log('No elements enqueued for building ' + bSymbol + '. Array size: ' + productionQueue.length, "PRODUCTION");
             return null;
         }
 
