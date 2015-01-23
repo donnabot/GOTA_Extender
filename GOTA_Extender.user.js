@@ -164,19 +164,9 @@ function initialize() {
         log('Initialized. Happy hacking.');
         inform("Initialized.");
 	
-	//save if initialise worked.
-	if(options.autoSave){
-		saveProductionQueue();
-	}
-
     } catch (e) {
         error("Fatal error, initialization failed: " + e);
         inform("Fatal error, initialization failed: " + e);
-
-	//save even if initialise errored.
-	if(options.autoSave){
-		saveProductionQueue();
-	}
     }
 
 }
@@ -346,8 +336,6 @@ var options = {
     default_autoBossChallenge: false,
     autoBrute: false,
     default_autoBrute: false,
-    autoSave: true,
-    default_autoSave: true,
 
     get: function () {
         var prefix = "";
@@ -923,7 +911,6 @@ function saveMainTab() {
     options.autoBossChallenge = $("#autoBossChallenge").hasClass("checked");
 
     options.autoBrute = $("#autoBrute").hasClass("checked");
-    options.autoSave = $("#autoSave").hasClass("checked");
 
     var ari = parseInt($("#autoReloadInterval").val());
     if (!isNaN(ari) && options.autoReloadInterval !== ari) {

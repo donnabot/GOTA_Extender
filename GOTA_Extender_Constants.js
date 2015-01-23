@@ -354,7 +354,6 @@ var templates = {
             '</div>' +
             '<div class="exrow">' +
             this.checkOption("autoBrute", "Brute all on load", o.autoBrute) +
-            this.checkOption("autoSave", "Save Queue on load", o.autoSave) +
             '</div>' +
             '<div class="exrow">' +
             this.selectOption("Sort player inventory by: ", "boonsSortBy", this.boonsSortingOptions, o.boonsSortBy) +
