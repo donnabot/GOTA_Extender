@@ -13,11 +13,13 @@
 // @license     WTFPL (more at http://www.wtfpl.net/)
 // @require     http://code.jquery.com/jquery-2.1.3.min.js
 // @require     https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.9.0/moment.min.js
-// @require     https://greasyfork.org/scripts/7491-donnabot-s-gota-extender-constants/code/Donnabot's%20GOTA_Extender_Constants.js?version=31941
-// @require     https://greasyfork.org/scripts/5279-greasemonkey-supervalues/code/GreaseMonkey_SuperValues.js?version=20819
-// @resource 	custom https://greasyfork.org/scripts/7492-donnabot-s-gota-extender-custom/code/Donnabot's%20GOTA_Extender_Custom.js?version=32615
-// @resource    auxiliary https://greasyfork.org/scripts/7490-donnabot-s-gota-extender-auxiliary/code/Donnabot's%20GOTA_Extender_Auxiliary.js?version=32510
-// @resource    original https://greasyfork.org/scripts/7493-donnabot-s-gota-extender-original/code/Donnabot's%20GOTA_Extender_Original.js?version=32511
+// @require     https://greasyfork.org/scripts/5279-greasemonkey-SuperValues/code/GreaseMonkey_SuperValues.js?version=20819
+// @require     https://greasyfork.org/scripts/7573-storage-prototype-extension/code/StoragePrototype_extension.js?version=32814
+// @require     https://greasyfork.org/scripts/5427-gota-extender-constants/code/GOTA_Extender_Constants.js?version=33067
+// @resource 	custom https://greasyfork.org/scripts/5426-gota-extender-custom/code/GOTA_Extender_Custom.js?version=33068
+// @resource    auxiliary https://greasyfork.org/scripts/5618-gota-extender-auxiliary/code/GOTA_Extender_Auxiliary.js?version=33069
+// @resource    original https://greasyfork.org/scripts/6702-gota-extender-original/code/GOTA_Extender_Original.js?version=31299
+// @resource    production https://greasyfork.org/scripts/7611-gota-extender-production/code/GOTA_Extender_Production.js?version=33066
 // @version     0.0.5
 // @grant       unsafeWindow
 // @grant       GM_getValue
@@ -94,6 +96,9 @@ function initialize() {
         // Clean up GOTA shit...
         console.clear();
 
+        // Inject Storage extension functions (for use in the page)
+        inject.outSource("https://greasyfork.org/scripts/7573-storage-prototype-extension/code/StoragePrototype_extension.js?version=32814");
+
         // Try an injection sequence
         inject.observable();
         inject.constants();
@@ -102,6 +107,15 @@ function initialize() {
         // Inject auxiliary code
         inject.code(GM_getResourceText("custom"));
         inject.code(GM_getResourceText("auxiliary"));
+        inject.code(GM_getResourceText("production"));
+
+        // Initialize modules
+        setTimeout(function() {
+
+            unsafeWindow.production.init(options.export(["queueDelay", "superiorMaterials"]));
+            unsafeWindow.bossChallenger.init();
+
+        }, 2E3);
 
     } catch (e) {
         error("Fatal error, injection failed: " + e);
@@ -117,26 +131,29 @@ function initialize() {
         // Claim
         quarterMasterDo();
 
+        // Claim favours
+        acceptAllFavors();
+
         // Try to load the queue
-        if (options.productionQueue != void 0 && options.productionQueue.length > 0) {
-            loadComponent("productionQueue");
-
-            // When done attempt production
-            if (typeof unsafeWindow.attemptProduction == "function") {
-                unsafeWindow.attemptProduction();
-            }
-        }
-
-        // Try to load the boss challenges
-        if (options.bossChallenges != void 0 && options.bossChallenges.length > 0) {
-            loadComponent("bossChallenges");
-
-            // When done attempt production
-            for(var i = 0; i < options.bossChallenges.length; i++){
-                var c = options.bossChallenges[i];
-                unsafeWindow.questSubmit(c.symbol, c.stage, s.attack, c.chosen, null, null, c.questId);
-            }
-        }
+        //if (options.productionQueue != void 0 && options.productionQueue.length > 0) {
+        //    loadComponent("productionQueue");
+        //
+        //    // When done attempt production
+        //    if (typeof unsafeWindow.attemptProduction == "function") {
+        //        unsafeWindow.attemptProduction();
+        //    }
+        //}
+        //
+        //// Try to load the boss challenges
+        //if (options.bossChallenges != void 0 && options.bossChallenges.length > 0) {
+        //    loadComponent("bossChallenges");
+        //
+        //    // When done attempt production
+        //    for(var i = 0; i < options.bossChallenges.length; i++){
+        //        var c = options.bossChallenges[i];
+        //        unsafeWindow.questSubmit(c.symbol, c.stage, s.attack, c.chosen, null, null, c.questId);
+        //    }
+        //}
 
         // Store all sworn swords
         getSwornSwords();
@@ -227,13 +244,13 @@ function signal_acknowledged() {
 
     // Parse command
     switch (commandObj.name) {
-        case "save":
-            saveComponent(args[0]);
-
-            var prefix = "COMMAND ACKNOWLEDGED" + " | " + new Date().toLocaleTimeString() + " | ";
-            observable.val(prefix + args[0] + " set for persistence.");
-
-            break;
+        //case "save":
+        //    saveComponent(args[0]);
+        //
+        //    var prefix = "COMMAND ACKNOWLEDGED" + " | " + new Date().toLocaleTimeString() + " | ";
+        //    observable.val(prefix + args[0] + " set for persistence.");
+        //
+        //    break;
         case "option":
             //log("argument 1 = " + args[0] + ", " +
             //    "has own prop? " + (options.hasOwnProperty(args[0])) + ", " +
@@ -288,12 +305,6 @@ function signal_acknowledged() {
 var options = {
     swornSwords: [],
     default_swornSwords: [],
-
-    productionQueue: [],
-    default_productionQueue: [],
-
-    bossChallenges: [],
-    default_bossChallenges: [],
 
     debugMode: true,
     default_debugMode: true,
@@ -370,38 +381,16 @@ var options = {
             return;
         }
 
-        var newValues = [];
+        //var newValues = [];
 
-        // Store property values in array
-        for (var newProperty in this) {
-            if (newProperty.indexOf("default_") > -1)
+        // Store all properties
+        for (var prop in this) {
+            if (prop.indexOf("default_") > -1)
                 continue;
 
-            if (this.hasOwnProperty(newProperty) && typeof this[newProperty] != "function") {
-                newValues.push(this[newProperty]);
+            if (this.hasOwnProperty(prop) && typeof this[prop] != "function") {
+                GM_SuperValue.set(prefix + prop, this[prop]);
             }
-        }
-
-        // console.debug(newValues);
-
-        // Revert
-        this.get();
-
-        var i = 0;
-
-        // Detect and change if necessary
-        for (var oldProperty in this) {
-            if (oldProperty.indexOf("default_") > -1)
-                continue;
-
-            if (this.hasOwnProperty(oldProperty) && typeof this[oldProperty] != "function" && this[oldProperty] != newValues[i]) {
-                // console.debug("Setting property " + oldProperty + " with old value of " + this[oldProperty] + " to the new value of " + newValues[i]);
-
-                GM_SuperValue.set(prefix + oldProperty, newValues[i]);
-                this[oldProperty] = newValues[i];
-            }
-
-            i++;
         }
     },
 
@@ -413,6 +402,45 @@ var options = {
         }
 
         this.set();
+    },
+
+    export: function(params){
+        if(params == void 0) {
+            return typeof cloneInto == "function"
+                ? cloneInto(this, unsafeWindow) // return structured clone
+                : this; // regular object (no need of cloning)
+        }
+
+        if(typeof params == "object" && params instanceof Array) {
+            var exportObject = {};
+
+            for(var i = 0; i < params.length; i++){
+                var exportProperty = params[i];
+                if(this.hasOwnProperty(exportProperty) && this[exportProperty] != "function"){
+                    exportObject[exportProperty] = this[exportProperty];
+                }
+            }
+
+            return typeof cloneInto == "function"
+                ? cloneInto(exportObject, unsafeWindow) // return structured clone
+                : exportObject; // regular object (no need of cloning)
+        }
+
+        // Further cases regard string only
+        if(typeof params != "string") {
+            warn("Cannot resolve export parameters.");
+            return null;
+        }
+
+        if(this.hasOwnProperty(params) && this[params] != "function")
+            return typeof cloneInto == "function"
+                ? cloneInto(this[params], unsafeWindow) // return structured clone
+                : this[params]; // regular object (no need of cloning)
+
+        if(this.hasOwnProperty(params) && this[params] == "function")
+            return typeof exportFunction == "function"
+                ? exportFunction(this[params], unsafeWindow) // return exported function
+                : this[params]; // regular function (no need of exporting)
     }
 };
 // <-- End of options object
@@ -434,8 +462,8 @@ var inject = {
 
         // Inject structured clone (for Mozilla)
         if (typeof (cloneInto) == "function") {
-            unsafeWindow.extender_queueDelay = cloneInto(options.queueDelay, unsafeWindow);
-            unsafeWindow.extender_confirmSuperiorMaterials = cloneInto(options.superiorMaterials, unsafeWindow);
+            //unsafeWindow.extender_queueDelay = cloneInto(options.queueDelay, unsafeWindow);
+            //unsafeWindow.extender_confirmSuperiorMaterials = cloneInto(options.superiorMaterials, unsafeWindow);
             unsafeWindow.extender_bruteWounds = cloneInto(options.bruteWounds, unsafeWindow);
             unsafeWindow.extender_bruteSwitchOff = cloneInto(options.bruteSwitchOff, unsafeWindow);
             unsafeWindow.extender_debugMode = cloneInto(options.debugMode, unsafeWindow);
@@ -453,8 +481,8 @@ var inject = {
             unsafeWindow.userContext.tooltipsEnabled = cloneInto(options.doTooltips, unsafeWindow);
 
         } else {
-            unsafeWindow.extender_queueDelay = options.queueDelay;
-            unsafeWindow.extender_confirmSuperiorMaterials = options.superiorMaterials;
+            //unsafeWindow.extender_queueDelay = options.queueDelay;
+            //unsafeWindow.extender_confirmSuperiorMaterials = options.superiorMaterials;
             unsafeWindow.extender_bruteWounds = options.bruteWounds;
             unsafeWindow.extender_bruteSwitchOff = options.bruteSwitchOff;
             unsafeWindow.extender_debugMode = options.debugMode;
@@ -532,11 +560,13 @@ var inject = {
             unsafeWindow.inform = inform;
         }
 
-        var clientEntriesArray = [new Date().toLocaleTimeString() + " | Logging started..."];
+        var clientEntries = sessionStorage.get("clientEntries", []);
+        clientEntries.push([new Date().toLocaleTimeString() + " | Extender initialized successfully."]);
+        sessionStorage.set("clientEntries", clientEntries);
 
-       typeof (cloneInto) == "function"
-           ? unsafeWindow.clientEntries = cloneInto(clientEntriesArray, unsafeWindow)
-           : unsafeWindow.clientEntries = clientEntriesArray;
+       //typeof (cloneInto) == "function"
+       //    ? unsafeWindow.clientEntries = cloneInto(clientEntriesArray, unsafeWindow)
+       //    : unsafeWindow.clientEntries = clientEntriesArray;
 
         log("Messaging system injected successfully.");
     }
@@ -556,9 +586,11 @@ var inject = {
         }
 
         if(clientEntry != void 0){
-            unsafeWindow.clientEntries.push(new Date().toLocaleTimeString() + " | " + message);
+            var clientEntries = sessionStorage.get("clientEntries", []);
+            clientEntries.push(new Date().toLocaleTimeString() + " | " + message);
+            sessionStorage.set("clientEntries", clientEntries);
         }
-    }
+    };
 
     window.error = function error(message, type) {
         if (console && console.error && typeof (console.error) == "function") {
@@ -601,7 +633,7 @@ function toggleAll() {
     toggleAutoCollect();
     toggleQueueTimer();
     toggleReloadWindow();
-};
+}
 
 var autoCollectLoop;
 function toggleAutoCollect() {
@@ -617,7 +649,7 @@ function toggleAutoCollect() {
 var queueTimer;
 function toggleQueueTimer() {
     if (options.queueTimerInterval > 0) {
-        queueTimer = setInterval(unsafeWindow.attemptProduction, options.queueTimerInterval * 60 * 1000);
+        queueTimer = setInterval(unsafeWindow.production.attempt(), options.queueTimerInterval * 60 * 1000);
         log("Queue timer interval set to: " + options.queueTimerInterval + "min.");
     } else {
         queueTimer = clearInterval(queueTimer);
@@ -629,7 +661,7 @@ var reloadWindowTimeout;
 function toggleReloadWindow() {
     if (options.autoReloadInterval > 0) {
         setTimeout(function () {
-            saveProductionQueue();
+            //saveProductionQueue();
             window.location.reload(true);
         }, options.autoReloadInterval * 60 * 1000);
         log("Auto reload interval set to: " + options.autoReloadInterval + "m.");
@@ -638,6 +670,26 @@ function toggleReloadWindow() {
         log("Auto reloading cancelled.");
     }
 
+}
+
+function acceptAllFavors() {
+    ajax({
+        url: "/play/accept_favor",
+        success: function (r) {
+            //console.debug(r, r.accepted);
+
+            r.silver_reward &&  log("Favors claimed: silver reward: " + r.silver_reward, "FAVOR", true);
+
+            if(!$.isEmptyObject(r.accepted)){
+                for(var item in r.accepted){
+                    var value = r.accepted[item];
+                    log("Accepted: " + value + " x " + item, "FAVOR", true);
+                }
+            } else {
+                log("All favors have been claimed.");
+            }
+        }
+    });
 }
 
 function quarterMasterDo(status) {
@@ -800,14 +852,14 @@ function tab_onchange(e) {
 
     switch (this.id) {
         case "logTab":
-            $("#extenderTabContent").html(templates.logTab(unsafeWindow.clientEntries));
+            $("#extenderTabContent").html(templates.logTab());
             break;
         case "mainTab":
             $("#extenderTabContent").html(templates.mainTab(options));
             break;
         case "queueTab":
             $("#extenderTabContent").html(templates.queueTab(options));
-            renderProductionItems();
+            unsafeWindow.production.render();
             break;
         case "bruteTab":
             getSwornSwords();
@@ -816,33 +868,6 @@ function tab_onchange(e) {
         default:
             break;
     }
-}
-
-function renderProductionItems() {
-
-    var qTable = $("#queueTable");
-    if (qTable.length == 0) {
-        error("Can't find queue table! Rendering production items failed.");
-        return;
-    }
-
-    // Clear table from any rows first
-    $("#queueTable .tableRow").each(function () {
-        $(this).remove();
-    });
-
-    var queue = unsafeWindow.productionQueue;
-    if (!queue || queue.length == 0) {
-        log("No queue was found to render.");
-        return;
-    }
-
-    // Render items
-    for (var i = 0; i < queue.length; i++) {
-        $("#headerRow").after(templates.tableRow(i, queue[i]));
-    }
-
-    log("Production queue rendered " + queue.length + " items.");
 }
 
 $("#credits_roll").on('click', "#saveOptions", saveOptions_click);
@@ -943,7 +968,7 @@ function saveQueueTab() {
         toggleQueueTimer();
     }
 
-    saveComponent("productionQueue");
+    //saveComponent("productionQueue");
 
     options.set();
     inject.constants();
@@ -986,32 +1011,6 @@ function resetOptions_click(e) {
     $("#credits_page").empty();
     $("#credits_roll").hide();
     inform("Options reset.");
-}
-
-$("#credits_roll").on('click', '.tableRow', deleteTableRow);
-function deleteTableRow(e) {
-    e.preventDefault();
-
-    try {
-        var index = $(this).find("td:first span.ranklist").text();
-
-        log("Attempting to delete element with index " + index + " from the queue array.");
-
-        if (unsafeWindow.productionQueue.length == 1) {
-            unsafeWindow.productionQueue.pop();
-        } else {
-            unsafeWindow.productionQueue.splice(index, 1);
-
-            options.productionQueue = unsafeWindow.productionQueue;
-            options.set("productionQueue");
-        }
-
-        renderProductionItems();
-
-    } catch (err) {
-        error(err);
-    }
-
 }
 // <-- Settings handling
 
@@ -1133,172 +1132,172 @@ function productiontab_onchange() {
     }
 }
 
-$("#modal_dialogs_top").on('click', '#upgradeQueue', queue_clicked);
-$("#modal_dialogs_top").on('click', 'span.btnwrap.btnmed.equipbtn.queue', queue_clicked);
-function queue_clicked(e) {
-    e.preventDefault();
-
-    try {
-        var queueingUpgrade = $(this).hasClass('upgradeQueue');
-        log("Queing " + (queueingUpgrade ? "upgrade." : "item(s)."));
-
-        if (queueingUpgrade) {
-
-            var container = $(this).parents('div#selected_upgrade');
-            var name = $(container).find('h5:first').text();
-
-            var infoBtm = $(this).parents('div.buildinginfobtm');
-            var func = $(infoBtm).find('.upgradeicon.active').attr('onclick');
-            var upgradeImg = $(infoBtm).find('.upgradeicon.active .upgradeiconart img').attr('src');
-
-            if (func.indexOf("clickSelectUpgrade") == -1) {
-                error("Cannot resolve upgrade id.");
-                return;
-            }
-
-            // TODO: Improve...
-            // "return clickSelectUpgrade('7', 'balcony');"
-            var symbol = func.split("'")[3];
-            log("Selected " + symbol + " upgrade. Retrieve successfull.");
-
-            var upgradeId;
-
-            var buildingUpgrades = unsafeWindow.buildingUpgrades[unsafeWindow.userContext.activeBuildingPanel];
-            for (var j = 0; j < buildingUpgrades.length; j++) {
-                if (buildingUpgrades[j].symbol == symbol) {
-                    upgradeId = buildingUpgrades[j].id;
-                    break;
-                }
-            }
-
-            if (!upgradeId) {
-                error("Fatal error, cannot resolve upgrade id.");
-                return;
-            }
-
-            log("Upgrade id resolved: " + upgradeId);
-
-            var upgrade = {
-                "name": name,
-                "upgradeId": upgradeId,
-                "type": "upgrade",
-                "symbol": symbol,
-                "img": upgradeImg,
-                "activeBuildingPanel": unsafeWindow.userContext.activeBuildingPanel
-            };
-
-            // Insert the element into the queueArray (cloneInto for Mozilla)
-            if (typeof cloneInto == "function") {
-                var upgradeClone = cloneInto(upgrade, unsafeWindow);
-                unsafeWindow.productionQueue.push(upgradeClone);
-            } else {
-                unsafeWindow.productionQueue.push(upgrade);
-            }
-
-            options.productionQueue = unsafeWindow.productionQueue;
-            options.set("productionQueue");
-
-            log("Pushed upgrade to queue.");
-
-        } else {
-
-            // Extract and construct object
-            var statview = $(this).parents(".statview");
-            var imgSrc = $(statview).find("div.statviewimg img").attr('src');
-
-            if (typeof (imgSrc) == "undefined") {
-                imgSrc = $(statview).find("span.iconview img").attr('src');
-            }
-
-            var statViewName = $(statview).find(".statviewname h3").text();
-            var quantity = $(this).attr("data-quantity");
-
-            // Extract variables needed
-            var recipeName;
-
-            var source = unsafeWindow.userContext.productionItemsClick[unsafeWindow.userContext.currentProductionItem];
-
-            if (!source) {
-                error('Failed to extract source production item.');
-                return;
-            }
-
-            for (var i = 0; i < unsafeWindow.userContext.recipeData.length; i++) {
-                var r = unsafeWindow.userContext.recipeData[i];
-                if (r.output == source.outputSymbol) {
-                    recipeName = r.symbol;
-                    break;
-                }
-
-                if (r.success_loot_table && r.success_loot_table == source.outputSymbol) {
-                    recipeName = r.symbol;
-                    break;
-                }
-
-                if (r.success_loot_item && r.success_loot_item == source.outputSymbol) {
-                    recipeName = r.symbol;
-                    break;
-                }
-            }
-
-            // Last attempt, these here are expensive operations
-            if (!recipeName) {
-                for (var i = 0; i < unsafeWindow.userContext.recipeData.length; i++) {
-                    var r = unsafeWindow.userContext.recipeData[i];
-                    var recipeInputs = JSON.stringify(r.input.split(","));
-                    if (JSON.stringify(source.recipeInputs) === recipeInputs) {
-                        recipeName = r.symbol;
-                        break;
-                    }
-                }
-            }
-            if (!recipeName) {
-                error('Failed to extract recipeName.');
-                return;
-            }
-
-            log('All needed variables were extracted.');
-
-            do {
-
-                // Construct production element
-                var element = {
-                    "recipeName": recipeName,
-                    "name": statViewName,
-                    "img": imgSrc,
-                    "type": "item",
-                    "outputSymbol": source.outputSymbol,
-                    "recipeCategory": source.recipeCategory,
-                    "recipeData": unsafeWindow.userContext.recipeData,
-                    "activeBuildingPanel": unsafeWindow.userContext.activeBuildingPanel
-                };
-
-                // Insert the element into the queueArray (cloneInto for Mozilla)
-                if (typeof (cloneInto) == "function") {
-                    var elementClone = cloneInto(element, unsafeWindow);
-                    unsafeWindow.productionQueue.push(elementClone);
-                } else {
-                    unsafeWindow.productionQueue.push(element);
-                }
-
-                options.productionQueue = unsafeWindow.productionQueue;
-                options.set("productionQueue");
-
-                quantity--;
-
-                log('Pushed element to queue.');
-
-            } while (quantity > 0);
-        }
-
-        log('Attempting immediate production...');
-        unsafeWindow.attemptProduction(unsafeWindow.userContext.activeBuildingPanel);
-        inform('Enqueued.');
-
-    } catch (err) {
-        error(err);
-    }
-}
+//$("#modal_dialogs_top").on('click', '#upgradeQueue', queue_clicked);
+//$("#modal_dialogs_top").on('click', 'span.btnwrap.btnmed.equipbtn.queue', queue_clicked);
+//function queue_clicked(e) {
+//    e.preventDefault();
+//
+//    try {
+//        var queueingUpgrade = $(this).hasClass('upgradeQueue');
+//        log("Queing " + (queueingUpgrade ? "upgrade." : "item(s)."));
+//
+//        if (queueingUpgrade) {
+//
+//            var container = $(this).parents('div#selected_upgrade');
+//            var name = $(container).find('h5:first').text();
+//
+//            var infoBtm = $(this).parents('div.buildinginfobtm');
+//            var func = $(infoBtm).find('.upgradeicon.active').attr('onclick');
+//            var upgradeImg = $(infoBtm).find('.upgradeicon.active .upgradeiconart img').attr('src');
+//
+//            if (func.indexOf("clickSelectUpgrade") == -1) {
+//                error("Cannot resolve upgrade id.");
+//                return;
+//            }
+//
+//            // TODO: Improve...
+//            // "return clickSelectUpgrade('7', 'balcony');"
+//            var symbol = func.split("'")[3];
+//            log("Selected " + symbol + " upgrade. Retrieve successfull.");
+//
+//            var upgradeId;
+//
+//            var buildingUpgrades = unsafeWindow.buildingUpgrades[unsafeWindow.userContext.activeBuildingPanel];
+//            for (var j = 0; j < buildingUpgrades.length; j++) {
+//                if (buildingUpgrades[j].symbol == symbol) {
+//                    upgradeId = buildingUpgrades[j].id;
+//                    break;
+//                }
+//            }
+//
+//            if (!upgradeId) {
+//                error("Fatal error, cannot resolve upgrade id.");
+//                return;
+//            }
+//
+//            log("Upgrade id resolved: " + upgradeId);
+//
+//            var upgrade = {
+//                "name": name,
+//                "upgradeId": upgradeId,
+//                "type": "upgrade",
+//                "symbol": symbol,
+//                "img": upgradeImg,
+//                "activeBuildingPanel": unsafeWindow.userContext.activeBuildingPanel
+//            };
+//
+//            // Insert the element into the queueArray (cloneInto for Mozilla)
+//            if (typeof cloneInto == "function") {
+//                var upgradeClone = cloneInto(upgrade, unsafeWindow);
+//                unsafeWindow.productionQueue.push(upgradeClone);
+//            } else {
+//                unsafeWindow.productionQueue.push(upgrade);
+//            }
+//
+//            options.productionQueue = unsafeWindow.productionQueue;
+//            options.set("productionQueue");
+//
+//            log("Pushed upgrade to queue.");
+//
+//        } else {
+//
+//            // Extract and construct object
+//            var statview = $(this).parents(".statview");
+//            var imgSrc = $(statview).find("div.statviewimg img").attr('src');
+//
+//            if (typeof (imgSrc) == "undefined") {
+//                imgSrc = $(statview).find("span.iconview img").attr('src');
+//            }
+//
+//            var statViewName = $(statview).find(".statviewname h3").text();
+//            var quantity = $(this).attr("data-quantity");
+//
+//            // Extract variables needed
+//            var recipeName;
+//
+//            var source = unsafeWindow.userContext.productionItemsClick[unsafeWindow.userContext.currentProductionItem];
+//
+//            if (!source) {
+//                error('Failed to extract source production item.');
+//                return;
+//            }
+//
+//            for (var i = 0; i < unsafeWindow.userContext.recipeData.length; i++) {
+//                var r = unsafeWindow.userContext.recipeData[i];
+//                if (r.output == source.outputSymbol) {
+//                    recipeName = r.symbol;
+//                    break;
+//                }
+//
+//                if (r.success_loot_table && r.success_loot_table == source.outputSymbol) {
+//                    recipeName = r.symbol;
+//                    break;
+//                }
+//
+//                if (r.success_loot_item && r.success_loot_item == source.outputSymbol) {
+//                    recipeName = r.symbol;
+//                    break;
+//                }
+//            }
+//
+//            // Last attempt, these here are expensive operations
+//            if (!recipeName) {
+//                for (var i = 0; i < unsafeWindow.userContext.recipeData.length; i++) {
+//                    var r = unsafeWindow.userContext.recipeData[i];
+//                    var recipeInputs = JSON.stringify(r.input.split(","));
+//                    if (JSON.stringify(source.recipeInputs) === recipeInputs) {
+//                        recipeName = r.symbol;
+//                        break;
+//                    }
+//                }
+//            }
+//            if (!recipeName) {
+//                error('Failed to extract recipeName.');
+//                return;
+//            }
+//
+//            log('All needed variables were extracted.');
+//
+//            do {
+//
+//                // Construct production element
+//                var element = {
+//                    "recipeName": recipeName,
+//                    "name": statViewName,
+//                    "img": imgSrc,
+//                    "type": "item",
+//                    "outputSymbol": source.outputSymbol,
+//                    "recipeCategory": source.recipeCategory,
+//                    "recipeData": unsafeWindow.userContext.recipeData,
+//                    "activeBuildingPanel": unsafeWindow.userContext.activeBuildingPanel
+//                };
+//
+//                // Insert the element into the queueArray (cloneInto for Mozilla)
+//                if (typeof (cloneInto) == "function") {
+//                    var elementClone = cloneInto(element, unsafeWindow);
+//                    unsafeWindow.productionQueue.push(elementClone);
+//                } else {
+//                    unsafeWindow.productionQueue.push(element);
+//                }
+//
+//                options.productionQueue = unsafeWindow.productionQueue;
+//                options.set("productionQueue");
+//
+//                quantity--;
+//
+//                log('Pushed element to queue.');
+//
+//            } while (quantity > 0);
+//        }
+//
+//        log('Attempting immediate production...');
+//        unsafeWindow.attemptProduction(unsafeWindow.userContext.activeBuildingPanel);
+//        inform('Enqueued.');
+//
+//    } catch (err) {
+//        error(err);
+//    }
+//}
 
 //function saveProductionQueue() {
 //
@@ -1309,53 +1308,53 @@ function queue_clicked(e) {
 //    }
 //}
 
-function saveComponent(component) {
-    console.debug("Saving component " + component);
+//function saveComponent(component) {
+//    console.debug("Saving component " + component);
+//
+//    if (component == void 0) {
+//        error("Cannot save " + component + ". Exiting...")
+//        return;
+//    }
+//
+//    var p = unsafeWindow[component];
+//    if (p == void 0) {
+//        error("Could not find " + component + " on page. Exiting...")
+//        return;
+//    }
+//
+//    options.productionQueue = p;
+//    options.set("productionQueue");
+//
+//}
 
-    if (component == void 0) {
-        error("Cannot save " + component + ". Exiting...")
-        return;
-    }
-
-    var p = unsafeWindow[component];
-    if (p == void 0) {
-        error("Could not find " + component + " on page. Exiting...")
-        return;
-    }
-
-    options.productionQueue = p;
-    options.set("productionQueue");
-
-}
-
-function loadComponent(component) {
-
-    if (component == void 0) {
-        error("Cannot load " + component + ". Exiting...")
-        return;
-    }
-
-    // console.debug("Conditions: ", !options.productionQueue, options.productionQueue.length == 0);
-    if (options[component] == void 0) {
-        warn("No stored " + component + " was found in options.");
-        return;
-    }
-
-    // console.debug("Conditions: ", !unsafeWindow.productionQueue);
-    if (unsafeWindow[component] == void 0) {
-        warn("The " + component + " was not found in page. Extender will create it.");
-    }
-
-    if (typeof cloneInto == "function") { // Mozilla
-        unsafeWindow[component] = cloneInto(options[component], unsafeWindow);
-    } else {                            // Chrome
-        unsafeWindow[component] = options[component];
-    }
-
-    // Clear this from options
-    options[component] = null;
-    options.set(component);
-}
+//function loadComponent(component) {
+//
+//    if (component == void 0) {
+//        error("Cannot load " + component + ". Exiting...")
+//        return;
+//    }
+//
+//    // console.debug("Conditions: ", !options.productionQueue, options.productionQueue.length == 0);
+//    if (options[component] == void 0) {
+//        warn("No stored " + component + " was found in options.");
+//        return;
+//    }
+//
+//    // console.debug("Conditions: ", !unsafeWindow.productionQueue);
+//    if (unsafeWindow[component] == void 0) {
+//        warn("The " + component + " was not found in page. Extender will create it.");
+//    }
+//
+//    if (typeof cloneInto == "function") { // Mozilla
+//        unsafeWindow[component] = cloneInto(options[component], unsafeWindow);
+//    } else {                            // Chrome
+//        unsafeWindow[component] = options[component];
+//    }
+//
+//    // Clear this from options
+//    options[component] = null;
+//    options.set(component);
+//}
 
 //function loadProductionQueue() {
 //
@@ -1751,4 +1750,3 @@ function ajax(params) {
         });
     }, 1E3);
 }
-

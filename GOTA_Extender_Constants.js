@@ -319,8 +319,9 @@ var templates = {
             '</tr>';
     },
 
-    logTab: function (log) {
+    logTab: function () {
 
+        var log = sessionStorage.get("clientEntries", []);
         var output = '<div class="exrow" style="text-align: right"> ' + this.clearLogOptionsBtn + '</div>';
 
         output += '<div class="exrow"><textarea style="width: 95%; height: 400px; overflow-y: scroll;" readonly="readonly" onkeydown="return false;" onkeypress="return false;" onkeyup="return false;" disabled="disabled">';

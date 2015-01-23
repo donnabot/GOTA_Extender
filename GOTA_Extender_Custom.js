@@ -173,7 +173,7 @@ doFinishProduction = function doFinishProduction(b, callback) {
                 }
 
                 if (typeof callback == "function") {
-                    console.debug("Calling callback... ");
+                    //console.debug("Calling callback... ");
                     callback();
                 }
             }
@@ -257,7 +257,7 @@ doProduction = function(c, a, b, d, g, callback) {
             else if (itemHasSeals(u[s]) && (!u[s].preserve_attributes || false == u[s].preserve_attributes)) D = JSON.parse(JSON.stringify(u[s])), y = generateSealNameList(u[s]), q += "[" + u[s].full_name + " : " + y + "]";
 
         // EXTENDER :: Modification
-        if (true != d && null != D && !extender_confirmSuperiorMaterials) {
+        if (true != d && null != D && !production.superiorMaterials) {
             return playerInventory = JSON.parse(JSON.stringify(f)), userContext.playerData.inventory = playerInventory, dialogAlert({
                 style: "confirm",
                 margin_top: 100,
@@ -360,10 +360,7 @@ buildTimerUpdate = function(c, a, b) {
             }, (extender_queueDelay / 2) * 1000);
 
             setTimeout(function() {
-                var el = getElement(d.symbol);
-                if (el) {
-                    executeElement(el);
-                }
+                production.attempt(d.symbol);
             }, extender_queueDelay * 1000);
         });
     } else if (a < 300 - 30) {
@@ -1276,54 +1273,7 @@ function questSubmit(b, a, c, d, g, k, f) {
             questById(f).action_taken = !0;
 
             // EXTENDER :: Modification, auto boss challenger
-            if (typeof a.actions_remaining == "undefined" || isNaN(a.actions_remaining)){				
-				log("Not on boss challenge (no actions remaining). Exiting...", "BOSS");
-				return;
-			}
-			
-			if(!extender_autoBossChallenge){
-				log("Boss challenge is not automated. Exiting...", "EXTENDER");
-				return;
-			}
-				
-			log("Boss challenge automated. Actions remaining: " + a.actions_remaining + "," +
-            "stage: " + a.stage, "BOSS");
-
-            if(a.stage && a.stage === 1000){
-                log("Boss challenge complete. Exiting...", "BOSS");
-
-                // Remove the quest from the array
-                bossChallenges = bossChallenges.filter(function (el) {
-                        return el.questId !== a.id;
-                    });
-                extender.save("bossChallenges");
-
-                // Close dialog and pop it from whenever necessary
-                questClose(a.symbol, a.id, true);
-                return;
-            }
-
-            if (a.actions_remaining > 0) {
-                questSubmit(a.symbol, a.stage, c, a.chosen, null, null, a.id);
-            } else {
-                log("No actions remaining! Adjusting...", "BOSS");
-
-                var bossInstance = {
-                    "quest": a.symbol,
-                    "stage": a.stage,
-                    "attack": c,
-                    "chosen": a.chosen,
-                    "questId": a.id,
-                    "timeout": setTimeout(function() {
-                        questSubmit(a.symbol, a.stage, c, a.chosen, null, null, a.id);
-                    }, 3 * 4 * 60 * 1000)
-                };
-
-                bossChallenges.push(bossInstance);
-                extender.save("bossChallenges");
-                log("Timer running. Fire again in 12 minutes.", "BOSS");
-
-            }
+            bossChallenger.fight(a);
         }
     });
 	

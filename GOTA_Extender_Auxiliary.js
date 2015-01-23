@@ -24,125 +24,125 @@ var extender = {
         }
     }
 };
-
-var productionQueue = [];
-function attemptProduction(bSymbol) {
-
-    if (!productionQueue || productionQueue.length == 0) {
-        log('Attempted production, but queue was missing or empty. Exiting...', "PRODUCTION");
-        return;
-    }
-
-    if (typeof bSymbol != "undefined") {
-
-        // Check this building for production
-        var b = buildingBySymbol(bSymbol);
-
-        if (buildingProducing(b)) {
-            log("Building " + b.symbol + " is busy.", "PRODUCTION");
-            return;
-        }
-
-        if (buildingFinished(b)) {
-            log("Building " + b.symbol + " finished production.", "PRODUCTION");
-
-            doFinishProduction(b.item_id, function() {
-                setTimeout(function() {
-                    attemptProduction(b.symbol);
-                }, extender_queueDelay * 1000);
-            });
-
-            return;
-        }
-
-        var element = getElement(b.symbol);
-        if (element) {
-            executeElement(element);
-            return;
-        }
-    } else {
-
-        for (var i = 0; i < userContext.buildingsData.length; i++) {
-            var b = userContext.buildingsData[i];
-
-            if (buildingProducing(b)) {
-                log("Building " + b.symbol + " is busy.", "PRODUCTION");
-                continue;
-            }
-
-            if (buildingFinished(b)) {
-                log("Building " + b.symbol + " finished production.", "PRODUCTION");
-                doFinishProduction(b.item_id, function() {
-                    setTimeout(function() {
-                        attemptProduction(b.symbol);
-                    }, extender_queueDelay * 1000);
-                });
-
-                return;
-            }
-
-            var element = getElement(b.symbol);
-            if (element) {
-                executeElement(element, function () {
-                    attemptProduction();
-                });
-
-                return;
-            }
-        }
-    }
-};
-
-function getElement(buildingSymbol) {
-    if (!productionQueue || productionQueue.length == 0) {
-        log('Attempted to extract item from queue, but the production queue was missing or empty. Exiting...', "PRODUCTION");
-        return null;
-    }
-
-    var element;
-
-    for (var i = 0; i < productionQueue.length; i++) {
-
-        if (productionQueue[i].activeBuildingPanel == buildingSymbol) {
-            element = productionQueue[i];
-            break;
-        }
-    }
-
-    if (!element) {
-        log('No elements enqueued for building ' + buildingSymbol + '. Array size: ' + productionQueue.length, "PRODUCTION");
-        return null;
-    }
-
-    return element;
-};
-
-function executeElement(element, callback) {
-
-    var index = productionQueue.indexOf(element);
-    log('Production of element ' + element.name + ' : ' + element.type + ' with index ' + index + ' initiated.', "PRODUCTION");
-
-    if (element.type == "item") {
-        userContext.recipeData = element.recipeData;
-        userContext.activeBuildingPanel = element.activeBuildingPanel;
-
-        doProduction(element.outputSymbol, element.recipeCategory, null, null, element.recipeName, callback);
-        productionQueue.splice(index, 1);
-        extender.save("productionQueue");
-
-        log('Production details: ' + element.name + ' at ' + element.activeBuildingPanel + ', ' + element.outputSymbol + ', ' + element.recipeCategory + ', ' + element.recipeName + ';', "PRODUCTION");
-    } else {
-
-        var buildingId = buildingBySymbol(element.activeBuildingPanel).id;
-
-        applySelectedUpgrade({ building_id: buildingId, id: element.upgradeId, gold: 0, silver: 0 }, null, callback);
-        productionQueue.splice(index, 1);
-        extender.save("productionQueue");
-
-        log('Production details: ' + element.name + ' : ' + element.type + ' at ' + element.activeBuildingPanel + ', ' + element.symbol + ';', "PRODUCTION");
-
-    }
-};
+//
+//var productionQueue = [];
+//function attemptProduction(bSymbol) {
+//
+//    if (!productionQueue || productionQueue.length == 0) {
+//        log('Attempted production, but queue was missing or empty. Exiting...', "PRODUCTION");
+//        return;
+//    }
+//
+//    if (typeof bSymbol != "undefined") {
+//
+//        // Check this building for production
+//        var b = buildingBySymbol(bSymbol);
+//
+//        if (buildingProducing(b)) {
+//            log("Building " + b.symbol + " is busy.", "PRODUCTION");
+//            return;
+//        }
+//
+//        if (buildingFinished(b)) {
+//            log("Building " + b.symbol + " finished production.", "PRODUCTION");
+//
+//            doFinishProduction(b.item_id, function() {
+//                setTimeout(function() {
+//                    attemptProduction(b.symbol);
+//                }, extender_queueDelay * 1000);
+//            });
+//
+//            return;
+//        }
+//
+//        var element = getElement(b.symbol);
+//        if (element) {
+//            executeElement(element);
+//            return;
+//        }
+//    } else {
+//
+//        for (var i = 0; i < userContext.buildingsData.length; i++) {
+//            var b = userContext.buildingsData[i];
+//
+//            if (buildingProducing(b)) {
+//                log("Building " + b.symbol + " is busy.", "PRODUCTION");
+//                continue;
+//            }
+//
+//            if (buildingFinished(b)) {
+//                log("Building " + b.symbol + " finished production.", "PRODUCTION");
+//                doFinishProduction(b.item_id, function() {
+//                    setTimeout(function() {
+//                        attemptProduction(b.symbol);
+//                    }, extender_queueDelay * 1000);
+//                });
+//
+//                return;
+//            }
+//
+//            var element = getElement(b.symbol);
+//            if (element) {
+//                executeElement(element, function () {
+//                    attemptProduction();
+//                });
+//
+//                return;
+//            }
+//        }
+//    }
+//};
+//
+//function getElement(buildingSymbol) {
+//    if (!productionQueue || productionQueue.length == 0) {
+//        log('Attempted to extract item from queue, but the production queue was missing or empty. Exiting...', "PRODUCTION");
+//        return null;
+//    }
+//
+//    var element;
+//
+//    for (var i = 0; i < productionQueue.length; i++) {
+//
+//        if (productionQueue[i].activeBuildingPanel == buildingSymbol) {
+//            element = productionQueue[i];
+//            break;
+//        }
+//    }
+//
+//    if (!element) {
+//        log('No elements enqueued for building ' + buildingSymbol + '. Array size: ' + productionQueue.length, "PRODUCTION");
+//        return null;
+//    }
+//
+//    return element;
+//};
+//
+//function executeElement(element, callback) {
+//
+//    var index = productionQueue.indexOf(element);
+//    log('Production of element ' + element.name + ' : ' + element.type + ' with index ' + index + ' initiated.', "PRODUCTION");
+//
+//    if (element.type == "item") {
+//        userContext.recipeData = element.recipeData;
+//        userContext.activeBuildingPanel = element.activeBuildingPanel;
+//
+//        doProduction(element.outputSymbol, element.recipeCategory, null, null, element.recipeName, callback);
+//        productionQueue.splice(index, 1);
+//        extender.save("productionQueue");
+//
+//        log('Production details: ' + element.name + ' at ' + element.activeBuildingPanel + ', ' + element.outputSymbol + ', ' + element.recipeCategory + ', ' + element.recipeName + ';', "PRODUCTION");
+//    } else {
+//
+//        var buildingId = buildingBySymbol(element.activeBuildingPanel).id;
+//
+//        applySelectedUpgrade({ building_id: buildingId, id: element.upgradeId, gold: 0, silver: 0 }, null, callback);
+//        productionQueue.splice(index, 1);
+//        extender.save("productionQueue");
+//
+//        log('Production details: ' + element.name + ' : ' + element.type + ' at ' + element.activeBuildingPanel + ', ' + element.symbol + ';', "PRODUCTION");
+//
+//    }
+//};
 
 function buildingFinished(b) {
 
@@ -904,19 +904,90 @@ function observable_onkeyup(e){
 }
 
 function clearLog(){
-    if(clientEntries == void 0){
-        error("Could not find the client log on page.");
-    }
-
-    if(!(clientEntries instanceof Array)){
-        error("The log on the page is not an array!");
-    }
-
-    if(clientEntries.length === 0){
-        warn("The log has no entries!");
-    }
-
-    clientEntries = [];
-    $("#logTab").trigger("click");
+    sessionStorage.set("clientEntries", []);
     log("The client log has been cleared successfully.");
+
+    $("#logTab").trigger("click");
 }
+
+var bossChallenger = (function(log, questClose, questSubmit){
+
+    var bossQuests = [];
+    var enabled = true;
+
+    function init(){
+        localStorage.get("bossQuests", []);
+
+        // Relaunch any quests pending...
+        for(var i = 0; i < bossQuests.length; i++){
+            var a = bossQuests[i];
+            questSubmit(a.quest, a.stage, a.attack, a.chosen, null, null, a.questId);
+        }
+    }
+
+    function persist(){
+        localStorage.set("bossQuests", bossQuests);
+    }
+
+    function fight(a){
+        if (a.actions_remaining == void 0 || isNaN(a.actions_remaining)){
+            log("Not on boss challenge (no actions remaining). Exiting...", "BOSS");
+            return;
+        }
+
+        if(!enabled){
+            log("Boss challenge is not automated. Exiting...", "EXTENDER");
+            return;
+        }
+
+        log("Boss challenge automated. Actions remaining: " + a.actions_remaining + "," +
+        "stage: " + a.stage, "BOSS");
+
+        if(a.stage && a.stage === 1000){
+            log("Boss challenge complete. Exiting...", "BOSS");
+
+            // Remove the quest from the array
+            bossQuests = bossQuests.filter(function (el) {
+                return el.questId !== a.id;
+            });
+
+            persist();
+
+            // Close dialog and pop it from whenever necessary
+            questClose(a.symbol, a.id, true);
+            return;
+        }
+
+        if (a.actions_remaining > 0) {
+            questSubmit(a.symbol, a.stage, c, a.chosen, null, null, a.id);
+        } else {
+            log("No actions remaining! Adjusting...", "BOSS");
+
+            var bossInstance = {
+                "quest": a.symbol,
+                "stage": a.stage,
+                "attack": c,
+                "chosen": a.chosen,
+                "questId": a.id,
+                "timeout": setTimeout(function() {
+                    questSubmit(a.symbol, a.stage, c, a.chosen, null, null, a.id);
+                }, 3 * 4 * 60 * 1000)
+            };
+
+            bossQuests.push(bossInstance);
+
+            persist();
+
+            log("Timer running. Fire again in 12 minutes.", "BOSS");
+        }
+    }
+
+    return {
+        init: init,
+        fight: fight,
+        persist: persist
+    }
+
+}(log, questClose, questSubmit));
+
+
