@@ -20,7 +20,7 @@
 // @resource    auxiliary https://greasyfork.org/scripts/5618-gota-extender-auxiliary/code/GOTA_Extender_Auxiliary.js?version=33069
 // @resource    original https://greasyfork.org/scripts/6702-gota-extender-original/code/GOTA_Extender_Original.js?version=31299
 // @resource    production https://greasyfork.org/scripts/7611-gota-extender-production/code/GOTA_Extender_Production.js?version=33066
-// @version     6.3.0
+// @version     6.4.0
 // @grant       unsafeWindow
 // @grant       GM_getValue
 // @grant       GM_setValue
@@ -391,10 +391,11 @@ var options = {
     },
 
     export: function(params){
-        if(params == void 0)
+        if(params == void 0) {
             return typeof cloneInto == "function"
                 ? cloneInto(this, unsafeWindow) // return structured clone
                 : this; // regular object (no need of cloning)
+        }
 
         if(typeof params == "object" && params instanceof Array) {
             var exportObject = {};
@@ -447,8 +448,8 @@ var inject = {
 
         // Inject structured clone (for Mozilla)
         if (typeof (cloneInto) == "function") {
-            unsafeWindow.extender_queueDelay = cloneInto(options.queueDelay, unsafeWindow);
-            unsafeWindow.extender_confirmSuperiorMaterials = cloneInto(options.superiorMaterials, unsafeWindow);
+            //unsafeWindow.extender_queueDelay = cloneInto(options.queueDelay, unsafeWindow);
+            //unsafeWindow.extender_confirmSuperiorMaterials = cloneInto(options.superiorMaterials, unsafeWindow);
             unsafeWindow.extender_bruteWounds = cloneInto(options.bruteWounds, unsafeWindow);
             unsafeWindow.extender_bruteSwitchOff = cloneInto(options.bruteSwitchOff, unsafeWindow);
             unsafeWindow.extender_debugMode = cloneInto(options.debugMode, unsafeWindow);
@@ -466,8 +467,8 @@ var inject = {
             unsafeWindow.userContext.tooltipsEnabled = cloneInto(options.doTooltips, unsafeWindow);
 
         } else {
-            unsafeWindow.extender_queueDelay = options.queueDelay;
-            unsafeWindow.extender_confirmSuperiorMaterials = options.superiorMaterials;
+            //unsafeWindow.extender_queueDelay = options.queueDelay;
+            //unsafeWindow.extender_confirmSuperiorMaterials = options.superiorMaterials;
             unsafeWindow.extender_bruteWounds = options.bruteWounds;
             unsafeWindow.extender_bruteSwitchOff = options.bruteSwitchOff;
             unsafeWindow.extender_debugMode = options.debugMode;
