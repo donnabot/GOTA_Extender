@@ -257,7 +257,7 @@ doProduction = function(c, a, b, d, g, callback) {
             else if (itemHasSeals(u[s]) && (!u[s].preserve_attributes || false == u[s].preserve_attributes)) D = JSON.parse(JSON.stringify(u[s])), y = generateSealNameList(u[s]), q += "[" + u[s].full_name + " : " + y + "]";
 
         // EXTENDER :: Modification
-        if (true != d && null != D && !extender_confirmSuperiorMaterials) {
+        if (true != d && null != D && !production.superiorMaterials) {
             return playerInventory = JSON.parse(JSON.stringify(f)), userContext.playerData.inventory = playerInventory, dialogAlert({
                 style: "confirm",
                 margin_top: 100,

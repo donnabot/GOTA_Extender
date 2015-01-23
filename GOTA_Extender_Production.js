@@ -341,15 +341,6 @@ var production = (function ($, localStorage, log, error, buildingBySymbol,
 
             log("Attempting to delete element with index " + index + " from the queue array.");
 
-            //if (unsafeWindow.productionQueue.length == 1) {
-            //    unsafeWindow.productionQueue.pop();
-            //} else {
-            //    unsafeWindow.productionQueue.splice(index, 1);
-            //
-            //    options.productionQueue = unsafeWindow.productionQueue;
-            //    options.set("productionQueue");
-            //}
-
             removeElement(index);
             render();
 

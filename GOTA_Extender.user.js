@@ -109,8 +109,10 @@ function initialize() {
 
         // Initialize modules
         setTimeout(function() {
-            unsafeWindow.production.init();
+
+            unsafeWindow.production.init(options.export(["queueDelay", "superiorMaterials"]));
             unsafeWindow.bossChallenger.init();
+
         }, 2E3);
 
     } catch (e) {
@@ -128,7 +130,7 @@ function initialize() {
         quarterMasterDo();
 
         // Claim favours
-        acceptAllFavors()
+        acceptAllFavors();
 
         // Try to load the queue
         //if (options.productionQueue != void 0 && options.productionQueue.length > 0) {
@@ -292,12 +294,6 @@ var options = {
     swornSwords: [],
     default_swornSwords: [],
 
-    productionQueue: [],
-    default_productionQueue: [],
-
-    bossChallenges: [],
-    default_bossChallenges: [],
-
     debugMode: true,
     default_debugMode: true,
     checkScript: false,
@@ -380,30 +376,6 @@ var options = {
                 GM_SuperValue.set(prefix + prop, this[prop]);
             }
         }
-
-        // console.debug(newValues);
-
-        // Load of crap ahead...
-
-        // Revert
-        //this.get();
-        //
-        //var i = 0;
-        //
-        //// Detect and change if necessary
-        //for (var oldProperty in this) {
-        //    if (oldProperty.indexOf("default_") > -1)
-        //        continue;
-        //
-        //    if (this.hasOwnProperty(oldProperty) && typeof this[oldProperty] != "function" && this[oldProperty] != newValues[i]) {
-        //        // console.debug("Setting property " + oldProperty + " with old value of " + this[oldProperty] + " to the new value of " + newValues[i]);
-        //
-        //        GM_SuperValue.set(prefix + oldProperty, newValues[i]);
-        //        this[oldProperty] = newValues[i];
-        //    }
-        //
-        //    i++;
-        //}
     },
 
     reset: function () {
@@ -414,6 +386,44 @@ var options = {
         }
 
         this.set();
+    },
+
+    export: function(params){
+        if(params == void 0)
+            return typeof cloneInto == "function"
+                ? cloneInto(this, unsafeWindow) // return structured clone
+                : this; // regular object (no need of cloning)
+
+        if(typeof params == "object" && params instanceof Array) {
+            var exportObject = {};
+
+            for(var i = 0; i < params.length; i++){
+                var exportProperty = params[i];
+                if(this.hasOwnProperty(exportProperty) && this[exportProperty] != "function"){
+                    exportObject[exportProperty] = this[exportProperty];
+                }
+            }
+
+            return typeof cloneInto == "function"
+                ? cloneInto(exportObject, unsafeWindow) // return structured clone
+                : exportObject; // regular object (no need of cloning)
+        }
+
+        // Further cases regard string only
+        if(typeof params != "string") {
+            warn("Cannot resolve export parameters.");
+            return null;
+        }
+
+        if(this.hasOwnProperty(params) && this[params] != "function")
+            return typeof cloneInto == "function"
+                ? cloneInto(this[params], unsafeWindow) // return structured clone
+                : this[params]; // regular object (no need of cloning)
+
+        if(this.hasOwnProperty(params) && this[params] == "function")
+            return typeof exportFunction == "function"
+                ? exportFunction(this[params], unsafeWindow) // return exported function
+                : this[params]; // regular function (no need of exporting)
     }
 };
 // <-- End of options object
@@ -622,7 +632,7 @@ function toggleAutoCollect() {
 var queueTimer;
 function toggleQueueTimer() {
     if (options.queueTimerInterval > 0) {
-        queueTimer = setInterval(unsafeWindow.attemptProduction, options.queueTimerInterval * 60 * 1000);
+        queueTimer = setInterval(unsafeWindow.production.attempt(), options.queueTimerInterval * 60 * 1000);
         log("Queue timer interval set to: " + options.queueTimerInterval + "min.");
     } else {
         queueTimer = clearInterval(queueTimer);
@@ -932,7 +942,7 @@ function saveQueueTab() {
         toggleQueueTimer();
     }
 
-    saveComponent("productionQueue");
+    //saveComponent("productionQueue");
 
     options.set();
     inject.constants();
@@ -1714,4 +1724,3 @@ function ajax(params) {
         });
     }, 1E3);
 }
-
