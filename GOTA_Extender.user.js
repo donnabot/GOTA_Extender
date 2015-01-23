@@ -20,7 +20,7 @@
 // @resource    auxiliary https://greasyfork.org/scripts/7490-donnabot-s-gota-extender-auxiliary/code/Donnabot's%20GOTA_Extender_Auxiliary.js?version=33081
 // @resource    original https://greasyfork.org/scripts/7493-donnabot-s-gota-extender-original/code/Donnabot's%20GOTA_Extender_Original.js?version=33084
 // @resource    production https://greasyfork.org/scripts/7612-donnabots-gota-extender-production/code/Donnabots_GOTA_Extender_Production.js?version=33080
-// @version     0.0.8
+// @version     0.0.9
 // @grant       unsafeWindow
 // @grant       GM_getValue
 // @grant       GM_setValue
@@ -161,12 +161,18 @@ function initialize() {
         // Sort player inventory
         unsafeWindow.sort();
 
+	//autobrute
+	autobruteall();
+
         log('Initialized. Happy hacking.');
         inform("Initialized.");
+
+
 	
     } catch (e) {
         error("Fatal error, initialization failed: " + e);
         inform("Fatal error, initialization failed: " + e);
+
     }
 
 }
@@ -660,6 +666,12 @@ function toggleReloadWindow() {
 
 }
 
+function autobruteall() {
+if(options.autoBrute){
+    unsafeWindow.bruteSendAll();
+}
+}
+
 function acceptAllFavors() {
     ajax({
         url: "/play/accept_favor",
@@ -676,11 +688,7 @@ function acceptAllFavors() {
             } else {
                 log("All favors have been claimed.");
 
-//Still a terrible spot for it but maybe it will work
-if(options.autoBrute){
-    unsafeWindow.bruteSendAll();
-}
-//will move it again later
+
 
             }
         }
