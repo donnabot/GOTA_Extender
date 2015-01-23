@@ -357,11 +357,11 @@ buildTimerUpdate = function(c, a, b) {
         doInstantSpeedUp(c, false, function() {
             setTimeout(function() {
                 doFinishProduction(d.item_id);
-            }, (extender_queueDelay / 2) * 1000);
+            }, (production.queueDelay / 2));
 
             setTimeout(function() {
                 production.attempt(d.symbol);
-            }, extender_queueDelay * 1000);
+            }, production.queueDelay);
         });
     } else if (a < 300 - 30) {
         doInstantSpeedUp(c, false, function() {
