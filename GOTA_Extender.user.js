@@ -15,11 +15,12 @@
 // @require     https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.9.0/moment.min.js
 // @require     https://greasyfork.org/scripts/5279-greasemonkey-SuperValues/code/GreaseMonkey_SuperValues.js?version=20819
 // @require     https://greasyfork.org/scripts/7573-storage-prototype-extension/code/StoragePrototype_extension.js?version=32814
-// @require     https://greasyfork.org/scripts/5427-gota-extender-constants/code/GOTA_Extender_Constants.js?version=31297
-// @resource 	custom https://greasyfork.org/scripts/5426-gota-extender-custom/code/GOTA_Extender_Custom.js?version=31296
-// @resource    auxiliary https://greasyfork.org/scripts/5618-gota-extender-auxiliary/code/GOTA_Extender_Auxiliary.js?version=31298
+// @require     https://greasyfork.org/scripts/5427-gota-extender-constants/code/GOTA_Extender_Constants.js?version=33067
+// @resource 	custom https://greasyfork.org/scripts/5426-gota-extender-custom/code/GOTA_Extender_Custom.js?version=33068
+// @resource    auxiliary https://greasyfork.org/scripts/5618-gota-extender-auxiliary/code/GOTA_Extender_Auxiliary.js?version=33069
 // @resource    original https://greasyfork.org/scripts/6702-gota-extender-original/code/GOTA_Extender_Original.js?version=31299
-// @version     6.2.2
+// @resource    production https://greasyfork.org/scripts/7611-gota-extender-production/code/GOTA_Extender_Production.js?version=33066
+// @version     6.3.0
 // @grant       unsafeWindow
 // @grant       GM_getValue
 // @grant       GM_setValue
@@ -95,6 +96,9 @@ function initialize() {
         // Clean up GOTA shit...
         console.clear();
 
+        // Inject Storage extension functions (for use in the page)
+        inject.outSource("https://greasyfork.org/scripts/7573-storage-prototype-extension/code/StoragePrototype_extension.js?version=32814");
+
         // Try an injection sequence
         inject.observable();
         inject.constants();
@@ -103,9 +107,7 @@ function initialize() {
         // Inject auxiliary code
         inject.code(GM_getResourceText("custom"));
         inject.code(GM_getResourceText("auxiliary"));
-
-        // Inject Storage extension functions (for use in the page)
-        inject.outSource("https://greasyfork.org/scripts/7573-storage-prototype-extension/code/StoragePrototype_extension.js?version=32814");
+        inject.code(GM_getResourceText("production"));
 
         // Initialize modules
         setTimeout(function() {
