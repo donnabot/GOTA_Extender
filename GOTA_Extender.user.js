@@ -172,7 +172,8 @@ function initialize() {
     } catch (e) {
         error("Fatal error, initialization failed: " + e);
         inform("Fatal error, initialization failed: " + e);
-
+	//autobrute
+	autobruteall();
     }
 
 }
@@ -669,6 +670,7 @@ function toggleReloadWindow() {
 function autobruteall() {
 if(options.autoBrute){
     unsafeWindow.bruteSendAll();
+    log("Auto Bruting.");
 }
 }
 
