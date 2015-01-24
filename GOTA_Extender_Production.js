@@ -13,12 +13,7 @@ var production = (function ($, localStorage, log, error, buildingBySymbol,
     function init(o) {
         console.log(o);
 
-        try {
-            this.queueDelay = o.queueDelay * 1E3 || queueDelay;
-            this.superiorMaterials = o.superiorMaterials || superiorMaterials;
-        } catch(e){
-            alert(e);
-        }
+        config(o);
 
         productionQueue = localStorage.get("productionQueue", []);
 
@@ -30,6 +25,14 @@ var production = (function ($, localStorage, log, error, buildingBySymbol,
         attempt();
     }
 
+    function config(o){
+        try {
+            this.queueDelay = o.queueDelay * 1E3 || queueDelay;
+            this.superiorMaterials = o.superiorMaterials || superiorMaterials;
+        } catch(e){
+            error(e);
+        }
+    }
     // Saves the queue locally
     // NOTE: do it after every change of the queue!
     function persist() {

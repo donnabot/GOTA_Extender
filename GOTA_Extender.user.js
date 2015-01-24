@@ -113,7 +113,7 @@ function initialize() {
         setTimeout(function() {
 
             unsafeWindow.production.init(options.export(["queueDelay", "superiorMaterials"]));
-            unsafeWindow.bossChallenger.init();
+            unsafeWindow.bossChallenger.init(options.export(["autoBossChallenge"]));
 
         }, 2E3);
 
@@ -462,7 +462,7 @@ var inject = {
             unsafeWindow.extender_shopSortBy2 = cloneInto(options.shopSortBy2, unsafeWindow);
 
             unsafeWindow.extender_sendAllAction = cloneInto(options.sendAllAction, unsafeWindow);
-            unsafeWindow.extender_autoBossChallenge = cloneInto(options.autoBossChallenge, unsafeWindow);
+            //unsafeWindow.extender_autoBossChallenge = cloneInto(options.autoBossChallenge, unsafeWindow);
 
             unsafeWindow.userContext.tooltipsEnabled = cloneInto(options.doTooltips, unsafeWindow);
 
@@ -481,7 +481,7 @@ var inject = {
             unsafeWindow.extender_shopSortBy2 = options.shopSortBy2;
 
             unsafeWindow.extender_sendAllAction = options.sendAllAction;
-            unsafeWindow.extender_autoBossChallenge = options.autoBossChallenge;
+            //unsafeWindow.extender_autoBossChallenge = options.autoBossChallenge;
 
             unsafeWindow.userContext.tooltipsEnabled = options.doTooltips;
         }
