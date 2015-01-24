@@ -16,10 +16,10 @@
 // @require     https://greasyfork.org/scripts/5279-greasemonkey-SuperValues/code/GreaseMonkey_SuperValues.js?version=20819
 // @require     https://greasyfork.org/scripts/7573-storage-prototype-extension/code/StoragePrototype_extension.js?version=32814
 // @require     https://greasyfork.org/scripts/5427-gota-extender-constants/code/GOTA_Extender_Constants.js?version=33067
-// @resource 	custom https://greasyfork.org/scripts/5426-gota-extender-custom/code/GOTA_Extender_Custom.js?version=33233
-// @resource    auxiliary https://greasyfork.org/scripts/5618-gota-extender-auxiliary/code/GOTA_Extender_Auxiliary.js?version=33245
+// @resource 	custom https://greasyfork.org/scripts/5426-gota-extender-custom/code/GOTA_Extender_Custom.js?version=33252
+// @resource    auxiliary https://greasyfork.org/scripts/5618-gota-extender-auxiliary/code/GOTA_Extender_Auxiliary.js?version=33251
 // @resource    original https://greasyfork.org/scripts/6702-gota-extender-original/code/GOTA_Extender_Original.js?version=31299
-// @resource    production https://greasyfork.org/scripts/7611-gota-extender-production/code/GOTA_Extender_Production.js?version=33244
+// @resource    production https://greasyfork.org/scripts/7611-gota-extender-production/code/GOTA_Extender_Production.js?version=33250
 // @version     6.6.6
 // @grant       unsafeWindow
 // @grant       GM_getValue
