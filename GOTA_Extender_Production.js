@@ -11,11 +11,9 @@ var production = (function ($, localStorage, log, error, buildingBySymbol,
     // Retrieves production
     // queue from localStorage
     function init(o) {
-        console.log(o);
-
-        config(o);
-
         productionQueue = localStorage.get("productionQueue", []);
+
+        this.config(o);
 
         $("#modal_dialogs_top").on('click', '#upgradeQueue', enqueue);
         $("#modal_dialogs_top").on('click', 'span.btnwrap.btnmed.equipbtn.queue', enqueue);
@@ -26,13 +24,16 @@ var production = (function ($, localStorage, log, error, buildingBySymbol,
     }
 
     function config(o){
+        //console.debug(o);
+
         try {
-            this.queueDelay = o.queueDelay * 1E3 || queueDelay;
-            this.superiorMaterials = o.superiorMaterials || superiorMaterials;
+            this.queueDelay = o.queueDelay * 1E3;
+            this.superiorMaterials = o.superiorMaterials;
         } catch(e){
             error(e);
         }
     }
+
     // Saves the queue locally
     // NOTE: do it after every change of the queue!
     function persist() {
@@ -387,6 +388,7 @@ var production = (function ($, localStorage, log, error, buildingBySymbol,
         persist: persist,
         enqueue: enqueue,
         render: render,
+        config: config,
         getElement: getElement,
         removeElement: removeElement,
         executeElement: executeElement,

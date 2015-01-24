@@ -910,15 +910,15 @@ function clearLog(){
     $("#logTab").trigger("click");
 }
 
-var bossChallenger = (function(log, error, questClose, questSubmit){
+var bossChallenger = (function(log, error, questClose, questSubmit, localStorage){
 
     var bossQuests = [];
     var enabled = true;
 
     function init(o){
-        localStorage.get("bossQuests", []);
+        bossQuests = localStorage.get("bossQuests", []);
 
-        config(o);
+        this.config(o);
 
         // Relaunch any quests pending...
         for(var i = 0; i < bossQuests.length; i++){
@@ -928,8 +928,10 @@ var bossChallenger = (function(log, error, questClose, questSubmit){
     }
 
     function config(o){
+        //console.debug(o);
+
         try {
-            this.enabled = o.autoBossChallenge || enabled;
+            this.enabled = o.autoBossChallenge;
         } catch(e){
             error(e);
         }
@@ -997,10 +999,12 @@ var bossChallenger = (function(log, error, questClose, questSubmit){
         init: init,
         fight: fight,
         persist: persist,
+        config: config,
+
         enabled: enabled,
         bossQuests: bossQuests
     }
 
-}(log, error, questClose, questSubmit));
+}(log, error, questClose, questSubmit, localStorage));
 
 

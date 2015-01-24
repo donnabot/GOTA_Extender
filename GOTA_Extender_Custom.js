@@ -1257,7 +1257,6 @@ function pvpLaunch(callback) {
 }
 log("Player vs player enhanced. Client pvpBan, hilarious.", "initialize");
 
-var bossChallenges = [];
 function questSubmit(b, a, c, d, g, k, f) {
     doLog("questSubmit: stage=" + a + " choice=" + c);
     uiEvent("quest_submit_" + b + "_" + a + "_choice_" + c, userContext.playerData);

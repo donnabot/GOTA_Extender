@@ -17,9 +17,9 @@
 // @require     https://greasyfork.org/scripts/7573-storage-prototype-extension/code/StoragePrototype_extension.js?version=32814
 // @require     https://greasyfork.org/scripts/5427-gota-extender-constants/code/GOTA_Extender_Constants.js?version=33067
 // @resource 	custom https://greasyfork.org/scripts/5426-gota-extender-custom/code/GOTA_Extender_Custom.js?version=33233
-// @resource    auxiliary https://greasyfork.org/scripts/5618-gota-extender-auxiliary/code/GOTA_Extender_Auxiliary.js?version=33234
+// @resource    auxiliary https://greasyfork.org/scripts/5618-gota-extender-auxiliary/code/GOTA_Extender_Auxiliary.js?version=33245
 // @resource    original https://greasyfork.org/scripts/6702-gota-extender-original/code/GOTA_Extender_Original.js?version=31299
-// @resource    production https://greasyfork.org/scripts/7611-gota-extender-production/code/GOTA_Extender_Production.js?version=33066
+// @resource    production https://greasyfork.org/scripts/7611-gota-extender-production/code/GOTA_Extender_Production.js?version=33244
 // @version     6.6.6
 // @grant       unsafeWindow
 // @grant       GM_getValue
@@ -900,6 +900,7 @@ function saveMainTab() {
     options.doTooltips = $("#toggleTooltips").hasClass("checked");
     options.neverSpendGold = $("#neverSpendGold").hasClass("checked");
     options.autoBossChallenge = $("#autoBossChallenge").hasClass("checked");
+    unsafeWindow.bossChallenger.config(options.export(["autoBossChallenge"]));
 
 
     var ari = parseInt($("#autoReloadInterval").val());
@@ -946,6 +947,7 @@ function saveQueueTab() {
     }
 
     //saveComponent("productionQueue");
+    unsafeWindow.production.config(options.export(["queueDelay", "superiorMaterials"]));
 
     options.set();
     inject.constants();
