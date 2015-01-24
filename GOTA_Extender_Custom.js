@@ -364,6 +364,7 @@ buildTimerUpdate = function(c, a, b) {
             }, (production.queueDelay));
         });
     } else if (a < 300 - 30) {
+        clearTimeout(userContext.buildingTimer[d.symbol]);
         doInstantSpeedUp(c, false, function() {
             doFinishProduction(d.item_id, function(){
                 setTimeout(function() {
