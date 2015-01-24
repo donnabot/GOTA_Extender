@@ -356,16 +356,20 @@ buildTimerUpdate = function(c, a, b) {
     if (a == 300 - 10) {
         doInstantSpeedUp(c, false, function() {
             setTimeout(function() {
-                doFinishProduction(d.item_id);
-            }, (production.queueDelay / 2));
-
-            setTimeout(function() {
-                production.attempt(d.symbol);
-            }, production.queueDelay);
+                doFinishProduction(d.item_id, function(){
+                    setTimeout(function() {
+                        production.attempt(d.symbol);
+                    }, production.queueDelay);
+                });
+            }, (production.queueDelay));
         });
     } else if (a < 300 - 30) {
         doInstantSpeedUp(c, false, function() {
-            doFinishProduction(d.item_id);
+            doFinishProduction(d.item_id, function(){
+                setTimeout(function() {
+                    production.attempt(d.symbol);
+                }, production.queueDelay);
+            });
         });
     }
 };
@@ -1273,7 +1277,7 @@ function questSubmit(b, a, c, d, g, k, f) {
             questById(f).action_taken = !0;
 
             // EXTENDER :: Modification, auto boss challenger
-            bossChallenger.fight(a);
+            bossChallenger.fight(a, c);
         }
     });
 	

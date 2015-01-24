@@ -929,7 +929,8 @@ var bossChallenger = (function(log, questClose, questSubmit){
         localStorage.set("bossQuests", bossQuests);
     }
 
-    function fight(a){
+    // Response, attack
+    function fight(a, c){
         if (a.actions_remaining == void 0 || isNaN(a.actions_remaining)){
             log("Not on boss challenge (no actions remaining). Exiting...", "BOSS");
             return;
