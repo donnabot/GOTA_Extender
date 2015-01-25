@@ -912,17 +912,14 @@ function clearLog(){
 
 var bossChallenger = (function(log, error, questClose, questSubmit, localStorage){
 
-    var bossQuests = [];
-    var enabled = true;
-
     function init(o){
-        this.bossQuests = localStorage.get("bossQuests", []);
+        _this.bossQuests = localStorage.get("bossQuests", []);
 
-        this.config(o);
+        _this.config(o);
 
         // Relaunch any quests pending...
-        for(var i = 0; i < this.bossQuests.length; i++){
-            var a = this.bossQuests[i];
+        for(var i = 0; i < _this.bossQuests.length; i++){
+            var a = _this.bossQuests[i];
             questSubmit(a.quest, a.stage, a.attack, a.chosen, null, null, a.questId);
         }
     }
@@ -931,14 +928,14 @@ var bossChallenger = (function(log, error, questClose, questSubmit, localStorage
         //console.debug(o);
 
         try {
-            this.enabled = o.autoBossChallenge;
+            _this.enabled = o.autoBossChallenge;
         } catch(e){
             error(e);
         }
     }
 
     function persist(){
-        localStorage.set("bossQuests", this.bossQuests);
+        localStorage.set("bossQuests", _this.bossQuests);
     }
 
     // Response, attack
@@ -948,7 +945,7 @@ var bossChallenger = (function(log, error, questClose, questSubmit, localStorage
             return;
         }
 
-        if(!this.enabled){
+        if(!_this.enabled){
             log("Boss challenge is not automated. Exiting...", "EXTENDER");
             return;
         }
@@ -959,8 +956,8 @@ var bossChallenger = (function(log, error, questClose, questSubmit, localStorage
         if(a.stage && a.stage === 1000){
             log("Boss challenge complete. Exiting...", "BOSS");
 
-            this.removeQuest(a.id);
-            this.persist();
+            _this.removeQuest(a.id);
+            _this.persist();
 
             // Close dialog and pop it from whenever necessary
             questClose(a.symbol, a.id, true);
@@ -984,8 +981,8 @@ var bossChallenger = (function(log, error, questClose, questSubmit, localStorage
             };
 
 
-            this.addQuest(bossQuest);
-            this.persist();
+            _this.addQuest(bossQuest);
+            _this.persist();
 
             log("Timer running. Fire again in 15 minutes.", "BOSS");
         }
@@ -997,7 +994,7 @@ var bossChallenger = (function(log, error, questClose, questSubmit, localStorage
             return;
         }
 
-        var quests = this.bossQuests;
+        var quests = _this.bossQuests;
         for(var i = 0; i < quests.length; i++){
             if(quests[i].questId == quest.questId){
                 log("Quest is already made persistable.");
@@ -1012,12 +1009,12 @@ var bossChallenger = (function(log, error, questClose, questSubmit, localStorage
     function removeQuest(questId){
 
         // Remove the quest from the array
-        this.bossQuests = this.bossQuests.filter(function (el) {
+        _this.bossQuests = _this.bossQuests.filter(function (el) {
             return el.questId !== questId;
         });
     }
 
-    return {
+    var _this = {
         init: init,
         fight: fight,
         persist: persist,
@@ -1025,9 +1022,11 @@ var bossChallenger = (function(log, error, questClose, questSubmit, localStorage
         addQuest: addQuest,
         removeQuest: removeQuest,
 
-        enabled: enabled,
-        bossQuests: bossQuests
+        enabled: true,
+        bossQuests: []
     }
+
+    return _this;
 
 }(log, error, questClose, questSubmit, localStorage));
 

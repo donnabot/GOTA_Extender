@@ -1,19 +1,15 @@
 var production = (function ($, localStorage, log, error, buildingBySymbol,
+                            buildingProducing, buildingFinished, buildingBySymbol,
                             doFinishProduction, userContext, doProduction,
                             applySelectedUpgrade, buildingUpgrades, inform) {
-
-    var productionQueue = [];
-
-    var queueDelay = 4E3;
-    var superiorMaterials = true;
 
 
     // Retrieves production
     // queue from localStorage
     function init(o) {
-        productionQueue = localStorage.get("productionQueue", []);
+        _this.queue = localStorage.get("_this.queue", []);
 
-        this.config(o);
+        _this.config(o);
 
         $("#modal_dialogs_top").on('click', '#upgradeQueue', enqueue);
         $("#modal_dialogs_top").on('click', 'span.btnwrap.btnmed.equipbtn.queue', enqueue);
@@ -27,8 +23,8 @@ var production = (function ($, localStorage, log, error, buildingBySymbol,
         //console.debug(o);
 
         try {
-            this.queueDelay = o.queueDelay * 1E3;
-            this.superiorMaterials = o.superiorMaterials;
+            _this.queueDelay = o.queueDelay * 1E3;
+            _this.superiorMaterials = o.superiorMaterials;
         } catch(e){
             error(e);
         }
@@ -37,14 +33,14 @@ var production = (function ($, localStorage, log, error, buildingBySymbol,
     // Saves the queue locally
     // NOTE: do it after every change of the queue!
     function persist() {
-        localStorage.set("productionQueue", productionQueue);
+        localStorage.set("_this.queue", _this.queue);
     }
 
     // Attempts building
     // production
     function attempt(bSymbol) {
 
-        if (!productionQueue || productionQueue.length == 0) {
+        if (!_this.queue || _this.queue.length == 0) {
             log('Attempted production, but queue was missing or empty. Exiting...', "PRODUCTION");
             return;
         }
@@ -54,7 +50,7 @@ var production = (function ($, localStorage, log, error, buildingBySymbol,
 
         if (bSymbol != void 0) {
 
-            // Check this building for production
+            // Check _this building for production
             building = buildingBySymbol(bSymbol);
 
             if (buildingProducing(building)) {
@@ -68,7 +64,7 @@ var production = (function ($, localStorage, log, error, buildingBySymbol,
                 doFinishProduction(building.item_id, function () {
                     setTimeout(function () {
                         attempt(building.symbol);
-                    }, queueDelay);
+                    }, _this.queueDelay);
                 });
 
                 return;
@@ -92,7 +88,7 @@ var production = (function ($, localStorage, log, error, buildingBySymbol,
                 doFinishProduction(building.item_id, function () {
                     setTimeout(function () {
                         attempt(building.symbol);
-                    }, queueDelay);
+                    }, _this.queueDelay);
                 });
 
                 return;
@@ -107,23 +103,23 @@ var production = (function ($, localStorage, log, error, buildingBySymbol,
     }
 
     function getElement(bSymbol) {
-        //if (!productionQueue || productionQueue.length == 0) {
+        //if (!_this.queue || _this.queue.length == 0) {
         //    log('Attempted to extract item from queue, but the production queue was missing or empty. Exiting...', "PRODUCTION");
         //    return null;
         //}
 
         var element;
 
-        for (var i = 0; i < productionQueue.length; i++) {
+        for (var i = 0; i < _this.queue.length; i++) {
 
-            if (productionQueue[i].activeBuildingPanel == bSymbol) {
-                element = productionQueue[i];
+            if (_this.queue[i].activeBuildingPanel == bSymbol) {
+                element = _this.queue[i];
                 break;
             }
         }
 
         if (!element) {
-            log('No elements enqueued for building ' + bSymbol + '. Array size: ' + productionQueue.length, "PRODUCTION");
+            log('No elements enqueued for building ' + bSymbol + '. Array size: ' + _this.queue.length, "PRODUCTION");
             return null;
         }
 
@@ -132,7 +128,7 @@ var production = (function ($, localStorage, log, error, buildingBySymbol,
 
     function executeElement(element, callback) {
 
-        var index = productionQueue.indexOf(element);
+        var index = _this.queue.indexOf(element);
         log('Production of element ' + element.name + ' : ' + element.type + ' with index ' + index + ' initiated. ' +
         (callback == void 0 ? 'No callback set.' : 'Callback set after production.'), "PRODUCTION");
 
@@ -141,7 +137,7 @@ var production = (function ($, localStorage, log, error, buildingBySymbol,
             userContext.activeBuildingPanel = element.activeBuildingPanel;
 
             doProduction(element.outputSymbol, element.recipeCategory, null, null, element.recipeName, callback);
-            productionQueue.splice(index, 1);
+            _this.queue.splice(index, 1);
             persist();
 
             log('Production details: ' + element.name + ' at ' + element.activeBuildingPanel + ', ' + element.outputSymbol + ', ' + element.recipeCategory + ', ' + element.recipeName + ';', "PRODUCTION");
@@ -150,7 +146,7 @@ var production = (function ($, localStorage, log, error, buildingBySymbol,
             var buildingId = buildingBySymbol(element.activeBuildingPanel).id;
 
             applySelectedUpgrade({building_id: buildingId, id: element.upgradeId, gold: 0, silver: 0}, null, callback);
-            productionQueue.splice(index, 1);
+            _this.queue.splice(index, 1);
             persist();
 
             log('Production details: ' + element.name + ' : ' + element.type + ' at ' + element.activeBuildingPanel + ', ' + element.symbol + ';', "PRODUCTION");
@@ -158,10 +154,10 @@ var production = (function ($, localStorage, log, error, buildingBySymbol,
     }
 
     function removeElement(index) {
-        if (productionQueue.length == 1) {
-            productionQueue.pop();
+        if (_this.queue.length == 1) {
+            _this.queue.pop();
         } else {
-            productionQueue.splice(index, 1);
+            _this.queue.splice(index, 1);
             persist();
         }
     }
@@ -218,7 +214,7 @@ var production = (function ($, localStorage, log, error, buildingBySymbol,
                     "activeBuildingPanel": userContext.activeBuildingPanel
                 };
 
-                productionQueue.push(upgrade);
+                _this.queue.push(upgrade);
                 persist();
 
                 log("Pushed upgrade to queue.");
@@ -300,16 +296,16 @@ var production = (function ($, localStorage, log, error, buildingBySymbol,
                     // Insert the element into the queueArray (cloneInto for Mozilla)
                     //if (typeof (cloneInto) == "function") {
                     //    var elementClone = cloneInto(element, unsafeWindow);
-                    //    productionQueue.push(elementClone);
+                    //    _this.queue.push(elementClone);
                     //} else {
-                    //    productionQueue.push(element);
+                    //    _this.queue.push(element);
                     //}
 
-                    productionQueue.push(element);
+                    _this.queue.push(element);
                     persist();
 
-                    //options.productionQueue = productionQueue;
-                    //options.set("productionQueue");
+                    //options._this.queue = _this.queue;
+                    //options.set("_this.queue");
 
                     quantity--;
 
@@ -369,20 +365,20 @@ var production = (function ($, localStorage, log, error, buildingBySymbol,
             $(this).remove();
         });
 
-        if (!productionQueue || productionQueue.length == 0) {
+        if (!_this.queue || _this.queue.length == 0) {
             log("No queue was found to render.");
             return;
         }
 
         // Render items
-        for (var i = 0; i < productionQueue.length; i++) {
-            $("#headerRow").after(tableRow(i, productionQueue[i]));
+        for (var i = 0; i < _this.queue.length; i++) {
+            $("#headerRow").after(tableRow(i, _this.queue[i]));
         }
 
-        log("Production queue rendered " + productionQueue.length + " items.");
+        log("Production queue rendered " + _this.queue.length + " items.");
     }
 
-    return {
+    var _this = {
         init: init,
         attempt: attempt,
         persist: persist,
@@ -393,11 +389,14 @@ var production = (function ($, localStorage, log, error, buildingBySymbol,
         removeElement: removeElement,
         executeElement: executeElement,
 
-        queue: productionQueue,
-        queueDelay: queueDelay,
-        superiorMaterials: superiorMaterials
+        queue: [],
+        queueDelay: 4E3,
+        superiorMaterials: true
     }
+    
+    return _this;
 
 }($, localStorage, log, error, buildingBySymbol,
+    buildingProducing, buildingFinished, buildingBySymbol,
     doFinishProduction, userContext, doProduction,
     applySelectedUpgrade, buildingUpgrades, inform));
