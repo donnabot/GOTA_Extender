@@ -7,7 +7,7 @@ var production = (function ($, localStorage, log, error, buildingBySymbol,
     // Retrieves production
     // queue from localStorage
     function init(o) {
-        _this.queue = localStorage.get("_this.queue", []);
+        _this.queue = localStorage.get("productionQueue", []);
 
         _this.config(o);
 
@@ -33,7 +33,7 @@ var production = (function ($, localStorage, log, error, buildingBySymbol,
     // Saves the queue locally
     // NOTE: do it after every change of the queue!
     function persist() {
-        localStorage.set("_this.queue", _this.queue);
+        localStorage.set("productionQueue", _this.queue);
     }
 
     // Attempts building
