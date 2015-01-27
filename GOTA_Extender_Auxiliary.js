@@ -16,12 +16,8 @@ var extender = {
             error("Please specify name and value as parameters.", "COMMAND");
         }
     },
-    save: function(component){
-        if (typeof component == "string") {
-            this.command("save", [component]);
-        } else {
-            error("Please specify the component to be saved.", "COMMAND");
-        }
+    collect: function(){
+        this.command("collect");
     }
 };
 //
@@ -883,24 +879,38 @@ function receiveMessage(event) {
 }
 
 function observable_onkeyup(e){
-    if(e.keyCode !== 13)
-        return true;
+    //console.debug(e);
 
-    var observable = $("textarea#observable");
-    if (!observable) {
-        error("The observable DOM element was not found in the page.");
+    if(e.keyCode === 13 && !e.ctrlKey && !e.shiftKey) {
+        var observable = $("textarea#observable");
+        if (!observable) {
+            error("The observable DOM element was not found in the page.");
+            return false;
+        }
+
+        try {
+            var cmd = observable.val().split("\n")[0];
+            eval("extender." + cmd);
+        } catch (err) {
+            var prefix = "COMMAND FAILED" + " | " + new Date().toLocaleTimeString() + " | ";
+            observable.val(prefix + err);
+        }
+
         return false;
     }
 
-    try {
-        var cmd = observable.val().toString();
-        eval("extender." + cmd);
-    } catch(err) {
-        var prefix = "COMMAND ACKNOWLEDGED" + " | " + new Date().toLocaleTimeString() + " | ";
-        observable.val(prefix + err);
+    if(e.keyCode === 46){
+        var observable = $("textarea#observable");
+        if (!observable) {
+            error("The observable DOM element was not found in the page.");
+            return false;
+        }
+
+        observable.val("");
+        return false;
     }
 
-    return false;
+    return true;
 }
 
 function clearLog(){

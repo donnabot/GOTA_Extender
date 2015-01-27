@@ -86,14 +86,22 @@ var templates = {
             '</span>',
 
     clearLogOptionsBtn:
-        '<span id="clearExLog" class="btnwrap btnlg" onclick="clearLog()">' +
+        '<span id="clearExLog" class="btnwrap btnlg exBtn" onclick="clearLog()">' +
             '<span class="btnedge">' +
             '<a class="btngold">Clear log</a>' +
             '</span>' +
             '</span>',
 
-    observable:
-        '<textarea id="observable" rows="1" style="width:99%; overflow:auto; display: none;" onkeyup="observable_onkeyup(event)"></textarea>',
+    showObservableBtn:
+        '<span id="showObservable" class="btnwrap btnlg exBtn" onclick="javascript: $(\'#observable\').toggle(\'display\');">' +
+            '<span class="btnedge">' +
+            '<a class="btngold">Console</a>' +
+            '</span>' +
+            '</span>',
+
+    observable: function(display) {
+        return '<textarea id="observable" rows="3" style="width:99%; overflow:auto; display: ' + (display ? 'inline' : 'none') + ';" onkeyup="observable_onkeyup(event)"></textarea>';
+    },
 
     tabContent:
         '<div id="extenderTabContent" style="margin-top: 18px; margin-top: 18px; overlow-x: scroll; height: 460px;"></div>',
@@ -322,7 +330,7 @@ var templates = {
     logTab: function () {
 
         var log = sessionStorage.get("clientEntries", []);
-        var output = '<div class="exrow" style="text-align: right"> ' + this.clearLogOptionsBtn + '</div>';
+        var output = '<div class="exrow" style="text-align: right"> ' + this.showObservableBtn + this.clearLogOptionsBtn + '</div>';
 
         output += '<div class="exrow"><textarea style="width: 95%; height: 400px; overflow-y: scroll;" readonly="readonly" onkeydown="return false;" onkeypress="return false;" onkeyup="return false;" disabled="disabled">';
         for(var i = log.length - 1; i > -1; i--){
@@ -435,6 +443,11 @@ var styles = {
     exRow:
         '.exrow {' +
             'margin: 8px 0 0;' +
+            '}',
+
+    exBtn:
+        '.exBtn {' +
+            'padding: 0 10px 0 0;' +
             '}',
 
     exOption:
