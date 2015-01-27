@@ -20,7 +20,7 @@
 // @resource    auxiliary https://greasyfork.org/scripts/5618-gota-extender-auxiliary/code/GOTA_Extender_Auxiliary.js?version=33442
 // @resource    original https://greasyfork.org/scripts/6702-gota-extender-original/code/GOTA_Extender_Original.js?version=31299
 // @resource    production https://greasyfork.org/scripts/7611-gota-extender-production/code/GOTA_Extender_Production.js?version=33443
-// @version     6.8.1
+// @version     6.8.2
 // @grant       unsafeWindow
 // @grant       GM_getValue
 // @grant       GM_setValue
@@ -635,7 +635,7 @@ function toggleAutoCollect() {
 var queueTimer;
 function toggleQueueTimer() {
     if (options.queueTimerInterval > 0) {
-        queueTimer = setInterval(unsafeWindow.production.attempt(), options.queueTimerInterval * 60 * 1000);
+        queueTimer = setInterval(unsafeWindow.production.attempt, options.queueTimerInterval * 60 * 1000);
         log("Queue timer interval set to: " + options.queueTimerInterval + "min.");
     } else {
         queueTimer = clearInterval(queueTimer);
