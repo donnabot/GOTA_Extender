@@ -234,6 +234,7 @@ var production = (function ($, localStorage, log, error, buildingBySymbol,
 
                 // Extract variables needed
                 var recipeName;
+                var recipeData;
 
                 var source = userContext.productionItemsClick[userContext.currentProductionItem];
 
@@ -246,16 +247,19 @@ var production = (function ($, localStorage, log, error, buildingBySymbol,
                     var r = userContext.recipeData[i];
                     if (r.output == source.outputSymbol) {
                         recipeName = r.symbol;
+                        recipeData = [r];
                         break;
                     }
 
                     if (r.success_loot_table && r.success_loot_table == source.outputSymbol) {
                         recipeName = r.symbol;
+                        recipeData = [r];
                         break;
                     }
 
                     if (r.success_loot_item && r.success_loot_item == source.outputSymbol) {
                         recipeName = r.symbol;
+                        recipeData = [r];
                         break;
                     }
                 }
@@ -267,6 +271,7 @@ var production = (function ($, localStorage, log, error, buildingBySymbol,
                         var recipeInputs = JSON.stringify(r.input.split(","));
                         if (JSON.stringify(source.recipeInputs) === recipeInputs) {
                             recipeName = r.symbol;
+                            recipeData = [r];
                             break;
                         }
                     }
@@ -274,6 +279,11 @@ var production = (function ($, localStorage, log, error, buildingBySymbol,
 
                 if (!recipeName) {
                     error('Failed to extract recipeName.');
+                    return;
+                }
+
+                if (!recipeData) {
+                    error('Failed to extract recipeData.');
                     return;
                 }
 
@@ -289,7 +299,7 @@ var production = (function ($, localStorage, log, error, buildingBySymbol,
                         "type": "item",
                         "outputSymbol": source.outputSymbol,
                         "recipeCategory": source.recipeCategory,
-                        "recipeData": userContext.recipeData,
+                        "recipeData": recipeData,
                         "activeBuildingPanel": userContext.activeBuildingPanel
                     };
 
