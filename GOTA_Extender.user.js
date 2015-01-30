@@ -20,7 +20,7 @@
 // @resource    auxiliary https://greasyfork.org/scripts/7490-donnabot-s-gota-extender-auxiliary/code/Donnabot's%20GOTA_Extender_Auxiliary.js?version=33081
 // @resource    original https://greasyfork.org/scripts/7493-donnabot-s-gota-extender-original/code/Donnabot's%20GOTA_Extender_Original.js?version=33084
 // @resource    production https://greasyfork.org/scripts/7612-donnabots-gota-extender-production/code/Donnabots_GOTA_Extender_Production.js?version=33080
-// @version     0.0.potato
+// @version     0.0.15
 // @grant       unsafeWindow
 // @grant       GM_getValue
 // @grant       GM_setValue
@@ -113,7 +113,7 @@ function initialize() {
         setTimeout(function() {
 
             unsafeWindow.production.init(options.export(["queueDelay", "superiorMaterials"]));
-            unsafeWindow.bossChallenger.init();
+            unsafeWindow.bossChallenger.init(options.export(["autoBossChallenge"]));
 
         }, 2E3);
 
@@ -163,8 +163,7 @@ function initialize() {
 
 	//autobrute
 	if(options.autoBrute){
-		var brutedelay = 5000;
-		unsafeWindow.setTimeout(function() { unsafeWindow.bruteSendAll(); },brutedelay);
+		unsafeWindow.bruteSendAll();
 		log("Auto Bruting.");
 	}
 
@@ -471,7 +470,7 @@ var inject = {
             unsafeWindow.extender_shopSortBy2 = cloneInto(options.shopSortBy2, unsafeWindow);
 
             unsafeWindow.extender_sendAllAction = cloneInto(options.sendAllAction, unsafeWindow);
-            unsafeWindow.extender_autoBossChallenge = cloneInto(options.autoBossChallenge, unsafeWindow);
+            //unsafeWindow.extender_autoBossChallenge = cloneInto(options.autoBossChallenge, unsafeWindow);
 
             unsafeWindow.userContext.tooltipsEnabled = cloneInto(options.doTooltips, unsafeWindow);
 
@@ -490,7 +489,7 @@ var inject = {
             unsafeWindow.extender_shopSortBy2 = options.shopSortBy2;
 
             unsafeWindow.extender_sendAllAction = options.sendAllAction;
-            unsafeWindow.extender_autoBossChallenge = options.autoBossChallenge;
+            //unsafeWindow.extender_autoBossChallenge = options.autoBossChallenge;
 
             unsafeWindow.userContext.tooltipsEnabled = options.doTooltips;
         }
@@ -644,7 +643,7 @@ function toggleAutoCollect() {
 var queueTimer;
 function toggleQueueTimer() {
     if (options.queueTimerInterval > 0) {
-        queueTimer = setInterval(unsafeWindow.production.attempt(), options.queueTimerInterval * 60 * 1000);
+        queueTimer = setInterval(unsafeWindow.production.attempt, options.queueTimerInterval * 60 * 1000);
         log("Queue timer interval set to: " + options.queueTimerInterval + "min.");
     } else {
         queueTimer = clearInterval(queueTimer);
@@ -912,6 +911,7 @@ function saveMainTab() {
     options.doTooltips = $("#toggleTooltips").hasClass("checked");
     options.neverSpendGold = $("#neverSpendGold").hasClass("checked");
     options.autoBossChallenge = $("#autoBossChallenge").hasClass("checked");
+    unsafeWindow.bossChallenger.config(options.export(["autoBossChallenge"]));
 
     options.autoBrute = $("#autoBrute").hasClass("checked");
 
@@ -959,6 +959,7 @@ function saveQueueTab() {
     }
 
     //saveComponent("productionQueue");
+    unsafeWindow.production.config(options.export(["queueDelay", "superiorMaterials"]));
 
     options.set();
     inject.constants();

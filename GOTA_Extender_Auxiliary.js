@@ -16,12 +16,8 @@ var extender = {
             error("Please specify name and value as parameters.", "COMMAND");
         }
     },
-    save: function(component){
-        if (typeof component == "string") {
-            this.command("save", [component]);
-        } else {
-            error("Please specify the component to be saved.", "COMMAND");
-        }
+    collect: function(){
+        this.command("collect");
     }
 };
 //
@@ -883,24 +879,38 @@ function receiveMessage(event) {
 }
 
 function observable_onkeyup(e){
-    if(e.keyCode !== 13)
-        return true;
+    //console.debug(e);
 
-    var observable = $("textarea#observable");
-    if (!observable) {
-        error("The observable DOM element was not found in the page.");
+    if(e.keyCode === 13 && !e.ctrlKey && !e.shiftKey) {
+        var observable = $("textarea#observable");
+        if (!observable) {
+            error("The observable DOM element was not found in the page.");
+            return false;
+        }
+
+        try {
+            var cmd = observable.val().split("\n")[0];
+            eval("extender." + cmd);
+        } catch (err) {
+            var prefix = "COMMAND FAILED" + " | " + new Date().toLocaleTimeString() + " | ";
+            observable.val(prefix + err);
+        }
+
         return false;
     }
 
-    try {
-        var cmd = observable.val().toString();
-        eval("extender." + cmd);
-    } catch(err) {
-        var prefix = "COMMAND ACKNOWLEDGED" + " | " + new Date().toLocaleTimeString() + " | ";
-        observable.val(prefix + err);
+    if(e.keyCode === 46){
+        var observable = $("textarea#observable");
+        if (!observable) {
+            error("The observable DOM element was not found in the page.");
+            return false;
+        }
+
+        observable.val("");
+        return false;
     }
 
-    return false;
+    return true;
 }
 
 function clearLog(){
@@ -910,48 +920,54 @@ function clearLog(){
     $("#logTab").trigger("click");
 }
 
-var bossChallenger = (function(log, questClose, questSubmit){
+var bossChallenger = (function(log, error, questClose, questSubmit, localStorage){
 
-    var bossQuests = [];
-    var enabled = true;
+    function init(o){
+        _this.bossQuests = localStorage.get("bossQuests", []);
 
-    function init(){
-        localStorage.get("bossQuests", []);
+        _this.config(o);
 
         // Relaunch any quests pending...
-        for(var i = 0; i < bossQuests.length; i++){
-            var a = bossQuests[i];
+        for(var i = 0; i < _this.bossQuests.length; i++){
+            var a = _this.bossQuests[i];
             questSubmit(a.quest, a.stage, a.attack, a.chosen, null, null, a.questId);
         }
     }
 
-    function persist(){
-        localStorage.set("bossQuests", bossQuests);
+    function config(o){
+        //console.debug(o);
+
+        try {
+            _this.enabled = o.autoBossChallenge;
+        } catch(e){
+            error(e);
+        }
     }
 
-    function fight(a){
+    function persist(){
+        localStorage.set("bossQuests", _this.bossQuests);
+    }
+
+    // Response, attack
+    function fight(a, c){
         if (a.actions_remaining == void 0 || isNaN(a.actions_remaining)){
             log("Not on boss challenge (no actions remaining). Exiting...", "BOSS");
             return;
         }
 
-        if(!enabled){
+        if(!_this.enabled){
             log("Boss challenge is not automated. Exiting...", "EXTENDER");
             return;
         }
 
-        log("Boss challenge automated. Actions remaining: " + a.actions_remaining + "," +
+        log("Boss challenge automated. Actions remaining: " + a.actions_remaining + ", " +
         "stage: " + a.stage, "BOSS");
 
         if(a.stage && a.stage === 1000){
             log("Boss challenge complete. Exiting...", "BOSS");
 
-            // Remove the quest from the array
-            bossQuests = bossQuests.filter(function (el) {
-                return el.questId !== a.id;
-            });
-
-            persist();
+            _this.removeQuest(a.id);
+            _this.persist();
 
             // Close dialog and pop it from whenever necessary
             questClose(a.symbol, a.id, true);
@@ -963,7 +979,7 @@ var bossChallenger = (function(log, questClose, questSubmit){
         } else {
             log("No actions remaining! Adjusting...", "BOSS");
 
-            var bossInstance = {
+            var bossQuest = {
                 "quest": a.symbol,
                 "stage": a.stage,
                 "attack": c,
@@ -974,20 +990,54 @@ var bossChallenger = (function(log, questClose, questSubmit){
                 }, 3 * 4 * 60 * 1000)
             };
 
-            bossQuests.push(bossInstance);
 
-            persist();
+            _this.addQuest(bossQuest);
+            _this.persist();
 
             log("Timer running. Fire again in 12 minutes.", "BOSS");
         }
     }
 
-    return {
-        init: init,
-        fight: fight,
-        persist: persist
+    function addQuest(quest){
+        if(quest == void 0){
+            error("No quest was passed to add function. Exiting...");
+            return;
+        }
+
+        var quests = _this.bossQuests;
+        for(var i = 0; i < quests.length; i++){
+            if(quests[i].questId == quest.questId){
+                log("Quest is already made persistable.");
+                return;
+            }
+        }
+
+        quests.push(quest);
+
     }
 
-}(log, questClose, questSubmit));
+    function removeQuest(questId){
+
+        // Remove the quest from the array
+        _this.bossQuests = _this.bossQuests.filter(function (el) {
+            return el.questId !== questId;
+        });
+    }
+
+    var _this = {
+        init: init,
+        fight: fight,
+        persist: persist,
+        config: config,
+        addQuest: addQuest,
+        removeQuest: removeQuest,
+
+        enabled: true,
+        bossQuests: []
+    }
+
+    return _this;
+
+}(log, error, questClose, questSubmit, localStorage));
 
 
