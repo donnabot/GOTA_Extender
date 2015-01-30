@@ -296,6 +296,8 @@ var options = {
     swornSwords: [],
     default_swornSwords: [],
 
+    logLevel: ["QUARTERMASTER", "FAVOR"],
+    default_logLevel: ["QUARTERMASTER", "FAVOR"],
     debugMode: true,
     default_debugMode: true,
     checkScript: false,
@@ -560,58 +562,63 @@ var inject = {
 // <-- End of injection object
 
 // --> Message handling
-(function(){
-    window.log = function log(message, type, clientEntry) {
-        if (options && options.debugMode && console && console.log
-            && typeof (console.log) == "function") {
-            if (!type)
-                type = "extender";
+function log(message, type, clientEntry) {
+    if (options && options.debugMode && console && console.log
+        && typeof (console.log) == "function") {
+        if (!type)
+            type = "extender";
 
-            var prefix = type.toString().toUpperCase() + " <" + new Date().toLocaleTimeString() + "> ";
-            console.log(prefix + message);
-        }
-
-        if(clientEntry != void 0){
-            var clientEntries = sessionStorage.get("clientEntries", []);
-            clientEntries.push(new Date().toLocaleTimeString() + " | " + message);
-            sessionStorage.set("clientEntries", clientEntries);
-        }
-    };
-
-    window.error = function error(message, type) {
-        if (console && console.error && typeof (console.error) == "function") {
-            if (!type)
-                type = "extender";
-
-            var prefix = type.toString().toUpperCase() + " - ERROR <" + new Date().toLocaleTimeString() + "> ";
-            console.error(prefix + message);
-        }
+        var prefix = type.toString().toUpperCase() + " <" + new Date().toLocaleTimeString() + "> ";
+        console.log(prefix + message);
     }
 
-    window.warn = function warn(message, type) {
-        if (console && console.warn && typeof (console.warn) == "function") {
-            if (!type)
-                type = "extender";
-
-            var prefix = type.toString().toUpperCase() + " - WARNING <" + new Date().toLocaleTimeString() + "> ";
-            console.warn(prefix + message);
-        }
+    if(clientEntry != void 0){
+        clientLog(message, type);
     }
+}
 
-    window.inform = function inform(msg) {
+function error(message, type) {
+    if (console && console.error && typeof (console.error) == "function") {
+        if (!type)
+            type = "extender";
 
-        if (unsafeWindow && typeof unsafeWindow.doAlert == "function") {
-            unsafeWindow.doAlert("EXTENDER", templates.formatMessage(msg));
-
-            //$("div#modals_container_high div#modalwrap div#exalert")
-            //    .parents("div.alertboxinner").css("min-height", "0")
-            //    .parent("div.alertbox").css("min-height", "0")
-            //    .parent("div.alertcontents").css("min-height", "0");
-
-        } else if (alert && typeof alert == "function")
-            alert(msg);
+        var prefix = type.toString().toUpperCase() + " - ERROR <" + new Date().toLocaleTimeString() + "> ";
+        console.error(prefix + message);
     }
-}());
+}
+
+function warn(message, type) {
+    if (console && console.warn && typeof (console.warn) == "function") {
+        if (!type)
+            type = "extender";
+
+        var prefix = type.toString().toUpperCase() + " - WARNING <" + new Date().toLocaleTimeString() + "> ";
+        console.warn(prefix + message);
+    }
+}
+
+function inform(msg) {
+
+    if (unsafeWindow && typeof unsafeWindow.doAlert == "function") {
+        unsafeWindow.doAlert("EXTENDER", templates.formatMessage(msg));
+
+        //$("div#modals_container_high div#modalwrap div#exalert")
+        //    .parents("div.alertboxinner").css("min-height", "0")
+        //    .parent("div.alertbox").css("min-height", "0")
+        //    .parent("div.alertcontents").css("min-height", "0");
+
+    } else if (alert && typeof alert == "function")
+        alert(msg);
+}
+
+function clientLog(msg, type){
+
+    if(options.logLevel.indexOf(type) > -1) {
+        var clientEntries = sessionStorage.get("clientEntries", []);
+        clientEntries.push(new Date().toLocaleTimeString() + " | " + msg);
+        sessionStorage.set("clientEntries", clientEntries);
+    }
+}
 // <-- Message handling
 
 // --> Loops handling
@@ -664,7 +671,8 @@ function acceptAllFavors() {
         success: function (r) {
             //console.debug(r, r.accepted);
 
-            r.silver_reward &&  log("Favors claimed: silver reward: " + r.silver_reward, "FAVOR", true);
+            r.silver_reward &&
+                log("Favors claimed: silver reward: " + r.silver_reward, "FAVOR", true);
 
             if(!$.isEmptyObject(r.accepted)){
                 for(var item in r.accepted){
