@@ -530,14 +530,6 @@ var inject = {
             unsafeWindow.inform = inform;
         }
 
-        var clientEntries = sessionStorage.get("clientEntries", []);
-        clientEntries.push([new Date().toLocaleTimeString() + " | Extender initialized successfully."]);
-        sessionStorage.set("clientEntries", clientEntries);
-
-       //typeof (cloneInto) == "function"
-       //    ? unsafeWindow.clientEntries = cloneInto(clientEntriesArray, unsafeWindow)
-       //    : unsafeWindow.clientEntries = clientEntriesArray;
-
         log("Messaging system injected successfully.");
     }
 };
@@ -791,10 +783,8 @@ function showSettings(e) {
         $("#extenderTabMenu .charactertabs").append(templates.optionsTab("logTab", "LOG"));
         $("#extenderTabMenu .charactertabs").append(templates.optionsTab("mainTab", "MAIN"));
         $("#extenderTabMenu .charactertabs").append(templates.optionsTab("queueTab", "QUEUE"));
-
-        if (options.allowBruting) {
-            $("#extenderTabMenu .charactertabs").append(templates.optionsTab("bruteTab", "BRUTING"));
-        }
+        $("#extenderTabMenu .charactertabs").append(templates.optionsTab("bruteTab", "BRUTING"));
+        $("#extenderTabMenu .charactertabs").append(templates.optionsTab("weTab", "WE"));
 
         $("#credits_page").append(templates.tabContent);
         $("#mainTab").trigger('click');
@@ -845,7 +835,11 @@ function tab_onchange(e) {
             getSwornSwords();
             $("#extenderTabContent").html(templates.bruteTab(options));
             break;
+        case "weTab":
+            $("#extenderTabContent").html(templates.weTab(options));
+            break;
         default:
+            warn("Not a known tab or in development.");
             break;
     }
 }
@@ -868,8 +862,11 @@ function saveOptions_click(e) {
             case "bruteTab":
                 saveBruteTab();
                 break;
-
+            case "weTab":
+                saveWeTab();
+                break;
             default:
+                warn("Not a known tab or in development.");
                 return;
         }
 
@@ -885,6 +882,10 @@ function saveOptions_click(e) {
     } catch (e) {
         inform(e);
     }
+}
+
+function saveWeTab(){
+
 }
 
 function saveMainTab() {

@@ -721,32 +721,32 @@ playSound = function playSound(a, d) {
 };
 log("Cleared playSound from console logging.", "initialize");
 
-submitWorldEventAction = function submitWorldEventAction(c, a, b) {
-    console.debug("Submitting world event action, " +
-        "sworn sword id: " + c + ", order: " + a + ", weakness attack? " + b);
-
-    showSpinner();
-    data = { sworn_sword_id: c, order: a };
-    !0 == b && (data.weakness_attack = b);
-    $.ajax({
-        url: "/play/world_event_attack",
-        data: data,
-        complete: function() {
-            hideSpinner();
-        },
-        success: function(a) {
-            console.debug("Logging response from the server for sending the sworn sword: ", b);
-
-            hideSpinner();
-            a.error && doAlert("Error Sending Swornsword", formatWorldEventError(a.error, a.error_code));
-            a.swornsword && (insertInventoryFromItem(userContext.playerData.inventory, a.swornsword), doItemCooldown(a.swornsword));
-            a.challenge && updateWorldEventChallenge(a.challenge);
-            !0 == a.show_outmaneuver_alert &&
-                dialogAlert({ style: "alert", text: "The order you just sent is guaranteed to critically hit and will have a bonus chance to find a weakness.", heading: "", button1: "Okay" });
-        }
-    });
-};
-log("Analyzing world event action.", "initialize");
+//submitWorldEventAction = function submitWorldEventAction(c, a, b) {
+//    console.debug("Submitting world event action, " +
+//        "sworn sword id: " + c + ", order: " + a + ", weakness attack? " + b);
+//
+//    showSpinner();
+//    data = { sworn_sword_id: c, order: a };
+//    !0 == b && (data.weakness_attack = b);
+//    $.ajax({
+//        url: "/play/world_event_attack",
+//        data: data,
+//        complete: function() {
+//            hideSpinner();
+//        },
+//        success: function(a) {
+//            console.debug("Logging response from the server for sending the sworn sword: ", b);
+//
+//            hideSpinner();
+//            a.error && doAlert("Error Sending Swornsword", formatWorldEventError(a.error, a.error_code));
+//            a.swornsword && (insertInventoryFromItem(userContext.playerData.inventory, a.swornsword), doItemCooldown(a.swornsword));
+//            a.challenge && updateWorldEventChallenge(a.challenge);
+//            !0 == a.show_outmaneuver_alert &&
+//                dialogAlert({ style: "alert", text: "The order you just sent is guaranteed to critically hit and will have a bonus chance to find a weakness.", heading: "", button1: "Okay" });
+//        }
+//    });
+//};
+//log("Analyzing world event action.", "initialize");
 
 getWorldEventAttackResults = function getWorldEventAttackResults(c, a, loop) {
     console.debug("Getting world event attack result, " +

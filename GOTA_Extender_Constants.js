@@ -396,6 +396,11 @@ var templates = {
             this.bruteAllBtn +
             this.bruteBtn +                        
             '</div>';
+    },
+
+    weTab: function () {
+
+        return "WORLD EVENT ACTIONS MANAGER";
     }
 };
 
