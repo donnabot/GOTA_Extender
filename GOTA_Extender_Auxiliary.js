@@ -922,26 +922,38 @@ function clearLog(){
 
 var bossChallenger = (function(log, error, questClose, questSubmit, localStorage){
 
+    var _this = {
+        init: init,
+        fight: fight,
+        persist: persist,
+        config: config,
+        addQuest: addQuest,
+        removeQuest: removeQuest,
+
+        enabled: true,
+        bossQuests: []
+    };
+
     function init(o){
-        _this.bossQuests = localStorage.get("bossQuests", []);
+        try {
+            _this.bossQuests = localStorage.get("bossQuests", []);
 
-        _this.config(o);
+            _this.config(o);
 
-        // Relaunch any quests pending...
-        for(var i = 0; i < _this.bossQuests.length; i++){
-            var a = _this.bossQuests[i];
-            questSubmit(a.quest, a.stage, a.attack, a.chosen, null, null, a.questId);
+            // Relaunch any quests pending...
+            for (var i = 0; i < _this.bossQuests.length; i++) {
+                var a = _this.bossQuests[i];
+                questSubmit(a.quest, a.stage, a.attack, a.chosen, null, null, a.questId);
+            }
+        } catch(e) {
+            error(e);
         }
     }
 
     function config(o){
         //console.debug(o);
 
-        try {
-            _this.enabled = o.autoBossChallenge;
-        } catch(e){
-            error(e);
-        }
+        _this.enabled = o.autoBossChallenge;
     }
 
     function persist(){
@@ -1024,20 +1036,30 @@ var bossChallenger = (function(log, error, questClose, questSubmit, localStorage
         });
     }
 
-    var _this = {
-        init: init,
-        fight: fight,
-        persist: persist,
-        config: config,
-        addQuest: addQuest,
-        removeQuest: removeQuest,
-
-        enabled: true,
-        bossQuests: []
-    }
-
     return _this;
 
 }(log, error, questClose, questSubmit, localStorage));
 
+function exSendFavors(favor, characterList){
+
+    var json = {
+        favor: favor,
+        recipients: characterList
+    };
+
+    showSpinner();
+
+    $.ajax({
+        type: "POST",
+        url: "/play/send_mass_favors",
+        data: json,
+        dataType: "JSON",
+        complete: hideSpinner,
+        success: function (a) {
+            !0 == a.status
+                ? void 0 == a.exceptions ? (doAlert("Message Sent", "Your Raven has been sent."), isWeb() || iosSignal("favors_sent", a.count)) : doAlert("Message Sent", "Your Raven has been sent.<br/><br/>" + a.exceptions + " did not receive a favor as you have already sent them the maximum per day.") : !1 == a.status && ("invalid_favor" == a.reason ? doAlert("Message Center",
+                "The selected favor is invalid.") : "not_enough_favors" == a.reason ? doAlert("Message Center", "You have reached your daily favor-giving limit. Your raven was not sent.") : "favor_limit_all" == a.reason ? doAlert("Message Center", "You have already sent the favors daily maximum to these recipients.") : "select_min_player" == a.reason && doAlert("Message Center", "Please select at least one recipient."))
+        }
+    })
+}
 
