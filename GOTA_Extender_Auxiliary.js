@@ -1063,3 +1063,32 @@ function exSendFavors(favor, characterList){
     })
 }
 
+function enlistSS(){
+    var ss = userContext.setSwornSword;
+    if(ss == void 0){
+        error("Could not find the selected sworn sword for enlisting. Exiting...", "WORLD EVENT");
+        return;
+    }
+
+    var weAttackers = localStorage.get("weAttackers", []);
+    if(weAttackers.length == 5){
+        weAttackers.pop();
+        weAttackers.unshift({
+            id: ss.id,
+            attack: ss.modifier
+        })
+    }
+
+}
+
+// TODO: Implement..
+//var PERSISTABLE = {
+//
+//    get queue() {
+//        return localStorage.get("productionQueue", []);
+//    },
+//
+//    set queue(val) {
+//        localStorage.set("productionQueue", val);
+//    }
+//};
