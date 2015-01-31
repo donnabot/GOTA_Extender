@@ -237,6 +237,7 @@ var templates = {
     ],
 
     orders: [
+        { val: "none", text: "NONE"},
         { val: "fight", text: "FIGHT" },
         { val: "harass", text: "HARASS" },
         { val: "aid", text: "PROTECT" },
@@ -427,15 +428,18 @@ var templates = {
 
     weAttackersOutput: function(){
 
-        var weAttackers = localStorage.get("weAttackers", []);
+        var weAttackerIds = localStorage.get("weAttackers", []);
 
         var markup = '';
         for(var i = 0; i < 5; i ++) {
-            var swornsword = weAttackers[i];
 
-            markup += '<div class="exrow">' +
-            'SLOT ' + i + ' : ' + (swornsword != void 0 ? swornsword.id + ' # ' + swornsword.full_name : 'Empty') +
-                this.selectOption("Orders: ", "slot" + i + "orders", this.orders, (attack != void 0 ? attack : swornsword != void 0 ? swornsword.modifier : "none"), "return false") +
+            var swornsword;
+            if(weAttackerIds[i] != void 0)
+                swornsword = unsafeWindow.getSwornSwords(weAttackerIds[i]);
+
+            markup += '<div class="exrow">';
+            markup += 'SLOT ' + i + ' : ' + (swornsword != void 0 ? swornsword.id + ' # ' + swornsword.full_name + ' | ' : 'Empty | ');
+            markup += this.selectOption("Orders: ", "slot_" + i + "_orders", this.orders, (swornsword != void 0 ? swornsword.modifier : "none"), "return false") +
             '</div>';
         }
 
@@ -449,7 +453,11 @@ var templates = {
         markup += '<div class="exrow">' +
             this.outputSwornSwords(o.swornSwords) +
             this.defaultBtn("pushSSid", "", "enlistSS();", "PUSH") +
-        '</div>' + this.weAttackersOutput();
+        '</div>';
+
+        markup += '<div class="exrow">' +
+            this.weAttackersOutput() +
+            '</div>';
 
         return markup;
     }
