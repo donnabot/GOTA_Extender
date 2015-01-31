@@ -134,26 +134,8 @@ function initialize() {
         // Claim favours
         acceptAllFavors();
 
-        // Try to load the queue
-        //if (options.productionQueue != void 0 && options.productionQueue.length > 0) {
-        //    loadComponent("productionQueue");
-        //
-        //    // When done attempt production
-        //    if (typeof unsafeWindow.attemptProduction == "function") {
-        //        unsafeWindow.attemptProduction();
-        //    }
-        //}
-        //
-        //// Try to load the boss challenges
-        //if (options.bossChallenges != void 0 && options.bossChallenges.length > 0) {
-        //    loadComponent("bossChallenges");
-        //
-        //    // When done attempt production
-        //    for(var i = 0; i < options.bossChallenges.length; i++){
-        //        var c = options.bossChallenges[i];
-        //        unsafeWindow.questSubmit(c.symbol, c.stage, s.attack, c.chosen, null, null, c.questId);
-        //    }
-        //}
+        // Send out gifts and shit..
+        sendGifts();
 
         // Store all sworn swords
         getSwornSwords();
@@ -768,6 +750,17 @@ function openBox() {
             }
 
             quarterMasterDo();
+        }
+    });
+}
+
+function sendGifts(){
+    ajax({
+        url: "/play/gifts",
+        success: function (r) {
+            var bestGift = r.favors.sort(function(a, b){
+                return a.description < b.description;
+            })[0].symbol;
         }
     });
 }
@@ -1398,8 +1391,8 @@ function warmap_onclick(e) {
     }, (options.baseDelay / 2) * 1000);
 }
 
-$("#modal_dialogs_top").on('click', '#incomingtab', wireEvents);
-function wireEvents(e) {
+$("#modal_dialogs_top").on('click', "[onclick*='pvpIncomingAttacks']", inspectIncoming);
+function inspectIncoming(e) {
     e.preventDefault();
 
     ajax({
@@ -1407,7 +1400,7 @@ function wireEvents(e) {
         url: "/play/incoming_attacks",
         success: function (a) {
             try {
-                // console.debug(response, a);
+                // console.debug(a);
                 $('div.perkscroll div.achiev-content').each(function () {
                     var id = /[0-9]+/.exec($(this).find('div.increspond').attr('onclick'));
 
@@ -1422,60 +1415,94 @@ function wireEvents(e) {
                     $(this).find("span.charportrait").attr("onclick", "return characterMainModal(" + attack.attacker.user_id + ")");
                     //$(this).find("span.targetalliancename").attr("onclick", "return allianceInfo(" + attack.alliance_id + ")");
 
-                    var text = 'Last seen:' + moment(attack.attacker.updated_at,"YYYY-MM-DD HH:mm:ss Z").local().format('MMMM Do YYYY, h:mm:ss a');
+                    var text = 'Last seen: ' + moment(attack.attacker.updated_at,"YYYY-MM-DD HH:mm:ss Z").local().format('MMMM Do YYYY, h:mm:ss a');
+                    $(this).append('<div class="ex_attack_timestamp">' + text + '</div>');
                 });
             } catch (e) {
                 error(e);
             }
         }
     });
-
-    //window.setTimeout(function () {
-    //    GM_xmlhttpRequest({
-    //        method: "GET",
-    //        url: "/play/incoming_attacks",
-    //        onload: function (response) {
-    //            try {
-    //                var a = JSON.parse(response.responseText);
-    //                // console.debug(response, a);
-    //                $('div.perkscroll div.achiev-content').each(function () {
-    //                    var id = /[0-9]+/.exec($(this).find('div.increspond').attr('onclick'));
-    //
-    //                    var attack = a.attacks.filter(function (e) {
-    //                        return e.camp_attack_id === null ? e.pvp_id == id : e.camp_attack_id == id;
-    //                    })[0];
-    //
-    //                    if (!attack)
-    //                        return;
-    //
-    //                    $(this).find("span.charname").attr("onclick", "return characterMainModal(" + attack.attacker.user_id + ")");
-    //                    $(this).find("span.charportrait").attr("onclick", "return characterMainModal(" + attack.attacker.user_id + ")");
-    //                    $(this).find("span.targetalliancename").attr("onclick", "return allianceInfo(" + attack.alliance_id + ")");
-    //                });
-    //            } catch (e) {
-    //                error(e);
-    //            }
-    //        }
-    //    });
-    //}, (options.baseDelay / 2) * 1000);
 }
 
-function saveBossChallenges() {
+$("#modal_dialogs_top").on('click', "[onclick*='pvpOutgoingAttacks']", inspectOutgoing);
+function inspectOutgoing(e) {
+    e.preventDefault();
 
-    var p = unsafeWindow.bossChallenges;
-    if (p && p.length > 0) {
-        options.bossChallenges = p;
-        options.set("bossChallenges");
-    }
+    ajax({
+        method: "GET",
+        url: "/play/outgoing_attacks",
+        success: function (a) {
+            try {
+                // console.debug(a);
+                $('div.perkscroll div.achiev-content').each(function () {
+                    var id = /[0-9]+/.exec($(this).find('div.increspond').attr('onclick'));
+
+                    var attack = a.attacks.filter(function (e) {
+                        return e.camp_attack_id === null ? e.pvp_id == id : e.camp_attack_id == id;
+                    })[0];
+
+                    if (!attack)
+                        return;
+
+                    $(this).find("span.charname").attr("onclick", "return characterMainModal(" + attack.defender.user_id + ")");
+                    $(this).find("span.charportrait").attr("onclick", "return characterMainModal(" + attack.defender.user_id + ")");
+                    //$(this).find("span.targetalliancename").attr("onclick", "return allianceInfo(" + attack.alliance_id + ")");
+
+                    var text = 'Last seen: ' + moment(attack.defender.updated_at,"YYYY-MM-DD HH:mm:ss Z").local().format('MMMM Do YYYY, h:mm:ss a');
+                    $(this).append('<div class="ex_attack_timestamp">' + text + '</div>');
+                });
+            } catch (e) {
+                error(e);
+            }
+        }
+    });
 }
+$("#modal_dialogs_top").on('click', "[onclick*='pvpStartWithTarget']", inspectTarget);
+$("#modal_dialogs_top").on('click', "[onclick*='pvpTargetSelected']", inspectTarget);
+function inspectTarget(e) {
+    e.preventDefault();
+    //console.debug(e, this, $(this));
 
-function loadBossChallenges() {
+    var func = $(this).attr("onclick");
+    var id = func.indexOf("pvpTargetSelected") > -1
+        ? func.substring(func.indexOf(",") + 1, func.indexOf(")"))
+        : func.substring(func.indexOf("(") + 1, func.indexOf(")"));
 
-    var p = unsafeWindow.bossChallenges;
-    if (p && p.length > 0) {
-        options.bossChallenges = p;
-        options.set("bossChallenges");
+    if(!id){
+        warn("Could not retrieve player id. Exiting...");
+        return;
     }
+
+    ajax({
+        method: "GET",
+        url: "/play/character_pvp/" + id,
+        success: function (a) {
+            try {
+                // console.debug(a);
+
+                var lastUpdated =
+                    a.defender.armor ? a.defender.armor.updated_at
+                        : a.defender.weapon ? a.defender.weapon.updated_at
+                        : a.defender.companion ? a.defender.companion.updated_at
+                        : null;
+
+                if (!lastUpdated) {
+                    warn("Could not establish when was the user last seen.");
+                    return;
+                }
+
+                var $h2 = $(".infobar:visible:first").find("h2");
+                if($h2.length){
+                    $h2.css("padding-left", "140px");
+                    $h2.html('Last seen: ' + moment(lastUpdated, "YYYY-MM-DD HH:mm:ss Z").local().format('MMMM Do YYYY, h:mm:ss a'));
+                }
+
+            } catch (e) {
+                error(e);
+            }
+        }
+    });
 }
 
 $("#modals_container").on("click", "#ex_alliance_search", searchAlliance_onclick);
