@@ -1063,20 +1063,48 @@ function exSendFavors(favor, characterList){
     })
 }
 
-function enlistSS(){
-    var ss = userContext.setSwornSword;
-    if(ss == void 0){
-        error("Could not find the selected sworn sword for enlisting. Exiting...", "WORLD EVENT");
-        return;
-    }
+var worldEvent = {
 
-    var weAttackers = localStorage.get("weAttackers", []);
-    if(weAttackers.length == 5){
-        weAttackers.pop();
-        weAttackers.unshift({
-            id: ss.id,
-            attack: ss.modifier
-        })
+    get attackers() {
+        return localStorage.get("weAttackers", []);
+    },
+
+    set attackers(val) {
+        localStorage.set("attackers", val);
+    },
+
+    dispatch: function() {
+        
+    },
+
+    enlistSS: function enlistSS() {
+
+        try {
+            var ss = userContext.setSwornSword;
+            if (ss == void 0) {
+                warn("No sworn sword specified to enlist for World Event. Exiting...", "WORLD EVENT");
+                return;
+            }
+
+            if (this.attackers.indexOf(ss.id) > -1) {
+                warn("Selected sworn sword is already enlisted for the world event. Exiting...", "WORLD EVENT");
+                return;
+            }
+
+            if (this.attackers.length == 5) {
+                this.attackers.pop();
+                this.attackers.unshift(ss.id);
+            } else {
+                this.attackers.push(ss.id);
+            }
+
+            //localStorage.set("weAttackers", weAttackers);
+            $("#weTab").trigger('click');
+
+        } catch (e) {
+            error(e);
+        }
+
     }
 
 }
