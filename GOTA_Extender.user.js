@@ -306,8 +306,8 @@ var options = {
     default_superiorMaterials: true,
     queueTimerInterval: 30,
     default_queueTimerInterval: 30,
-    allowBruting: true,
-    default_allowBruting: true,
+    featureTesting: true,
+    default_featureTesting: true,
     bruteWounds: 1,
     default_bruteWounds: 1,
     bruteSwitchOff: true,
@@ -796,7 +796,9 @@ function showSettings(e) {
         $("#extenderTabMenu .charactertabs").append(templates.optionsTab("mainTab", "MAIN"));
         $("#extenderTabMenu .charactertabs").append(templates.optionsTab("queueTab", "QUEUE"));
         $("#extenderTabMenu .charactertabs").append(templates.optionsTab("bruteTab", "BRUTING"));
-        $("#extenderTabMenu .charactertabs").append(templates.optionsTab("weTab", "WE"));
+
+        if(options.featureTesting)
+            $("#extenderTabMenu .charactertabs").append(templates.optionsTab("weTab", "WE"));
 
         $("#credits_page").append(templates.tabContent);
         $("#mainTab").trigger('click');
@@ -1013,7 +1015,7 @@ function viewAdventure_onclick() {
     log("View adventure details.");
 
     var vBtn = $(this).find("a.btngold");
-    if (!vBtn || vBtn.text() != "View Results!" || !options.allowBruting) {
+    if (!vBtn || vBtn.text() != "View Results!") {
         return;
     }
 
@@ -1042,11 +1044,6 @@ function brute_onclick() {
 
     if (!b || b.length == 0) {
         warn("Cannot find brute button!");
-    }
-
-    if (!options.allowBruting) {
-        error("Bruting is not allowed.");
-        return;
     }
 
     unsafeWindow.brutingImmediateTermination = false;
