@@ -539,6 +539,13 @@ var styles = {
             'top: 7px;' +
             '}',
 
+    exAttackTimestamp:
+        '.ex_attack_timestamp {' +
+            'text-align: left;'+
+            'margin-bottom: 15px;' +
+            'padding: 10px 0 0 15px;' +
+            'font-family: GoudyTrajan-Bold,Trajan,"Trajan Pro",Trajanbold;' +
+            '}',
     addAllStyles: function() {
 
         try {
