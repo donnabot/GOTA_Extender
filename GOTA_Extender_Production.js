@@ -3,6 +3,21 @@ var production = (function ($, localStorage, log, error, buildingBySymbol,
                             doFinishProduction, userContext, doProduction,
                             applySelectedUpgrade, buildingUpgrades, inform) {
 
+    var _this = {
+        init: init,
+        attempt: attempt,
+        persist: persist,
+        enqueue: enqueue,
+        render: render,
+        config: config,
+        getElement: getElement,
+        removeElement: removeElement,
+        executeElement: executeElement,
+
+        queue: [],
+        queueDelay: 4E3,
+        superiorMaterials: true
+    };
 
     // Retrieves production
     // queue from localStorage
@@ -386,22 +401,6 @@ var production = (function ($, localStorage, log, error, buildingBySymbol,
         }
 
         log("Production queue rendered " + _this.queue.length + " items.");
-    }
-
-    var _this = {
-        init: init,
-        attempt: attempt,
-        persist: persist,
-        enqueue: enqueue,
-        render: render,
-        config: config,
-        getElement: getElement,
-        removeElement: removeElement,
-        executeElement: executeElement,
-
-        queue: [],
-        queueDelay: 4E3,
-        superiorMaterials: true
     }
     
     return _this;
