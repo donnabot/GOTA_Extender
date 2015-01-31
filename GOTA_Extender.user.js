@@ -273,6 +273,18 @@ function signal_acknowledged() {
 }
 // <-- Page command handling
 
+// TODO: Implement..
+//var PERSISTABLE =  {
+//
+//    get queue() {
+//        return localStorage.get("productionQueue", []);
+//    },
+//
+//    set queue(val) {
+//        localStorage.set("productionQueue", val);
+//    }
+//};
+
 // --> Options object
 var options = {
     swornSwords: [],

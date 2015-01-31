@@ -29,6 +29,21 @@ var templates = {
             '</div>';
     },
 
+    brownBtn: function (id, cssClass, onclick, text) {
+        return '<span id="' + id + '" class="btnwrap btnsm ' + cssClass + '">' +
+            '<span class="btnedge">' +
+            '<a ' + (onclick != void 0 ? 'onclick="' + onclick + '"' : 'onclick:"return false"') + ' class="btnbrown">' +
+            '<span></span>' + text + '</a></span></span>';
+    },
+
+    defaultBtn: function (id, cssClass, onclick, text) {
+        return '<span id="' + id + '" class="btnwrap btnlg ' + cssClass + '" onclick="' + onclick + '">' +
+            '<span class="btnedge">' +
+            '<a class="btngold">' + text + '</a>' +
+            '</span>' +
+            '</span>';
+    },
+
     sendAllBtn:
         '<span id="adventureSendAll" class="btnwrap btnsm exSendAllButton">' +
             '<span class="btnedge">' +
@@ -221,6 +236,18 @@ var templates = {
         { val: "all", text: "Throw everything" }
     ],
 
+    orders: [
+        { val: "fight", text: "FIGHT" },
+        { val: "harass", text: "HARASS" },
+        { val: "aid", text: "PROTECT" },
+        { val: "barter", text: "BARTER" },
+        { val: "hoodwink", text: "SWINDLE" },
+        { val: "bribe", text: "BRIBE" },
+        { val: "spy", text: "SPY" },
+        { val: "sabotage", text: "SABOTAGE" },
+        { val: "steal", text: "STEAL" }
+    ],
+
     outputSwornSwords: function (swornSwords) {
 
         if (!(swornSwords instanceof Array) || swornSwords.length == 0)
@@ -398,9 +425,33 @@ var templates = {
             '</div>';
     },
 
-    weTab: function () {
+    weAttackersOutput: function(){
 
-        return "WORLD EVENT ACTIONS MANAGER";
+        var weAttackers = localStorage.get("weAttackers", []);
+
+        var markup = '';
+        for(var i = 0; i < 5; i ++) {
+            var swornsword = weAttackers[i];
+
+            markup += '<div class="exrow">' +
+            'SLOT ' + i + ' : ' + (swornsword != void 0 ? swornsword.id + ' # ' + swornsword.full_name : 'Empty') +
+                this.selectOption("Orders: ", "slot" + i + "orders", this.orders, (attack != void 0 ? attack : swornsword != void 0 ? swornsword.modifier : "none"), "return false") +
+            '</div>';
+        }
+
+        return markup;
+    },
+
+    weTab: function (o) {
+
+        var markup = '';
+        markup += '<div class="exrow">WORLD EVENT BATTLE MANAGER<hr /></div>';
+        markup += '<div class="exrow">' +
+            this.outputSwornSwords(o.swornSwords) +
+            this.defaultBtn("pushSSid", "", "enlistSS();", "PUSH") +
+        '</div>' + this.weAttackersOutput();
+
+        return markup;
     }
 };
 
@@ -551,6 +602,7 @@ var styles = {
             'padding: 10px 0 0 15px;' +
             'font-family: GoudyTrajan-Bold,Trajan,"Trajan Pro",Trajanbold;' +
             '}',
+
     addAllStyles: function() {
 
         try {
