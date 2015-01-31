@@ -1250,6 +1250,12 @@ function pvpLaunch(callback) {
             // EXTENDER :: Modification, call callback
             // parameter indicates successfull sending
             if (typeof callback == "function") {
+                if(a.error && a.error === "too_many_attacks") {
+                    //inform("Too MANY ATTACKS! StAHP STAAAHP!");
+                    pvpFormStore = null;
+                    return;
+                }
+
                 callback(!a.error);
             }
         }
