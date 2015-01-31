@@ -314,8 +314,8 @@ var options = {
     default_shopSortBy: "price",
     shopSortBy2: "rarity",
     default_shopSortBy2: "rarity",
-    sendAllAction: "friendly",
-    default_sendAllAction: "friendly",
+    sendAllAction: "all",
+    default_sendAllAction: "all",
     autoBossChallenge: false,
     default_autoBossChallenge: false,
 

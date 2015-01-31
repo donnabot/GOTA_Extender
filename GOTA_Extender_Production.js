@@ -102,7 +102,7 @@ var production = (function ($, localStorage, log, error, buildingBySymbol,
                 log("Building " + building.symbol + " finished production.", "PRODUCTION");
                 doFinishProduction(building.item_id, function () {
                     setTimeout(function () {
-                        attempt(building.symbol);
+                        attempt();
                     }, _this.queueDelay);
                 });
 
