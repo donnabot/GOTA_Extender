@@ -449,7 +449,8 @@ var templates = {
     weTab: function (o) {
 
         var markup = '';
-        markup += '<div class="exrow">WORLD EVENT BATTLE MANAGER<hr /></div>';
+        markup += '<div class="exrow">WORLD EVENT BATTLE MANAGER</div><hr />';
+        markup += '<div class="exrow">' + this.numberOption("worldEventDelay", "Delay: ", o.worldEventDelay, 2, 12, 2) + this.checkOption("weManagerEnabled", " Enabled", o.weManagerEnabled) + '</div><hr />';
         markup += '<div class="exrow">' +
             this.outputSwornSwords(o.swornSwords) +
             this.defaultBtn("pushSSid", "", "worldEvent.enlistSS();", "PUSH") +
