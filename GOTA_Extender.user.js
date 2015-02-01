@@ -114,6 +114,7 @@ function initialize() {
 
             unsafeWindow.production.init(options.export(["queueDelay", "superiorMaterials"]));
             unsafeWindow.bossChallenger.init(options.export(["autoBossChallenge"]));
+            unsafeWindow.worldEvent.init(options.export(["weManagerEnabled", "worldEventDelay"]));
 
         }, 2E3);
 
@@ -306,8 +307,6 @@ var options = {
     default_superiorMaterials: true,
     queueTimerInterval: 30,
     default_queueTimerInterval: 30,
-    featureTesting: true,
-    default_featureTesting: true,
     bruteWounds: 1,
     default_bruteWounds: 1,
     bruteSwitchOff: true,
@@ -330,6 +329,14 @@ var options = {
     default_sendAllAction: "all",
     autoBossChallenge: false,
     default_autoBossChallenge: false,
+
+    featureTesting: false,
+    default_featureTesting: false,
+
+    weManagerEnabled: false,
+    default_weManagerEnabled: false,
+    worldEventDelay: 6,
+    default_worldEventDelay: 6,
 
     get: function () {
         var prefix = "";
@@ -864,6 +871,10 @@ function saveOptions_click(e) {
 
     try {
 
+        if ($("#credits_roll").is(":hidden")) {
+            return;
+        }
+
         var tab = $(".inventorytab.active:visible").parents(".inventorytabwrap").attr("id");
 
         switch (tab) {
@@ -899,13 +910,19 @@ function saveOptions_click(e) {
 }
 
 function saveWeTab(){
+    var wed = parseInt($("#worldEventDelay").text());
+    if (!isNaN(wed) && options.worldEventDelay != wed) {
+        options.worldEventDelay = wed;
+    }
 
+    options.weManagerEnabled = $("#weManagerEnabled").hasClass("checked");
+    unsafeWindow.worldEvent.config(options.export(["weManagerEnabled", "worldEventDelay"]));
+    unsafeWindow.worldEvent.dispatch();
+
+    options.set();
 }
 
 function saveMainTab() {
-    if ($("#credits_roll").is(":hidden")) {
-        return;
-    }
 
     var bd = parseInt($("#baseDelay").text());
     if (!isNaN(bd) && options.baseDelay != bd) {
@@ -917,7 +934,6 @@ function saveMainTab() {
     options.neverSpendGold = $("#neverSpendGold").hasClass("checked");
     options.autoBossChallenge = $("#autoBossChallenge").hasClass("checked");
     unsafeWindow.bossChallenger.config(options.export(["autoBossChallenge"]));
-
 
     var ari = parseInt($("#autoReloadInterval").val());
     if (!isNaN(ari) && options.autoReloadInterval !== ari) {
@@ -962,12 +978,10 @@ function saveQueueTab() {
         toggleQueueTimer();
     }
 
-    //saveComponent("productionQueue");
     unsafeWindow.production.config(options.export(["queueDelay", "superiorMaterials"]));
 
     options.set();
     inject.constants();
-    //unsafeWindow.sort();
 }
 
 function saveBruteTab() {
