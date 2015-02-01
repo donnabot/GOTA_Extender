@@ -428,12 +428,12 @@ var templates = {
 
     weAttackersOutput: function(){
 
-        var weAttackerIds = localStorage.get("weAttackers", []);
+        var weAttackerIds = unsafeWindow.worldEvent.attackers;
 
         var markup = '';
         for(var i = 0; i < 5; i ++) {
 
-            var swornsword;
+            var swornsword = null;
             if(weAttackerIds[i] != void 0)
                 swornsword = unsafeWindow.getSwornSwords(weAttackerIds[i]);
 
@@ -452,7 +452,7 @@ var templates = {
         markup += '<div class="exrow">WORLD EVENT BATTLE MANAGER<hr /></div>';
         markup += '<div class="exrow">' +
             this.outputSwornSwords(o.swornSwords) +
-            this.defaultBtn("pushSSid", "", "enlistSS();", "PUSH") +
+            this.defaultBtn("pushSSid", "", "worldEvent.enlistSS();", "PUSH") +
         '</div>';
 
         markup += '<div class="exrow">' +
