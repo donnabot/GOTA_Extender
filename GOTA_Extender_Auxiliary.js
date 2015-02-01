@@ -1063,51 +1063,214 @@ function exSendFavors(favor, characterList){
     })
 }
 
-var worldEvent = {
+var worldEvent = (function ($, log, warn, error, submitWorldEventAction, getWorldEventAttackResults, userContext) {
+    var _this = {
 
-    get attackers() {
-        return localStorage.get("weAttackers", []);
-    },
+        delay: 6E3,
+        enabled: true,
+        activeSwornSwords: [],
+        timeouts: [],
 
-    set attackers(val) {
-        localStorage.set("attackers", val);
-    },
+        get attackers() {
+            return localStorage.get("weAttackers", []);
+        },
 
-    dispatch: function() {
-        
-    },
+        set attackers(val) {
+            localStorage.set("weAttackers", val);
+        },
 
-    enlistSS: function enlistSS() {
+        init: function (o) {
+            try {
 
-        try {
-            var ss = userContext.setSwornSword;
-            if (ss == void 0) {
-                warn("No sworn sword specified to enlist for World Event. Exiting...", "WORLD EVENT");
+                this.config(o);
+                this.analyze();
+
+            } catch(err) {
+                error(err);
+            }
+
+            log("World event initialized.", "WORLD EVENT");
+        },
+
+        config: function (o) {
+            this.delay = o.delay || this.delay;
+            this.enabled = o.enabled || this.enabled;
+        },
+
+        dispatch: function () {
+            if (!this.enabled) {
+                log("This feature has been disabled. Exiting...", "WORLD EVENT");
                 return;
             }
 
-            if (this.attackers.indexOf(ss.id) > -1) {
-                warn("Selected sworn sword is already enlisted for the world event. Exiting...", "WORLD EVENT");
+            var attackers = this.attackers.filter(function(a){
+                return a != void 0;
+            });
+
+            for (var i = 0; i < attackers.length; i++) {
+
+                var ss = getSwornSwords(attackers[i]);
+                if (!ss) {
+                    error("Failed to find the sworn sword. Request won't be sent.");
+                    continue;
+                }
+
+                var order = $("#slot_" + i + "_orders").length
+                    ? $("#slot_" + i + "_orders").val()
+                    : ss.modifier;
+
+                submitWorldEventAction(ss.id, order, false);
+            }
+        },
+
+        retrieve: function (ss) {
+            if (ss != void 0) {
+
+                if (!ss.id || !ss.action || (ss.full_name == void 0 && ss.name == void 0) || (ss.cooldown == void 0 && ss.cooldown_seconds == void 0)) {
+                    error("Incorrect object passed, lack of parameters.", "WORLD EVENT");
+                    console.debug("Debug information, passed sworn sword: ", ss);
+                    return;
+                }
+
+                var cooldown =
+                    ss.cooldown != void 0           // defined as cooldown
+                    ? (ss.cooldown !== 0
+                    ? ss.cooldown                   // there is a cooldown
+                    : false)                        // there ain't a cooldown
+
+                    : ss.cooldown_seconds != void 0 // defined as cooldown_seconds
+                    ? (ss.cooldown_seconds !== 0
+                    ? ss.cooldown_seconds           // there is a cooldown
+                    : false)                        // there ain't a cooldown
+
+                    : 36E2;                         // default cooldown of 1hour
+
+
+                if (!cooldown) {
+
+                    getWorldEventAttackResults(ss.id, ss.action, true);
+
+                } else {
+
+                    var timeout = {
+                        id: ss.id,
+                        name: ss.full_name || ss.name,
+                        timeout: setTimeout(function () {
+
+                            getWorldEventAttackResults(ss.id, ss.action, true);
+
+                        }, (cooldown * 1E3) + _this.delay)
+                    }
+
+                    this.timeouts.push(timeout);
+                }
+
+                return;
+            }
+        },
+
+        analyze: function () {
+
+            // dummy data
+            var data = {
+                sworn_sword_id: 0,
+                order: "aid",
+            };
+
+            $.ajax({
+                url: "/play/world_event_attack",
+                data: data,
+                success: function (a) {
+                    console.debug("Analyzing response from the server for the world event action: ", a);
+
+                    if (a.challenge && a.challenge.active_swornswords) {
+                        for (var i = 0; i < a.challenge.active_swornswords.length; i++) {
+                            _this.retrieve(a.challenge.active_swornswords[i]);
+                        }
+                    }
+
+                }
+            });
+        },
+
+        afterSubmit: function (a, ssId) {
+            if (!this.enabled) {
+                log("This feature has been disabled. Exiting...", "WORLD EVENT");
                 return;
             }
 
-            if (this.attackers.length == 5) {
-                this.attackers.pop();
-                this.attackers.unshift(ss.id);
-            } else {
-                this.attackers.push(ss.id);
+            console.debug("Logging response from the server for sending the sworn sword: ", a);
+
+            if (a.swornsword && a.swornsword.cooldown) {
+
+                this.retrieve(a.swornsword);
+
+            } else if (a.challenge && a.challenge.active_swornswords && a.challenge.active_swornswords.length) {
+                var swornswords = a.challenge.active_swornswords;
+                for (var i = 0; i < swornswords.length; i++) {
+                    if (swornswords[i].id !== ssId)
+                        continue;
+
+                    this.retrieve(swornswords[i]);
+
+                }
+            }
+        },
+
+        afterGet: function (b, ssId) {
+            if (!this.enabled) {
+                log("This feature has been disabled. Exiting...", "WORLD EVENT");
+                return;
             }
 
-            //localStorage.set("weAttackers", weAttackers);
-            $("#weTab").trigger('click');
+            console.debug("Logging response from the server from world event attack: ", b);
 
-        } catch (e) {
-            error(e);
+            if (b.swornsword && b.action) {
+                submitWorldEventAction(b.swornsword.id, b.action, false);
+            }
+        },
+
+        enlistSS: function () {
+
+            try {
+                var attackArray = this.attackers;
+                var ss = userContext.setSwornSword;
+                if (ss == void 0) {
+
+                    if (attackArray.length == 5) {
+                        attackArray.pop();
+                    }
+
+                    attackArray.unshift(null);
+
+                } else {
+
+                    if (attackArray.indexOf(ss.id) > -1) {
+                        warn("Selected sworn sword is already enlisted for the world event. Exiting...", "WORLD EVENT");
+                        return;
+                    }
+
+                    if (attackArray.length == 5) {
+                        attackArray.pop();
+                        attackArray.unshift(ss.id);
+                    } else {
+                        attackArray.push(ss.id);
+                    }
+                }
+
+                this.attackers = attackArray;
+                $("#weTab").trigger('click');
+
+            } catch (e) {
+                error(e);
+            }
+
         }
-
     }
 
-}
+    return _this;
+
+}($, log, warn, error, submitWorldEventAction, getWorldEventAttackResults, userContext));
 
 // TODO: Implement..
 //var PERSISTABLE = {
