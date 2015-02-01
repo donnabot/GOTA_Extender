@@ -1066,9 +1066,8 @@ function exSendFavors(favor, characterList){
 var worldEvent = (function ($, log, warn, error, submitWorldEventAction, getWorldEventAttackResults, userContext) {
     var _this = {
 
-        delay: 6E3,
+        delay: 4E3,
         enabled: true,
-        activeSwornSwords: [],
         timeouts: [],
 
         get attackers() {
@@ -1085,16 +1084,18 @@ var worldEvent = (function ($, log, warn, error, submitWorldEventAction, getWorl
                 this.config(o);
                 this.analyze();
 
+                log("World event initialized.", "WORLD EVENT");
+
             } catch(err) {
                 error(err);
             }
-
-            log("World event initialized.", "WORLD EVENT");
         },
 
         config: function (o) {
-            this.delay = o.delay || this.delay;
-            this.enabled = o.enabled || this.enabled;
+            //console.debug(o);
+
+            this.delay = o.worldEventDelay * 1E3 || this.delay;
+            this.enabled = o.weManagerEnabled != void 0 ? o.weManagerEnabled : this.enabled;
         },
 
         dispatch: function () {
@@ -1124,6 +1125,11 @@ var worldEvent = (function ($, log, warn, error, submitWorldEventAction, getWorl
         },
 
         retrieve: function (ss) {
+            if (!this.enabled) {
+                log("This feature has been disabled. Exiting...", "WORLD EVENT");
+                return;
+            }
+
             if (ss != void 0) {
 
                 if (!ss.id || !ss.action || (ss.full_name == void 0 && ss.name == void 0) || (ss.cooldown == void 0 && ss.cooldown_seconds == void 0)) {
@@ -1170,6 +1176,10 @@ var worldEvent = (function ($, log, warn, error, submitWorldEventAction, getWorl
         },
 
         analyze: function () {
+            if (!this.enabled) {
+                log("This feature has been disabled. Exiting...", "WORLD EVENT");
+                return;
+            }
 
             // dummy data
             var data = {
