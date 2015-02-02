@@ -922,26 +922,38 @@ function clearLog(){
 
 var bossChallenger = (function(log, error, questClose, questSubmit, localStorage){
 
+    var _this = {
+        init: init,
+        fight: fight,
+        persist: persist,
+        config: config,
+        addQuest: addQuest,
+        removeQuest: removeQuest,
+
+        enabled: true,
+        bossQuests: []
+    };
+
     function init(o){
-        _this.bossQuests = localStorage.get("bossQuests", []);
+        try {
+            _this.bossQuests = localStorage.get("bossQuests", []);
 
-        _this.config(o);
+            _this.config(o);
 
-        // Relaunch any quests pending...
-        for(var i = 0; i < _this.bossQuests.length; i++){
-            var a = _this.bossQuests[i];
-            questSubmit(a.quest, a.stage, a.attack, a.chosen, null, null, a.questId);
+            // Relaunch any quests pending...
+            for (var i = 0; i < _this.bossQuests.length; i++) {
+                var a = _this.bossQuests[i];
+                questSubmit(a.quest, a.stage, a.attack, a.chosen, null, null, a.questId);
+            }
+        } catch(e) {
+            error(e);
         }
     }
 
     function config(o){
         //console.debug(o);
 
-        try {
-            _this.enabled = o.autoBossChallenge;
-        } catch(e){
-            error(e);
-        }
+        _this.enabled = o.autoBossChallenge;
     }
 
     function persist(){
@@ -1024,20 +1036,260 @@ var bossChallenger = (function(log, error, questClose, questSubmit, localStorage
         });
     }
 
-    var _this = {
-        init: init,
-        fight: fight,
-        persist: persist,
-        config: config,
-        addQuest: addQuest,
-        removeQuest: removeQuest,
-
-        enabled: true,
-        bossQuests: []
-    }
-
     return _this;
 
 }(log, error, questClose, questSubmit, localStorage));
 
+function exSendFavors(favor, characterList){
 
+    var json = {
+        favor: favor,
+        recipients: characterList
+    };
+
+    showSpinner();
+
+    $.ajax({
+        type: "POST",
+        url: "/play/send_mass_favors",
+        data: json,
+        dataType: "JSON",
+        complete: hideSpinner,
+        success: function (a) {
+            !0 == a.status
+                ? void 0 == a.exceptions ? (doAlert("Message Sent", "Your Raven has been sent."), isWeb() || iosSignal("favors_sent", a.count)) : doAlert("Message Sent", "Your Raven has been sent.<br/><br/>" + a.exceptions + " did not receive a favor as you have already sent them the maximum per day.") : !1 == a.status && ("invalid_favor" == a.reason ? doAlert("Message Center",
+                "The selected favor is invalid.") : "not_enough_favors" == a.reason ? doAlert("Message Center", "You have reached your daily favor-giving limit. Your raven was not sent.") : "favor_limit_all" == a.reason ? doAlert("Message Center", "You have already sent the favors daily maximum to these recipients.") : "select_min_player" == a.reason && doAlert("Message Center", "Please select at least one recipient."))
+        }
+    })
+}
+
+var worldEvent = (function ($, log, warn, error, submitWorldEventAction, getWorldEventAttackResults, userContext) {
+    var _this = {
+
+        delay: 4E3,
+        enabled: true,
+        timeouts: [],
+
+        get attackers() {
+            return localStorage.get("weAttackers", []);
+        },
+
+        set attackers(val) {
+            localStorage.set("weAttackers", val);
+        },
+
+        init: function (o) {
+            try {
+
+                this.config(o);
+                this.analyze();
+
+                log("World event initialized.", "WORLD EVENT");
+
+            } catch(err) {
+                error(err);
+            }
+        },
+
+        config: function (o) {
+            //console.debug(o);
+
+            this.delay = o.worldEventDelay * 1E3 || this.delay;
+            this.enabled = o.weManagerEnabled != void 0 ? o.weManagerEnabled : this.enabled;
+        },
+
+        dispatch: function () {
+            if (!this.enabled) {
+                log("This feature has been disabled. Exiting...", "WORLD EVENT");
+                return;
+            }
+
+            var attackers = this.attackers.filter(function(a){
+                return a != void 0;
+            });
+
+            for (var i = 0; i < attackers.length; i++) {
+
+                var ss = getSwornSwords(attackers[i]);
+                if (!ss) {
+                    error("Failed to find the sworn sword. Request won't be sent.");
+                    continue;
+                }
+
+                var order = $("#slot_" + i + "_orders").length
+                    ? $("#slot_" + i + "_orders").val()
+                    : ss.modifier;
+
+                submitWorldEventAction(ss.id, order, false);
+            }
+        },
+
+        retrieve: function (ss) {
+            if (!this.enabled) {
+                log("This feature has been disabled. Exiting...", "WORLD EVENT");
+                return;
+            }
+
+            if (ss != void 0) {
+
+                if (!ss.id || !ss.action || (ss.full_name == void 0 && ss.name == void 0) || (ss.cooldown == void 0 && ss.cooldown_seconds == void 0)) {
+                    error("Incorrect object passed, lack of parameters.", "WORLD EVENT");
+                    console.debug("Debug information, passed sworn sword: ", ss);
+                    return;
+                }
+
+                var cooldown =
+                    ss.cooldown != void 0           // defined as cooldown
+                    ? (ss.cooldown !== 0
+                    ? ss.cooldown                   // there is a cooldown
+                    : false)                        // there ain't a cooldown
+
+                    : ss.cooldown_seconds != void 0 // defined as cooldown_seconds
+                    ? (ss.cooldown_seconds !== 0
+                    ? ss.cooldown_seconds           // there is a cooldown
+                    : false)                        // there ain't a cooldown
+
+                    : 36E2;                         // default cooldown of 1hour
+
+
+                if (!cooldown) {
+
+                    getWorldEventAttackResults(ss.id, ss.action, true);
+
+                } else {
+
+                    var timeout = {
+                        id: ss.id,
+                        name: ss.full_name || ss.name,
+                        timeout: setTimeout(function () {
+
+                            getWorldEventAttackResults(ss.id, ss.action, true);
+
+                        }, (cooldown * 1E3) + _this.delay)
+                    }
+
+                    this.timeouts.push(timeout);
+                }
+
+                return;
+            }
+        },
+
+        analyze: function () {
+            if (!this.enabled) {
+                log("This feature has been disabled. Exiting...", "WORLD EVENT");
+                return;
+            }
+
+            // dummy data
+            var data = {
+                sworn_sword_id: 0,
+                order: "aid",
+            };
+
+            $.ajax({
+                url: "/play/world_event_attack",
+                data: data,
+                success: function (a) {
+                    console.debug("Analyzing response from the server for the world event action: ", a);
+
+                    if (a.challenge && a.challenge.active_swornswords) {
+                        for (var i = 0; i < a.challenge.active_swornswords.length; i++) {
+                            _this.retrieve(a.challenge.active_swornswords[i]);
+                        }
+                    }
+
+                }
+            });
+        },
+
+        afterSubmit: function (a, ssId) {
+            if (!this.enabled) {
+                log("This feature has been disabled. Exiting...", "WORLD EVENT");
+                return;
+            }
+
+            console.debug("Logging response from the server for sending the sworn sword: ", a);
+
+            if (a.swornsword && a.swornsword.cooldown) {
+
+                this.retrieve(a.swornsword);
+
+            } else if (a.challenge && a.challenge.active_swornswords && a.challenge.active_swornswords.length) {
+                var swornswords = a.challenge.active_swornswords;
+                for (var i = 0; i < swornswords.length; i++) {
+                    if (swornswords[i].id !== ssId)
+                        continue;
+
+                    this.retrieve(swornswords[i]);
+
+                }
+            }
+        },
+
+        afterGet: function (b, ssId) {
+            if (!this.enabled) {
+                log("This feature has been disabled. Exiting...", "WORLD EVENT");
+                return;
+            }
+
+            console.debug("Logging response from the server from world event attack: ", b);
+
+            if (b.swornsword && b.action) {
+                submitWorldEventAction(b.swornsword.id, b.action, false);
+            }
+        },
+
+        enlistSS: function () {
+
+            try {
+                var attackArray = this.attackers;
+                var ss = userContext.setSwornSword;
+                if (ss == void 0) {
+
+                    if (attackArray.length == 5) {
+                        attackArray.pop();
+                    }
+
+                    attackArray.unshift(null);
+
+                } else {
+
+                    if (attackArray.indexOf(ss.id) > -1) {
+                        warn("Selected sworn sword is already enlisted for the world event. Exiting...", "WORLD EVENT");
+                        return;
+                    }
+
+                    if (attackArray.length == 5) {
+                        attackArray.pop();
+                        attackArray.unshift(ss.id);
+                    } else {
+                        attackArray.push(ss.id);
+                    }
+                }
+
+                this.attackers = attackArray;
+                $("#weTab").trigger('click');
+
+            } catch (e) {
+                error(e);
+            }
+
+        }
+    }
+
+    return _this;
+
+}($, log, warn, error, submitWorldEventAction, getWorldEventAttackResults, userContext));
+
+// TODO: Implement..
+//var PERSISTABLE = {
+//
+//    get queue() {
+//        return localStorage.get("productionQueue", []);
+//    },
+//
+//    set queue(val) {
+//        localStorage.set("productionQueue", val);
+//    }
+//};

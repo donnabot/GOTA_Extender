@@ -722,7 +722,7 @@ playSound = function playSound(a, d) {
 log("Cleared playSound from console logging.", "initialize");
 
 submitWorldEventAction = function submitWorldEventAction(c, a, b) {
-    console.debug("Submitting world event action, " +
+    console.debug("Logging parameters, " +
         "sworn sword id: " + c + ", order: " + a + ", weakness attack? " + b);
 
     showSpinner();
@@ -735,11 +735,15 @@ submitWorldEventAction = function submitWorldEventAction(c, a, b) {
             hideSpinner();
         },
         success: function(a) {
-            console.debug("Logging response from the server for sending the sworn sword: ", b);
 
             hideSpinner();
             a.error && doAlert("Error Sending Swornsword", formatWorldEventError(a.error, a.error_code));
             a.swornsword && (insertInventoryFromItem(userContext.playerData.inventory, a.swornsword), doItemCooldown(a.swornsword));
+
+            // EXTENDER :: Modification
+            // full loop implemented
+            worldEvent.afterSubmit(a, c);
+
             a.challenge && updateWorldEventChallenge(a.challenge);
             !0 == a.show_outmaneuver_alert &&
                 dialogAlert({ style: "alert", text: "The order you just sent is guaranteed to critically hit and will have a bonus chance to find a weakness.", heading: "", button1: "Okay" });
@@ -748,9 +752,9 @@ submitWorldEventAction = function submitWorldEventAction(c, a, b) {
 };
 log("Analyzing world event action.", "initialize");
 
-getWorldEventAttackResults = function getWorldEventAttackResults(c, a, loop) {
-    console.debug("Getting world event attack result, " +
-        "sworn sword id: " + c + ", refresh? " + a + " and then loop? " + loop);
+getWorldEventAttackResults = function getWorldEventAttackResults(c, a) {
+    console.debug("Logging parameters, " +
+        "sworn sword id: " + c + ", refresh? " + a);
 
     showSpinner();
     $.ajax({
@@ -762,14 +766,9 @@ getWorldEventAttackResults = function getWorldEventAttackResults(c, a, loop) {
         success: function(b) {
             hideSpinner();
 
-            console.debug("Logging response from the server from world event attack: ", b);
-            console.debug("Got response, repeat event condition: " +
-                "loop? " + loop + ", response contains sworn sword? " + (b.swornsword) + ", response contains an action parameter? " + (b.action));
-
-            if (loop && b.swornsword && b.action) {
-                submitWorldEventAction(b.swornsword.id, b.action, false);
-                console.debug("Submit a new world event action with parameters: ", b.swornsword.id, b.action, false);
-            }
+            // EXTENDER :: Modification
+            // full loop implemented
+            worldEvent.afterGet(b, c);
 
             b.error
                 ? doAlert("Error Getting Results", formatWorldEventError(b.error, b.error_code))
@@ -1250,6 +1249,12 @@ function pvpLaunch(callback) {
             // EXTENDER :: Modification, call callback
             // parameter indicates successfull sending
             if (typeof callback == "function") {
+                if(a.error && a.error === "too_many_attacks") {
+                    //inform("Too MANY ATTACKS! StAHP STAAAHP!");
+                    pvpFormStore = null;
+                    return;
+                }
+
                 callback(!a.error);
             }
         }

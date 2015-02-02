@@ -29,6 +29,21 @@ var templates = {
             '</div>';
     },
 
+    brownBtn: function (id, cssClass, onclick, text) {
+        return '<span id="' + id + '" class="btnwrap btnsm ' + cssClass + '">' +
+            '<span class="btnedge">' +
+            '<a ' + (onclick != void 0 ? 'onclick="' + onclick + '"' : 'onclick:"return false"') + ' class="btnbrown">' +
+            '<span></span>' + text + '</a></span></span>';
+    },
+
+    defaultBtn: function (id, cssClass, onclick, text) {
+        return '<span id="' + id + '" class="btnwrap btnlg ' + cssClass + '" onclick="' + onclick + '">' +
+            '<span class="btnedge">' +
+            '<a class="btngold">' + text + '</a>' +
+            '</span>' +
+            '</span>';
+    },
+
     sendAllBtn:
         '<span id="adventureSendAll" class="btnwrap btnsm exSendAllButton">' +
             '<span class="btnedge">' +
@@ -221,6 +236,19 @@ var templates = {
         { val: "all", text: "Throw everything" }
     ],
 
+    orders: [
+        { val: "none", text: "NONE"},
+        { val: "fight", text: "FIGHT" },
+        { val: "harass", text: "HARASS" },
+        { val: "aid", text: "PROTECT" },
+        { val: "barter", text: "BARTER" },
+        { val: "hoodwink", text: "SWINDLE" },
+        { val: "bribe", text: "BRIBE" },
+        { val: "spy", text: "SPY" },
+        { val: "sabotage", text: "SABOTAGE" },
+        { val: "steal", text: "STEAL" }
+    ],
+
     outputSwornSwords: function (swornSwords) {
 
         if (!(swornSwords instanceof Array) || swornSwords.length == 0)
@@ -399,6 +427,43 @@ var templates = {
             this.bruteAllBtn +
             this.bruteBtn +                        
             '</div>';
+    },
+
+    weAttackersOutput: function(){
+
+        var weAttackerIds = unsafeWindow.worldEvent.attackers;
+
+        var markup = '';
+        for(var i = 0; i < 5; i ++) {
+
+            var swornsword = null;
+            if(weAttackerIds[i] != void 0)
+                swornsword = unsafeWindow.getSwornSwords(weAttackerIds[i]);
+
+            markup += '<div class="exrow">';
+            markup += 'SLOT ' + i + ' : ' + (swornsword != void 0 ? swornsword.id + ' # ' + swornsword.full_name + ' | ' : 'Empty | ');
+            markup += this.selectOption("Orders: ", "slot_" + i + "_orders", this.orders, (swornsword != void 0 ? swornsword.modifier : "none"), "return false") +
+            '</div>';
+        }
+
+        return markup;
+    },
+
+    weTab: function (o) {
+
+        var markup = '';
+        markup += '<div class="exrow">WORLD EVENT BATTLE MANAGER</div><hr />';
+        markup += '<div class="exrow">' + this.numberOption("worldEventDelay", "Delay: ", o.worldEventDelay, 2, 12, 2) + this.checkOption("weManagerEnabled", " Enabled", o.weManagerEnabled) + '</div><hr />';
+        markup += '<div class="exrow">' +
+            this.outputSwornSwords(o.swornSwords) +
+            this.defaultBtn("pushSSid", "", "worldEvent.enlistSS();", "PUSH") +
+        '</div>';
+
+        markup += '<div class="exrow">' +
+            this.weAttackersOutput() +
+            '</div>';
+
+        return markup;
     }
 };
 
@@ -540,6 +605,14 @@ var styles = {
             '.exSendAllButton {' +
             'position: absolute;' +
             'top: 7px;' +
+            '}',
+
+    exAttackTimestamp:
+        '.ex_attack_timestamp {' +
+            'text-align: left;'+
+            'margin-bottom: 15px;' +
+            'padding: 10px 0 0 15px;' +
+            'font-family: GoudyTrajan-Bold,Trajan,"Trajan Pro",Trajanbold;' +
             '}',
 
     addAllStyles: function() {

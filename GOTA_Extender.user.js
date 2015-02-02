@@ -114,6 +114,7 @@ function initialize() {
 
             unsafeWindow.production.init(options.export(["queueDelay", "superiorMaterials"]));
             unsafeWindow.bossChallenger.init(options.export(["autoBossChallenge"]));
+            unsafeWindow.worldEvent.init(options.export(["weManagerEnabled", "worldEventDelay"]));
 
         }, 2E3);
 
@@ -134,26 +135,8 @@ function initialize() {
         // Claim favours
         acceptAllFavors();
 
-        // Try to load the queue
-        //if (options.productionQueue != void 0 && options.productionQueue.length > 0) {
-        //    loadComponent("productionQueue");
-        //
-        //    // When done attempt production
-        //    if (typeof unsafeWindow.attemptProduction == "function") {
-        //        unsafeWindow.attemptProduction();
-        //    }
-        //}
-        //
-        //// Try to load the boss challenges
-        //if (options.bossChallenges != void 0 && options.bossChallenges.length > 0) {
-        //    loadComponent("bossChallenges");
-        //
-        //    // When done attempt production
-        //    for(var i = 0; i < options.bossChallenges.length; i++){
-        //        var c = options.bossChallenges[i];
-        //        unsafeWindow.questSubmit(c.symbol, c.stage, s.attack, c.chosen, null, null, c.questId);
-        //    }
-        //}
+        // Send out gifts and shit..
+        sendGifts();
 
         // Store all sworn swords
         getSwornSwords();
@@ -297,11 +280,25 @@ function signal_acknowledged() {
 }
 // <-- Page command handling
 
+// TODO: Implement..
+//var PERSISTABLE =  {
+//
+//    get queue() {
+//        return localStorage.get("productionQueue", []);
+//    },
+//
+//    set queue(val) {
+//        localStorage.set("productionQueue", val);
+//    }
+//};
+
 // --> Options object
 var options = {
     swornSwords: [],
     default_swornSwords: [],
 
+    logLevel: ["QUARTERMASTER", "FAVOR"],
+    default_logLevel: ["QUARTERMASTER", "FAVOR"],
     debugMode: true,
     default_debugMode: true,
     checkScript: false,
@@ -316,8 +313,6 @@ var options = {
     default_superiorMaterials: true,
     queueTimerInterval: 30,
     default_queueTimerInterval: 30,
-    allowBruting: true,
-    default_allowBruting: true,
     bruteWounds: 1,
     default_bruteWounds: 1,
     bruteSwitchOff: true,
@@ -336,12 +331,20 @@ var options = {
     default_shopSortBy: "price",
     shopSortBy2: "rarity",
     default_shopSortBy2: "rarity",
-    sendAllAction: "friendly",
-    default_sendAllAction: "friendly",
+    sendAllAction: "all",
+    default_sendAllAction: "all",
     autoBossChallenge: false,
     default_autoBossChallenge: false,
     autoBrute: false,
     default_autoBrute: false,
+
+    featureTesting: false,
+    default_featureTesting: false,
+
+    weManagerEnabled: false,
+    default_weManagerEnabled: false,
+    worldEventDelay: 6,
+    default_worldEventDelay: 6,
 
     get: function () {
         var prefix = "";
@@ -554,72 +557,69 @@ var inject = {
             unsafeWindow.inform = inform;
         }
 
-        var clientEntries = sessionStorage.get("clientEntries", []);
-        clientEntries.push([new Date().toLocaleTimeString() + " | Extender initialized successfully."]);
-        sessionStorage.set("clientEntries", clientEntries);
-
-       //typeof (cloneInto) == "function"
-       //    ? unsafeWindow.clientEntries = cloneInto(clientEntriesArray, unsafeWindow)
-       //    : unsafeWindow.clientEntries = clientEntriesArray;
-
         log("Messaging system injected successfully.");
     }
 };
 // <-- End of injection object
 
 // --> Message handling
-(function(){
-    window.log = function log(message, type, clientEntry) {
-        if (options && options.debugMode && console && console.log
-            && typeof (console.log) == "function") {
-            if (!type)
-                type = "extender";
+function log(message, type, clientEntry) {
+    if (options && options.debugMode && console && console.log
+        && typeof (console.log) == "function") {
+        if (!type)
+            type = "extender";
 
-            var prefix = type.toString().toUpperCase() + " <" + new Date().toLocaleTimeString() + "> ";
-            console.log(prefix + message);
-        }
-
-        if(clientEntry != void 0){
-            var clientEntries = sessionStorage.get("clientEntries", []);
-            clientEntries.push(new Date().toLocaleTimeString() + " | " + message);
-            sessionStorage.set("clientEntries", clientEntries);
-        }
-    };
-
-    window.error = function error(message, type) {
-        if (console && console.error && typeof (console.error) == "function") {
-            if (!type)
-                type = "extender";
-
-            var prefix = type.toString().toUpperCase() + " - ERROR <" + new Date().toLocaleTimeString() + "> ";
-            console.error(prefix + message);
-        }
+        var prefix = type.toString().toUpperCase() + " <" + new Date().toLocaleTimeString() + "> ";
+        console.log(prefix + message);
     }
 
-    window.warn = function warn(message, type) {
-        if (console && console.warn && typeof (console.warn) == "function") {
-            if (!type)
-                type = "extender";
-
-            var prefix = type.toString().toUpperCase() + " - WARNING <" + new Date().toLocaleTimeString() + "> ";
-            console.warn(prefix + message);
-        }
+    if(clientEntry != void 0){
+        clientLog(message, type);
     }
+}
 
-    window.inform = function inform(msg) {
+function error(message, type) {
+    if (console && console.error && typeof (console.error) == "function") {
+        if (!type)
+            type = "extender";
 
-        if (unsafeWindow && typeof unsafeWindow.doAlert == "function") {
-            unsafeWindow.doAlert("EXTENDER", templates.formatMessage(msg));
-
-            //$("div#modals_container_high div#modalwrap div#exalert")
-            //    .parents("div.alertboxinner").css("min-height", "0")
-            //    .parent("div.alertbox").css("min-height", "0")
-            //    .parent("div.alertcontents").css("min-height", "0");
-
-        } else if (alert && typeof alert == "function")
-            alert(msg);
+        var prefix = type.toString().toUpperCase() + " - ERROR <" + new Date().toLocaleTimeString() + "> ";
+        console.error(prefix + message);
     }
-}());
+}
+
+function warn(message, type) {
+    if (console && console.warn && typeof (console.warn) == "function") {
+        if (!type)
+            type = "extender";
+
+        var prefix = type.toString().toUpperCase() + " - WARNING <" + new Date().toLocaleTimeString() + "> ";
+        console.warn(prefix + message);
+    }
+}
+
+function inform(msg) {
+
+    if (unsafeWindow && typeof unsafeWindow.doAlert == "function") {
+        unsafeWindow.doAlert("EXTENDER", templates.formatMessage(msg));
+
+        //$("div#modals_container_high div#modalwrap div#exalert")
+        //    .parents("div.alertboxinner").css("min-height", "0")
+        //    .parent("div.alertbox").css("min-height", "0")
+        //    .parent("div.alertcontents").css("min-height", "0");
+
+    } else if (alert && typeof alert == "function")
+        alert(msg);
+}
+
+function clientLog(msg, type){
+
+    if(options.logLevel.indexOf(type) > -1) {
+        var clientEntries = sessionStorage.get("clientEntries", []);
+        clientEntries.push(new Date().toLocaleTimeString() + " | " + msg);
+        sessionStorage.set("clientEntries", clientEntries);
+    }
+}
 // <-- Message handling
 
 // --> Loops handling
@@ -672,7 +672,8 @@ function acceptAllFavors() {
         success: function (r) {
             //console.debug(r, r.accepted);
 
-            r.silver_reward &&  log("Favors claimed: silver reward: " + r.silver_reward, "FAVOR", true);
+            r.silver_reward &&
+                log("Favors claimed: silver reward: " + r.silver_reward, "FAVOR", true);
 
             if(!$.isEmptyObject(r.accepted)){
                 for(var item in r.accepted){
@@ -775,6 +776,17 @@ function openBox() {
     });
 }
 
+function sendGifts(){
+    ajax({
+        url: "/play/gifts",
+        success: function (r) {
+            var bestGift = r.favors.sort(function(a, b){
+                return a.description < b.description;
+            })[0].symbol;
+        }
+    });
+}
+
 function collectTax() {
     try {
 
@@ -801,10 +813,10 @@ function showSettings(e) {
         $("#extenderTabMenu .charactertabs").append(templates.optionsTab("logTab", "LOG"));
         $("#extenderTabMenu .charactertabs").append(templates.optionsTab("mainTab", "MAIN"));
         $("#extenderTabMenu .charactertabs").append(templates.optionsTab("queueTab", "QUEUE"));
+        $("#extenderTabMenu .charactertabs").append(templates.optionsTab("bruteTab", "BRUTING"));
 
-        if (options.allowBruting) {
-            $("#extenderTabMenu .charactertabs").append(templates.optionsTab("bruteTab", "BRUTING"));
-        }
+        if(options.featureTesting)
+            $("#extenderTabMenu .charactertabs").append(templates.optionsTab("weTab", "WE"));
 
         $("#credits_page").append(templates.tabContent);
         $("#mainTab").trigger('click');
@@ -855,7 +867,11 @@ function tab_onchange(e) {
             getSwornSwords();
             $("#extenderTabContent").html(templates.bruteTab(options));
             break;
+        case "weTab":
+            $("#extenderTabContent").html(templates.weTab(options));
+            break;
         default:
+            warn("Not a known tab or in development.");
             break;
     }
 }
@@ -865,6 +881,10 @@ function saveOptions_click(e) {
     e.preventDefault();
 
     try {
+
+        if ($("#credits_roll").is(":hidden")) {
+            return;
+        }
 
         var tab = $(".inventorytab.active:visible").parents(".inventorytabwrap").attr("id");
 
@@ -878,8 +898,11 @@ function saveOptions_click(e) {
             case "bruteTab":
                 saveBruteTab();
                 break;
-
+            case "weTab":
+                saveWeTab();
+                break;
             default:
+                warn("Not a known tab or in development.");
                 return;
         }
 
@@ -897,10 +920,20 @@ function saveOptions_click(e) {
     }
 }
 
-function saveMainTab() {
-    if ($("#credits_roll").is(":hidden")) {
-        return;
+function saveWeTab(){
+    var wed = parseInt($("#worldEventDelay").text());
+    if (!isNaN(wed) && options.worldEventDelay != wed) {
+        options.worldEventDelay = wed;
     }
+
+    options.weManagerEnabled = $("#weManagerEnabled").hasClass("checked");
+    unsafeWindow.worldEvent.config(options.export(["weManagerEnabled", "worldEventDelay"]));
+    unsafeWindow.worldEvent.dispatch();
+
+    options.set();
+}
+
+function saveMainTab() {
 
     var bd = parseInt($("#baseDelay").text());
     if (!isNaN(bd) && options.baseDelay != bd) {
@@ -912,7 +945,6 @@ function saveMainTab() {
     options.neverSpendGold = $("#neverSpendGold").hasClass("checked");
     options.autoBossChallenge = $("#autoBossChallenge").hasClass("checked");
     unsafeWindow.bossChallenger.config(options.export(["autoBossChallenge"]));
-
     options.autoBrute = $("#autoBrute").hasClass("checked");
 
     var ari = parseInt($("#autoReloadInterval").val());
@@ -958,12 +990,10 @@ function saveQueueTab() {
         toggleQueueTimer();
     }
 
-    //saveComponent("productionQueue");
     unsafeWindow.production.config(options.export(["queueDelay", "superiorMaterials"]));
 
     options.set();
     inject.constants();
-    //unsafeWindow.sort();
 }
 
 function saveBruteTab() {
@@ -1011,7 +1041,7 @@ function viewAdventure_onclick() {
     log("View adventure details.");
 
     var vBtn = $(this).find("a.btngold");
-    if (!vBtn || vBtn.text() != "View Results!" || !options.allowBruting) {
+    if (!vBtn || vBtn.text() != "View Results!") {
         return;
     }
 
@@ -1040,11 +1070,6 @@ function brute_onclick() {
 
     if (!b || b.length == 0) {
         warn("Cannot find brute button!");
-    }
-
-    if (!options.allowBruting) {
-        error("Bruting is not allowed.");
-        return;
     }
 
     unsafeWindow.brutingImmediateTermination = false;
@@ -1402,8 +1427,8 @@ function warmap_onclick(e) {
     }, (options.baseDelay / 2) * 1000);
 }
 
-$("#modal_dialogs_top").on('click', '#incomingtab', wireEvents);
-function wireEvents(e) {
+$("#modal_dialogs_top").on('click', "[onclick*='pvpIncomingAttacks']", inspectIncoming);
+function inspectIncoming(e) {
     e.preventDefault();
 
     ajax({
@@ -1411,7 +1436,7 @@ function wireEvents(e) {
         url: "/play/incoming_attacks",
         success: function (a) {
             try {
-                // console.debug(response, a);
+                // console.debug(a);
                 $('div.perkscroll div.achiev-content').each(function () {
                     var id = /[0-9]+/.exec($(this).find('div.increspond').attr('onclick'));
 
@@ -1426,60 +1451,94 @@ function wireEvents(e) {
                     $(this).find("span.charportrait").attr("onclick", "return characterMainModal(" + attack.attacker.user_id + ")");
                     //$(this).find("span.targetalliancename").attr("onclick", "return allianceInfo(" + attack.alliance_id + ")");
 
-                    var text = 'Last seen:' + moment(attack.attacker.updated_at,"YYYY-MM-DD HH:mm:ss Z").local().format('MMMM Do YYYY, h:mm:ss a');
+                    var text = 'Last seen: ' + moment(attack.attacker.updated_at,"YYYY-MM-DD HH:mm:ss Z").local().format('MMMM Do YYYY, h:mm:ss a');
+                    $(this).append('<div class="ex_attack_timestamp">' + text + '</div>');
                 });
             } catch (e) {
                 error(e);
             }
         }
     });
-
-    //window.setTimeout(function () {
-    //    GM_xmlhttpRequest({
-    //        method: "GET",
-    //        url: "/play/incoming_attacks",
-    //        onload: function (response) {
-    //            try {
-    //                var a = JSON.parse(response.responseText);
-    //                // console.debug(response, a);
-    //                $('div.perkscroll div.achiev-content').each(function () {
-    //                    var id = /[0-9]+/.exec($(this).find('div.increspond').attr('onclick'));
-    //
-    //                    var attack = a.attacks.filter(function (e) {
-    //                        return e.camp_attack_id === null ? e.pvp_id == id : e.camp_attack_id == id;
-    //                    })[0];
-    //
-    //                    if (!attack)
-    //                        return;
-    //
-    //                    $(this).find("span.charname").attr("onclick", "return characterMainModal(" + attack.attacker.user_id + ")");
-    //                    $(this).find("span.charportrait").attr("onclick", "return characterMainModal(" + attack.attacker.user_id + ")");
-    //                    $(this).find("span.targetalliancename").attr("onclick", "return allianceInfo(" + attack.alliance_id + ")");
-    //                });
-    //            } catch (e) {
-    //                error(e);
-    //            }
-    //        }
-    //    });
-    //}, (options.baseDelay / 2) * 1000);
 }
 
-function saveBossChallenges() {
+$("#modal_dialogs_top").on('click', "[onclick*='pvpOutgoingAttacks']", inspectOutgoing);
+function inspectOutgoing(e) {
+    e.preventDefault();
 
-    var p = unsafeWindow.bossChallenges;
-    if (p && p.length > 0) {
-        options.bossChallenges = p;
-        options.set("bossChallenges");
-    }
+    ajax({
+        method: "GET",
+        url: "/play/outgoing_attacks",
+        success: function (a) {
+            try {
+                // console.debug(a);
+                $('div.perkscroll div.achiev-content').each(function () {
+                    var id = /[0-9]+/.exec($(this).find('div.increspond').attr('onclick'));
+
+                    var attack = a.attacks.filter(function (e) {
+                        return e.camp_attack_id === null ? e.pvp_id == id : e.camp_attack_id == id;
+                    })[0];
+
+                    if (!attack)
+                        return;
+
+                    $(this).find("span.charname").attr("onclick", "return characterMainModal(" + attack.defender.user_id + ")");
+                    $(this).find("span.charportrait").attr("onclick", "return characterMainModal(" + attack.defender.user_id + ")");
+                    //$(this).find("span.targetalliancename").attr("onclick", "return allianceInfo(" + attack.alliance_id + ")");
+
+                    var text = 'Last seen: ' + moment(attack.defender.updated_at,"YYYY-MM-DD HH:mm:ss Z").local().format('MMMM Do YYYY, h:mm:ss a');
+                    $(this).append('<div class="ex_attack_timestamp">' + text + '</div>');
+                });
+            } catch (e) {
+                error(e);
+            }
+        }
+    });
 }
+$("#modal_dialogs_top").on('click', "[onclick*='pvpStartWithTarget']", inspectTarget);
+$("#modal_dialogs_top").on('click', "[onclick*='pvpTargetSelected']", inspectTarget);
+function inspectTarget(e) {
+    e.preventDefault();
+    //console.debug(e, this, $(this));
 
-function loadBossChallenges() {
+    var func = $(this).attr("onclick");
+    var id = func.indexOf("pvpTargetSelected") > -1
+        ? func.substring(func.indexOf(",") + 1, func.indexOf(")"))
+        : func.substring(func.indexOf("(") + 1, func.indexOf(")"));
 
-    var p = unsafeWindow.bossChallenges;
-    if (p && p.length > 0) {
-        options.bossChallenges = p;
-        options.set("bossChallenges");
+    if(!id){
+        warn("Could not retrieve player id. Exiting...");
+        return;
     }
+
+    ajax({
+        method: "GET",
+        url: "/play/character_pvp/" + id,
+        success: function (a) {
+            try {
+                // console.debug(a);
+
+                var lastUpdated =
+                    a.defender.armor ? a.defender.armor.updated_at
+                        : a.defender.weapon ? a.defender.weapon.updated_at
+                        : a.defender.companion ? a.defender.companion.updated_at
+                        : null;
+
+                if (!lastUpdated) {
+                    warn("Could not establish when was the user last seen.");
+                    return;
+                }
+
+                var $h2 = $(".infobar:visible:first").find("h2");
+                if($h2.length){
+                    $h2.css("padding-left", "140px");
+                    $h2.html('Last seen: ' + moment(lastUpdated, "YYYY-MM-DD HH:mm:ss Z").local().format('MMMM Do YYYY, h:mm:ss a'));
+                }
+
+            } catch (e) {
+                error(e);
+            }
+        }
+    });
 }
 
 $("#modals_container").on("click", "#ex_alliance_search", searchAlliance_onclick);
