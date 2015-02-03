@@ -600,7 +600,7 @@ speedBuild = function speedBuild(c, a, callback) {
 log("Speed build is what actually calls the callback (not doInstantSpeedUp).", "initialize");
 
 doTrain = function doTrain(a) {
-if(userContext.setSwornSword.upgradepoints > 0){
+if(userContext.setSwornSword.upgrade_points > 0){
     $.ajax({
         url: "/play/train/" + userContext.setSwornSword.id + "?attribute=" + a + "&client_seqnum="  + userContext.player_data_seqnum,
         dataType: "JSON",
