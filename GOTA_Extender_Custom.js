@@ -605,8 +605,7 @@ if(userContext.setSwornSword.upgrade_points > 0){
         url: "/play/train/" + userContext.setSwornSword.id + "?attribute=" + a + "&client_seqnum="  + userContext.player_data_seqnum,
         dataType: "JSON",
 		success: function(b) { 
-var bAsString = JSON.stringify(b);
-log("TRAINED" + userContext.setSwornSword.full_name +". "+ bAsString +".","BRUTING");
+log("TRAINED" + userContext.setSwornSword.full_name +".","BRUTING");
 		}
     });
 }else{
