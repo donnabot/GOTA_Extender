@@ -210,21 +210,21 @@ var templates = {
     battleTrainoptions: [
         { val: "fight", text: "Vanguards" },
         { val: "harass", text: "Skirmishers" },
-        { val: "aid", text: "Protectors" },
+        { val: "aid", text: "Protectors" }
     ],
     tradeTrainoptions: [
         { val: "barter", text: "Merchants" },
         { val: "hoodwink", text: "Charlatans" },
-        { val: "bribe", text: "Corruptors" },
+        { val: "bribe", text: "Corruptors" }
     ],
     intrigueTrainoptions: [
         { val: "spy", text: "Agents" },
         { val: "sabotage", text: "Saboteurs" },
-        { val: "steal", text: "Thieves" },
+        { val: "steal", text: "Thieves" }
     ],
     existTrainoptions: [
         { val: "stat", text: "Base Stat" },
-        { val: "mod", text: "Percentage Modifier" },
+        { val: "mod", text: "Percentage Modifier" }
     ],
 
     shopSortingOptions: [
