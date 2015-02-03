@@ -794,20 +794,20 @@ function resolveModifier(s) {
     // Calculate what attack shoild we use if there ain't any
     var max = Math.max(s.calc_battle, s.calc_trade, s.calc_intrigue);
     if (max == s.calc_intrigue) {
-	if(o.intrigueTrain && o.intrigueTrain != "intrigue"){
-        	s.modifier = o.intrigueTrain;
+	if(extender_intrigueTrain && extender_intrigueTrain != "intrigue"){
+        	s.modifier = extender_intrigueTrain;
 	}else{
         	s.modifier = "spy";
 	}
     } else if (max == s.calc_trade) {
-	if(o.tradeTrain && o.tradeTrain != "trade"){
-        	s.modifier = o.tradeTrain;
+	if(extender_tradeTrain && extender_tradeTrain != "trade"){
+        	s.modifier = extender_tradeTrain;
 	}else{
         	s.modifier = "barter";
 	}
     } else {
-	if(o.battleTrain && o.battleTrain != "battle"){
-        	s.modifier = o.battleTrain;
+	if(extender_battleTrain && extender_battleTrain != "battle"){
+        	s.modifier = extender_battleTrain;
 	}else{
         	s.modifier = "fight";
 	}
