@@ -600,13 +600,18 @@ speedBuild = function speedBuild(c, a, callback) {
 log("Speed build is what actually calls the callback (not doInstantSpeedUp).", "initialize");
 
 doTrain = function doTrain(a) {
-    $.ajaxQueue({
+if(userContext.setSwornSword.upgradepoints > 0){
+    $.ajax({
         url: "/play/train/" + userContext.setSwornSword.id + "?attribute=" + a + "&client_seqnum="  + userContext.player_data_seqnum,
         dataType: "JSON",
-		success: function(a) { 
-log("TRAINED "+ a +".","BRUTING");
+		success: function(b) { 
+var bAsString = JSON.stringify(b);
+log("TRAINED" + userContext.setSwornSword.full_name +". "+ bAsString +".","BRUTING");
 		}
     });
+}else{
+log("no points " + userContext.setSwornSword.full_name + ".","BRUTING");
+}
 };
 
 doAdventure = function doAdventure(c, a, b, callback) {
