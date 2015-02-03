@@ -20,7 +20,7 @@
 // @resource    auxiliary https://greasyfork.org/scripts/7490-donnabot-s-gota-extender-auxiliary/code/Donnabot's%20GOTA_Extender_Auxiliary.js?version=34898
 // @resource    original https://greasyfork.org/scripts/7493-donnabot-s-gota-extender-original/code/Donnabot's%20GOTA_Extender_Original.js?version=33084
 // @resource    production https://greasyfork.org/scripts/7612-donnabots-gota-extender-production/code/Donnabots_GOTA_Extender_Production.js?version=34877
-// @version     0.0.23
+// @version     0.0.24
 // @grant       unsafeWindow
 // @grant       GM_getValue
 // @grant       GM_setValue
@@ -480,6 +480,11 @@ var inject = {
             unsafeWindow.extender_shopSortBy = cloneInto(options.shopSortBy, unsafeWindow);
             unsafeWindow.extender_shopSortBy2 = cloneInto(options.shopSortBy2, unsafeWindow);
 
+            unsafeWindow.extender_battleTrain = cloneInto(options.battleTrain, unsafeWindow);
+            unsafeWindow.extender_tradeTrain = cloneInto(options.tradeTrain, unsafeWindow);
+            unsafeWindow.extender_intrigueTrain = cloneInto(options.intrigueTrain, unsafeWindow);
+            unsafeWindow.extender_existTrain = cloneInto(options.existTrain, unsafeWindow);
+
             unsafeWindow.extender_sendAllAction = cloneInto(options.sendAllAction, unsafeWindow);
             //unsafeWindow.extender_autoBossChallenge = cloneInto(options.autoBossChallenge, unsafeWindow);
 
@@ -498,6 +503,11 @@ var inject = {
             unsafeWindow.extender_boonsSortBy2 = options.boonsSortBy2;
             unsafeWindow.extender_shopSortBy = options.shopSortBy;
             unsafeWindow.extender_shopSortBy2 = options.shopSortBy2;
+
+            unsafeWindow.extender_battleTrain = options.battleTrain;
+            unsafeWindow.extender_tradeTrain = options.tradeTrain;
+            unsafeWindow.extender_intrigueTrain = options.intrigueTrain;
+            unsafeWindow.extender_existTrain = options.existTrain;
 
             unsafeWindow.extender_sendAllAction = options.sendAllAction;
             //unsafeWindow.extender_autoBossChallenge = options.autoBossChallenge;
