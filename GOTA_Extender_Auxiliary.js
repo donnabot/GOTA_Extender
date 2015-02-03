@@ -270,7 +270,7 @@ function bruteForce(enabled, times) {
             });
         }
 var upgradetimes = s.upgrade_points;
-
+var lastdoness = GM_getValue("lastdoness");
 while(upgradetimes > 0 && s.id != lastdoness){
 	if(extender_existTrain == "mod"){
 		doTrain(s.modifier);
@@ -289,7 +289,8 @@ while(upgradetimes > 0 && s.id != lastdoness){
 	}
 	upgradetimes--;
 }
-var lastdoness = s.id;
+GM_setValue("lastdoness",s.id);
+
 
         return;
     }
