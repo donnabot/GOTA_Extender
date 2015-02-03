@@ -273,8 +273,8 @@ var upgradetimes = s.upgrade_points;
 var lastdoness = sessionStorage.get("lastdoness","0");
 while(upgradetimes > 0 && s.id != lastdoness){
 	if(extender_existTrain == "mod"){
-		doTrain(s.modifier);
-		log("Training " + s.full_name + " Modifier " + s.modifier + ": "+ upgradetimes +" points to go", "BRUTING");
+		doTrain(s.modifier, s.id, s.full_name);
+		log("Training " + s.full_name + " Modifier " + s.modifier + ": "+ upgradetimes +" points to go", "TRAINING");
 	}else{
 		var max = Math.max(s.calc_battle, s.calc_trade, s.calc_intrigue);
 		if (max == s.calc_intrigue) {
@@ -284,8 +284,8 @@ while(upgradetimes > 0 && s.id != lastdoness){
 		} else {
 			var StattoTrain="battle";
 		}
-		doTrain(StattoTrain);
-		log("Training " + s.full_name + " Base Stat " + StattoTrain + ". " + upgradetimes +" points to go", "BRUTING");
+		doTrain(StattoTrain, s.id, s.full_name);
+		log("Training " + s.full_name + " Base Stat " + StattoTrain + ". " + upgradetimes +" points to go", "TRAINING");
 	}
 	upgradetimes--;
 }

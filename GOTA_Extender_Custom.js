@@ -599,17 +599,17 @@ speedBuild = function speedBuild(c, a, callback) {
 };
 log("Speed build is what actually calls the callback (not doInstantSpeedUp).", "initialize");
 
-doTrain = function doTrain(a) {
+doTrain = function doTrain(a, b, c) {
 if(userContext.setSwornSword.upgrade_points > 0){
     $.ajaxQueue({
-        url: "/play/train/" + userContext.setSwornSword.id + "?attribute=" + a + "&client_seqnum="  + userContext.player_data_seqnum,
+        url: "/play/train/" + b + "?attribute=" + a + "&client_seqnum="  + userContext.player_data_seqnum,
         dataType: "JSON",
-		success: function(b) { 
-log("TRAINED" + userContext.setSwornSword.full_name +".","BRUTING");
+		success: function(d) { 
+log("TRAINED" + c +".","TRAINING");
 		}
     });
 }else{
-log("no points " + userContext.setSwornSword.full_name + ".","BRUTING");
+log("no points " + c + ".","TRAINING");
 }
 };
 
