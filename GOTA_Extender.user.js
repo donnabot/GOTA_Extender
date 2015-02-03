@@ -15,12 +15,12 @@
 // @require     https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.9.0/moment.min.js
 // @require     https://greasyfork.org/scripts/5279-greasemonkey-SuperValues/code/GreaseMonkey_SuperValues.js?version=20819
 // @require     https://greasyfork.org/scripts/7573-storage-prototype-extension/code/StoragePrototype_extension.js?version=32814
-// @require     https://greasyfork.org/scripts/7491-donnabot-s-gota-extender-constants/code/Donnabot's%20GOTA_Extender_Constants.js?version=34892
+// @require     https://greasyfork.org/scripts/7491-donnabot-s-gota-extender-constants/code/Donnabot's%20GOTA_Extender_Constants.js?version=34930
 // @resource 	custom https://greasyfork.org/scripts/7492-donnabot-s-gota-extender-custom/code/Donnabot's%20GOTA_Extender_Custom.js?version=34893
 // @resource    auxiliary https://greasyfork.org/scripts/7490-donnabot-s-gota-extender-auxiliary/code/Donnabot's%20GOTA_Extender_Auxiliary.js?version=34928
 // @resource    original https://greasyfork.org/scripts/7493-donnabot-s-gota-extender-original/code/Donnabot's%20GOTA_Extender_Original.js?version=33084
 // @resource    production https://greasyfork.org/scripts/7612-donnabots-gota-extender-production/code/Donnabots_GOTA_Extender_Production.js?version=34877
-// @version     0.0.30
+// @version     0.0.31
 // @grant       unsafeWindow
 // @grant       GM_getValue
 // @grant       GM_setValue
