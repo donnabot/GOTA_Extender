@@ -272,9 +272,7 @@ function bruteForce(enabled, times) {
 var upgradetimes = s.upgrade_points;
 while(upgradetimes > 0){
 	if(extender_existTrain == "mod"){
-		setTimeout(function() {
-			doTrain(s.modifier);
-		}, extender_baseDelay);
+		doTrain(s.modifier);
 		log("Training " + s.full_name + " Modifier " + s.modifier + ": "+ upgradetimes +" points to go", "BRUTING");
 	}else{
 		var max = Math.max(s.calc_battle, s.calc_trade, s.calc_intrigue);
@@ -285,10 +283,8 @@ while(upgradetimes > 0){
 		} else {
 			var StattoTrain="battle";
 		}
-		setTimeout(function() {
-			doTrain(StattoTrain);
-		}, extender_baseDelay);
-		log("Training " + s.full_name + " Base Stat"+ upgradetimes +" points to go", "BRUTING");
+		doTrain(StattoTrain);
+		log("Training " + s.full_name + " Base Stat " + StattoTrain + ". " + upgradetimes +" points to go", "BRUTING");
 	}
 	upgradetimes--;
 }
