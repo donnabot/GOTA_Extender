@@ -235,7 +235,9 @@ function bruteForce(enabled, times) {
     }
 
     var s = userContext.setSwornSword;
-log("GETTING S INFO" + s + ".", "BRUTING");
+
+var sAsString = JSON.stringify(s);
+log("GETTING S INFO" + sAsString + ".", "BRUTING");
 
     if (!s) {
         msg = "Failed, no sworn sword set.";
