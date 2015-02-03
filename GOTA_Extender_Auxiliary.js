@@ -272,6 +272,7 @@ log("GETTING S INFO" + sAsString + ".", "BRUTING");
 
 	if(extender_existTrain == "mod"){
 		doTrain(s.modifier);
+log("Training Mod", "BRUTING");
 	}else{
 		var max = Math.max(s.calc_battle, s.calc_trade, s.calc_intrigue);
 		if (max == s.calc_intrigue) {
@@ -281,6 +282,7 @@ log("GETTING S INFO" + sAsString + ".", "BRUTING");
 		} else {
 			doTrain("battle");
 		}
+log("Training Stat", "BRUTING");
 	}
 
         return;
