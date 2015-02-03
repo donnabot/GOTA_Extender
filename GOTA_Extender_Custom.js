@@ -603,6 +603,9 @@ doTrain = function doTrain(a) {
     $.ajaxQueue({
         url: "/play/train/" + userContext.setSwornSword.id + "?attribute=" + a + "&client_seqnum="  + userContext.player_data_seqnum,
         dataType: "JSON",
+		success: function(a) { 
+log("TRAINED "+ a +".","BRUTING");
+		}
     });
 };
 
