@@ -236,8 +236,8 @@ function bruteForce(enabled, times) {
 
     var s = userContext.setSwornSword;
 
-var sAsString = JSON.stringify(s);
-log("GETTING S INFO" + sAsString + ".", "BRUTING");
+//var sAsString = JSON.stringify(s);
+//log("GETTING S INFO" + sAsString + ".", "BRUTING");
 
     if (!s) {
         msg = "Failed, no sworn sword set.";
@@ -269,10 +269,11 @@ log("GETTING S INFO" + sAsString + ".", "BRUTING");
                 bruteForce(!failure, times);
             });
         }
-
+var upgradetimes = s.upgrade_points;
+while(upgradetimes > 0){
 	if(extender_existTrain == "mod"){
 		doTrain(s.modifier);
-log("Training Mod", "BRUTING");
+		log("Training " + s.full_name + " Modifier " + s.modifier + ": "+ upgradetimes +" points to go", "BRUTING");
 	}else{
 		var max = Math.max(s.calc_battle, s.calc_trade, s.calc_intrigue);
 		if (max == s.calc_intrigue) {
@@ -282,8 +283,10 @@ log("Training Mod", "BRUTING");
 		} else {
 			doTrain("battle");
 		}
-log("Training Stat", "BRUTING");
+		log("Training " + s.full_name + " Base Stat"+ upgradetimes +" points to go", "BRUTING");
 	}
+	upgradetimes--;
+}
 
         return;
     }
