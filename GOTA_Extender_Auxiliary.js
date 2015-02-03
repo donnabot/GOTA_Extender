@@ -270,7 +270,8 @@ function bruteForce(enabled, times) {
             });
         }
 var upgradetimes = s.upgrade_points;
-while(upgradetimes > 0){
+
+while(upgradetimes > 0 && s.id != lastdoness){
 	if(extender_existTrain == "mod"){
 		doTrain(s.modifier);
 		log("Training " + s.full_name + " Modifier " + s.modifier + ": "+ upgradetimes +" points to go", "BRUTING");
@@ -288,6 +289,7 @@ while(upgradetimes > 0){
 	}
 	upgradetimes--;
 }
+var lastdoness = s.id;
 
         return;
     }
