@@ -274,7 +274,7 @@ var lastdoness = sessionStorage.get("lastdoness","0");
 while(upgradetimes > 0 && s.id != lastdoness){
 	if(extender_existTrain == "mod"){
 		doTrain(s.modifier, s.id, s.full_name);
-		log("Training " + s.full_name + " Modifier " + s.modifier + ": "+ upgradetimes +" points to go", "TRAINING");
+		msg = "Training " + s.full_name + " in " + s.modifier + ". "+ upgradetimes +" points to go.";
 	}else{
 		var max = Math.max(s.calc_battle, s.calc_trade, s.calc_intrigue);
 		if (max == s.calc_intrigue) {
@@ -285,8 +285,10 @@ while(upgradetimes > 0 && s.id != lastdoness){
 			var StattoTrain="battle";
 		}
 		doTrain(StattoTrain, s.id, s.full_name);
-		log("Training " + s.full_name + " Base Stat " + StattoTrain + ". " + upgradetimes +" points to go", "TRAINING");
+		msg = "Training " + s.full_name + " in " + StattoTrain + ". " + upgradetimes +" points to go.";
 	}
+	log(msg, "TRAINING");
+	container.after("<br />" + msg);
 	upgradetimes--;
 }
 sessionStorage.set("lastdoness",s.id);

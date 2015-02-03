@@ -605,11 +605,11 @@ if(userContext.setSwornSword.upgrade_points > 0){
         url: "/play/train/" + b + "?attribute=" + a + "&client_seqnum="  + userContext.player_data_seqnum,
         dataType: "JSON",
 		success: function(d) { 
-log("TRAINED" + c +".","TRAINING");
+log("TRAINED " + c +".","TRAINING");
 		}
     });
 }else{
-log("no points " + c + ".","TRAINING");
+log("no points on " + c + ".","TRAINING");
 }
 };
 
