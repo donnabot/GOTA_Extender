@@ -268,7 +268,7 @@ log("GETTING S INFO" + s + ".", "BRUTING");
             });
         }
 
-	if(o.existTrain == "mod"){
+	if(extender_existTrain == "mod"){
 		doTrain(s.modifier);
 	}else{
 		var max = Math.max(s.calc_battle, s.calc_trade, s.calc_intrigue);
