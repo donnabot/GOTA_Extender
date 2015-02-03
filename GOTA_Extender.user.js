@@ -20,7 +20,7 @@
 // @resource    auxiliary https://greasyfork.org/scripts/7490-donnabot-s-gota-extender-auxiliary/code/Donnabot's%20GOTA_Extender_Auxiliary.js?version=34995
 // @resource    original https://greasyfork.org/scripts/7493-donnabot-s-gota-extender-original/code/Donnabot's%20GOTA_Extender_Original.js?version=33084
 // @resource    production https://greasyfork.org/scripts/7612-donnabots-gota-extender-production/code/Donnabots_GOTA_Extender_Production.js?version=34877
-// @version     0.0.41
+// @version     0.0.42
 // @grant       unsafeWindow
 // @grant       GM_getValue
 // @grant       GM_setValue
@@ -976,6 +976,11 @@ function saveMainTab() {
         options.autoCollectInterval = aci;
         toggleAutoCollect();
     }
+
+    options.existTrain = $("#existTrain").val();
+    options.battleTrain = $("#battleTrain").val();
+    options.tradeTrain = $("#tradeTrain").val();
+    options.intrigueTrain = $("#intrigueTrain").val();
 
     options.boonsSortBy = $("#boonsSortBy").val();
     options.boonsSortBy2 = $("#boonsSortBy2").val();
