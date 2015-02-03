@@ -601,7 +601,7 @@ log("Speed build is what actually calls the callback (not doInstantSpeedUp).", "
 
 doTrain = function doTrain(a) {
 if(userContext.setSwornSword.upgrade_points > 0){
-    $.ajaxqueue({
+    $.ajaxQueue({
         url: "/play/train/" + userContext.setSwornSword.id + "?attribute=" + a + "&client_seqnum="  + userContext.player_data_seqnum,
         dataType: "JSON",
 		success: function(b) { 
