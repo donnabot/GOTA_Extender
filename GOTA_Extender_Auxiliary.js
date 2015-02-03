@@ -235,6 +235,7 @@ function bruteForce(enabled, times) {
     }
 
     var s = userContext.setSwornSword;
+log("GETTING S INFO" + s + ".", "BRUTING");
 
     if (!s) {
         msg = "Failed, no sworn sword set.";
@@ -266,6 +267,19 @@ function bruteForce(enabled, times) {
                 bruteForce(!failure, times);
             });
         }
+
+	if(o.existTrain == "mod"){
+		doTrain(s.modifier);
+	}else{
+		var max = Math.max(s.calc_battle, s.calc_trade, s.calc_intrigue);
+		if (max == s.calc_intrigue) {
+			doTrain("intrigue");
+		} else if (max == s.calc_trade) {
+			doTrain("trade");
+		} else {
+			doTrain("battle");
+		}
+	}
 
         return;
     }
@@ -780,11 +794,23 @@ function resolveModifier(s) {
     // Calculate what attack shoild we use if there ain't any
     var max = Math.max(s.calc_battle, s.calc_trade, s.calc_intrigue);
     if (max == s.calc_intrigue) {
-        s.modifier = "spy";
+	if(o.intrigueTrain && o.intrigueTrain != "intrigue"){
+        	s.modifier = o.intrigueTrain;
+	}else{
+        	s.modifier = "spy";
+	}
     } else if (max == s.calc_trade) {
-        s.modifier = "barter";
+	if(o.tradeTrain && o.tradeTrain != "trade"){
+        	s.modifier = o.tradeTrain;
+	}else{
+        	s.modifier = "barter";
+	}
     } else {
-        s.modifier = "fight";
+	if(o.battleTrain && o.battleTrain != "battle"){
+        	s.modifier = o.battleTrain;
+	}else{
+        	s.modifier = "fight";
+	}
     }
 	
 }

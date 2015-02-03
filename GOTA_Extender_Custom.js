@@ -599,6 +599,13 @@ speedBuild = function speedBuild(c, a, callback) {
 };
 log("Speed build is what actually calls the callback (not doInstantSpeedUp).", "initialize");
 
+doTrain = function doTrain(a) {
+    $.ajaxQueue({
+        url: "/play/train/" + userContext.setSwornSword.id + "?attribute=" + a + "&client_seqnum="  + userContext.player_data_seqnum,
+        dataType: "JSON",
+    });
+};
+
 doAdventure = function doAdventure(c, a, b, callback) {
     //console.debug("First passed parameter: ", c);
     // EXTENDER : Modfification

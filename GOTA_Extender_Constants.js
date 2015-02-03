@@ -207,6 +207,26 @@ var templates = {
         { val: "calc_intrigue", text: "Intrigue stats" }
     ],
 
+    battleTrainoptions: [
+        { val: "fight", text: "Vanguards" },
+        { val: "harass", text: "Skirmishers" },
+        { val: "aid", text: "Protectors" },
+    ],
+    tradeTrainoptions: [
+        { val: "barter", text: "Merchants" },
+        { val: "hoodwink", text: "Charlatans" },
+        { val: "bribe", text: "Corruptors" },
+    ],
+    intrigueTrainoptions: [
+        { val: "spy", text: "Agents" },
+        { val: "sabotage", text: "Saboteurs" },
+        { val: "steal", text: "Thieves" },
+    ],
+    existTrainoptions: [
+        { val: "stat", text: "Base Stat" },
+        { val: "mod", text: "Percentage Modifier" },
+    ],
+
     shopSortingOptions: [
         { val: "price", text: "Silver" },
         { val: "price_perk_points", text: "Gold" },
@@ -388,8 +408,16 @@ var templates = {
             this.checkOption("neverSpendGold", "Never spend gold", o.neverSpendGold) +
             this.checkOption("autoBossChallenge", "Auto Boss challenge", o.autoBossChallenge) +
             '</div>' +
+     //     '<div class="exrow">' +
+     //     this.checkOption("autoBrute", "Brute all on load", o.autoBrute) +
+     //     '</div>' +
             '<div class="exrow">' +
-            this.checkOption("autoBrute", "Brute all on load", o.autoBrute) +
+            this.selectOption(" Train In: ", "existTrain", this.existTrainoptions, o.existTrain) +
+            this.selectOption(" Battle Mod: ", "battleTrain", this.battleTrainoptions, o.battleTrain) +
+            '</div>' +
+            '<div class="exrow">' +
+            this.selectOption(" Trade Mod: ", "tradeTrain", this.tradeTrainoptions, o.tradeTrain) +
+            this.selectOption(" Intrigue Mod: ", "intrigueTrain", this.intrigueTrainoptions, o.intrigueTrain) +
             '</div>' +
             '<div class="exrow">' +
             this.selectOption("Sort player inventory by: ", "boonsSortBy", this.boonsSortingOptions, o.boonsSortBy) +
